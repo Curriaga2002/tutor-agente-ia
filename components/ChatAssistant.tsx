@@ -589,6 +589,35 @@ ${index + 1}. **${criterio.criterio}:**
     }
   }
 
+  // Función para limpiar todo el chat
+  const clearChat = () => {
+    if (confirm("¿Estás seguro de que quieres limpiar todo el chat? Esta acción no se puede deshacer.")) {
+      // Mantener solo el mensaje inicial del sistema
+      setMessages([
+        {
+          id: "1",
+          text: "🎓 **ASISTENTE DE PLANEACIÓN DIDÁCTICA**\n\n¡Hola! Soy tu tutor IA para ayudarte a crear planeaciones didácticas efectivas. ¿En qué grado estás trabajando y qué tema quieres desarrollar?",
+          isUser: false,
+          timestamp: new Date(),
+          isFormatted: true,
+        },
+      ])
+      
+      // Resetear el estado de guardado
+      setChatSaved(false)
+      
+      // Limpiar documentos subidos
+      setUploadedDocuments([])
+      
+      // Notificar al componente padre
+      if (onChatUpdate) {
+        onChatUpdate([])
+      }
+      
+      alert("✅ Chat limpiado exitosamente")
+    }
+  }
+
   // Función para exportar el chat como Word
   const exportChatAsWord = async () => {
     if (messages.length <= 1) {
@@ -934,6 +963,15 @@ ${'='.repeat(80)}`
           title="Exportar conversación para ver y usar"
         >
           {isExportingWord ? "📄 Exportando..." : "📄 Exportar"}
+        </button>
+
+        <button
+          onClick={clearChat}
+          disabled={messages.length <= 1}
+          className="bg-orange-600 text-white px-3 py-2 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition duration-200 text-sm font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+          title="Limpiar toda la conversación y empezar de nuevo"
+        >
+          🗑️ Limpiar Chat
         </button>
       </div>
 
