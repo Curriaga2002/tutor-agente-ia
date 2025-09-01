@@ -231,7 +231,7 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
       })
 
       const fileName = `Planeacion_Didactica_${formData.grado}_${formData.tema.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}_${new Date().toLocaleTimeString("es-CO", { hour: '2-digit', minute: '2-digit' }).replace(/:/g, "-")}.docx`
-      
+
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement("a")
       link.href = url
@@ -379,7 +379,7 @@ NOTAS ADICIONALES
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">Configuración de la Planeación</h2>
+        <h2 className="text-xl font-semibold text-gray-800">Planeación Didáctica con Tutor IA</h2>
       </div>
 
       {/* Mensajes de estado */}
@@ -388,119 +388,12 @@ NOTAS ADICIONALES
           <p className="text-green-800 text-sm">{success}</p>
         </div>
       )}
-      
+
       {error && (
         <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
           <p className="text-red-800 text-sm">{error}</p>
         </div>
       )}
-
-      {/* Formulario unificado en tarjetas sugeridas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
-          <label htmlFor="grado" className="block text-sm font-medium text-blue-800 mb-2">
-            🎓 Grado
-          </label>
-          <select
-            id="grado"
-            name="grado"
-            value={formData.grado}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-blue-900"
-          >
-            <option value="">Seleccionar</option>
-            <option value="8°">8° Grado</option>
-            <option value="9°">9° Grado</option>
-          </select>
-        </div>
-
-        <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
-          <label htmlFor="tema" className="block text-sm font-medium text-green-800 mb-2">
-            🎯 Tema
-          </label>
-          <input
-            type="text"
-            id="tema"
-            name="tema"
-            value={formData.tema}
-            onChange={handleInputChange}
-            placeholder="Ej: Algoritmos..."
-            className="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-green-900"
-          />
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4">
-          <label htmlFor="duracion" className="block text-sm font-medium text-purple-800 mb-2">
-            ⏰ Duración
-          </label>
-          <select
-            id="duracion"
-            name="duracion"
-            value={formData.duracion}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-purple-900"
-          >
-            <option value="">Seleccionar</option>
-            <option value="1 hora">1 hora</option>
-            <option value="2 horas">2 horas</option>
-          </select>
-        </div>
-
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
-          <label htmlFor="sesiones" className="block text-sm font-medium text-orange-800 mb-2">
-            📅 Sesiones
-          </label>
-          <input
-            type="number"
-            id="sesiones"
-            name="sesiones"
-            value={formData.sesiones}
-            onChange={handleInputChange}
-            min="1"
-            max="10"
-            placeholder="1"
-            className="w-full px-3 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-orange-900"
-          />
-        </div>
-      </div>
-
-      {/* Botones de acción */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={isGenerating}
-          className="bg-primary text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          {isGenerating ? "⏳ Generando..." : "🎯 Generar Planeación"}
-        </button>
-
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={!currentPlanningData || isSaving}
-          className="bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          {isSaving ? "💾 Guardando..." : "💾 Guardar Planeación"}
-        </button>
-
-        <button
-          type="button"
-          onClick={handleDownload}
-          disabled={!currentPlanningData || isExporting}
-          className="bg-orange-600 text-white py-3 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          {isExporting ? "📄 Exportando..." : `📄 Descargar Word ${chatConversations.length > 1 ? `(${chatConversations.length - 1} conversaciones)` : ""}`}
-        </button>
-
-        <button
-          type="button"
-          onClick={handleReset}
-          className="bg-gray-500 text-white py-3 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition duration-200 font-medium"
-        >
-          🔄 Limpiar Formulario
-        </button>
-      </div>
 
       {/* Chat expandido */}
       <div className="w-full">

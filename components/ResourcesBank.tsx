@@ -19,7 +19,7 @@ interface Planeacion {
     id: string
     text: string
     isUser: boolean
-    timestamp: string
+    timestamp: Date
     isFormatted?: boolean
   }>
   created_at: string
@@ -100,29 +100,6 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
             ]
           }
         },
-        chat_history: [
-          {
-            id: "1",
-            text: "🎓 **ASISTENTE DE PLANEACIÓN DIDÁCTICA**\n\n¡Hola! Soy tu tutor IA especializado en planeación didáctica...",
-            isUser: false,
-            timestamp: new Date(Date.now() - 3600000).toISOString(),
-            isFormatted: true,
-          },
-          {
-            id: "2",
-            text: "¿Cómo puedo hacer esta planeación más interactiva?",
-            isUser: true,
-            timestamp: new Date(Date.now() - 3000000).toISOString(),
-            isFormatted: false,
-          },
-          {
-            id: "3",
-            text: "Para hacer la planeación más interactiva, puedes incluir actividades grupales, juegos educativos y uso de tecnología...",
-            isUser: false,
-            timestamp: new Date(Date.now() - 2400000).toISOString(),
-            isFormatted: true,
-          }
-        ],
         created_at: new Date().toISOString()
       },
       {
@@ -156,29 +133,6 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
             ]
           }
         },
-        chat_history: [
-          {
-            id: "1",
-            text: "🎓 **ASISTENTE DE PLANEACIÓN DIDÁCTICA**\n\n¡Hola! Soy tu tutor IA especializado en planeación didáctica...",
-            isUser: false,
-            timestamp: new Date(Date.now() - 86400000 - 3600000).toISOString(),
-            isFormatted: true,
-          },
-          {
-            id: "2",
-            text: "¿Qué recursos puedo usar para enseñar sobre ecosistemas?",
-            isUser: true,
-            timestamp: new Date(Date.now() - 86400000 - 3000000).toISOString(),
-            isFormatted: false,
-          },
-          {
-            id: "3",
-            text: "Para enseñar sobre ecosistemas, puedes usar videos documentales, salidas de campo, simulaciones digitales...",
-            isUser: false,
-            timestamp: new Date(Date.now() - 86400000 - 2400000).toISOString(),
-            isFormatted: true,
-          }
-        ],
         created_at: new Date(Date.now() - 86400000).toISOString()
       }
     ]
@@ -377,7 +331,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
     }
 
     // Agregar historial del chat
-    if (plan.chat_history && Array.isArray(plan.chat_history) && plan.chat_history.length > 0) {
+    if (plan.chat_history && plan.chat_history.length > 0) {
       formattedText += `${'='.repeat(50)}\n`
       formattedText += `HISTORIAL COMPLETO DEL CHAT\n`
       formattedText += `${'='.repeat(50)}\n\n`
@@ -391,11 +345,6 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
         const cleanText = message.text.replace(/\*\*/g, '').replace(/\*/g, '')
         formattedText += `${role} (${time}):\n${cleanText}\n\n`
       })
-    } else {
-      formattedText += `${'='.repeat(50)}\n`
-      formattedText += `HISTORIAL DEL CHAT\n`
-      formattedText += `${'='.repeat(50)}\n\n`
-      formattedText += `No hay historial de chat disponible para esta planeación.\n\n`
     }
 
     return formattedText
@@ -592,7 +541,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
               <div className="space-y-4">
                 <h4 className="font-semibold text-gray-800 mb-4">💬 Conversación Completa</h4>
                 
-                {selectedPlan.chat_history && Array.isArray(selectedPlan.chat_history) && selectedPlan.chat_history.length > 0 ? (
+                {selectedPlan.chat_history && selectedPlan.chat_history.length > 0 ? (
                   selectedPlan.chat_history.map((message) => (
                     <div key={message.id} className={`${message.isUser ? "text-right" : "text-left"}`}>
                       <div
@@ -623,12 +572,6 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                   <div className="text-center text-gray-500 py-8">
                     <div className="text-4xl mb-2">💬</div>
                     <p>No hay historial de chat disponible para esta planeación.</p>
-                    <p className="text-sm mt-2 text-gray-400">
-                      {!selectedPlan.chat_history 
-                        ? "Esta planeación no tiene historial de chat registrado."
-                        : "El historial del chat está vacío."
-                      }
-                    </p>
                   </div>
                 )}
               </div>
