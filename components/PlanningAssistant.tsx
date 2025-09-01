@@ -18,9 +18,8 @@ export default function PlanningAssistant() {
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
 
         {activeTab === "generar" && (
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="w-full">
             <PlanningForm currentPlanningData={currentPlanningData} setCurrentPlanningData={setCurrentPlanningData} />
-            <ResultsPanel currentPlanningData={currentPlanningData} />
           </div>
         )}
 

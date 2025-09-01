@@ -9,6 +9,13 @@ import { createClient } from "../lib/supabase/client"
 interface PlanningFormProps {
   currentPlanningData: any
   setCurrentPlanningData: (data: any) => void
+  chatHistory?: Array<{
+    id: string
+    text: string
+    isUser: boolean
+    timestamp: Date
+    isFormatted?: boolean
+  }>
 }
 
 export default function PlanningForm({ currentPlanningData, setCurrentPlanningData }: PlanningFormProps) {
@@ -24,6 +31,13 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
   })
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [chatConversations, setChatConversations] = useState<Array<{
+    id: string
+    text: string
+    isUser: boolean
+    timestamp: Date
+    isFormatted?: boolean
+  }>>([])
 
   const supabase = createClient()
 
@@ -216,10 +230,12 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       })
 
+      const fileName = `Planeacion_Didactica_${formData.grado}_${formData.tema.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}_${new Date().toLocaleTimeString("es-CO", { hour: '2-digit', minute: '2-digit' }).replace(/:/g, "-")}.docx`
+      
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement("a")
       link.href = url
-      link.download = `Planeacion_${formData.grado}_${formData.tema.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.docx`
+      link.download = fileName
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -241,55 +257,104 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
       day: "numeric",
     })
 
+    // Filtrar conversaciones del chat (excluir el mensaje inicial del sistema)
+    const relevantChatMessages = chatConversations.filter(msg => 
+      msg.id !== "1" && msg.text.trim().length > 0
+    )
+
+    // Generar contenido del chat formateado
+    const chatContent = relevantChatMessages.length > 0 
+      ? relevantChatMessages.map(msg => {
+          const time = msg.timestamp.toLocaleTimeString("es-CO", { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          })
+          const role = msg.isUser ? "DOCENTE" : "TUTOR IA"
+          const cleanText = msg.text.replace(/\*\*/g, '').replace(/\*/g, '')
+          return `${role} (${time}):\n${cleanText}\n`
+        }).join("\n")
+      : "No hay conversaciones registradas en el chat."
+
     return `
-PLANEACIÓN DIDÁCTICA
-====================
+PLANEACIÓN DIDÁCTICA COMPLETA
+=============================
 
-Información General:
-- Grado: ${formData.grado}
-- Tema: ${formData.tema}
-- Duración por sesión: ${formData.duracion}
-- Número de sesiones: ${formData.sesiones}
-- Fecha de creación: ${currentDate}
-- Estrategia: ${planData.estrategia || "No especificada"}
+INFORMACIÓN GENERAL
+------------------
+📚 Grado: ${formData.grado}
+🎯 Tema: ${formData.tema}
+⏰ Duración por sesión: ${formData.duracion}
+📅 Número de sesiones: ${formData.sesiones}
+📅 Fecha de creación: ${currentDate}
+🏗️ Estrategia metodológica: ${planData.estrategia || "No especificada"}
 
-OBJETIVOS DE APRENDIZAJE:
+OBJETIVOS DE APRENDIZAJE
+------------------------
 ${planData.objetivos?.map((obj: string, index: number) => `${index + 1}. ${obj}`).join("\n") || "No especificados"}
 
-DESARROLLO DE LA CLASE:
+DESARROLLO DE LA CLASE
+----------------------
 
-Inicio:
+🎭 INICIO (15-20 minutos):
 ${planData.planeacion?.inicio || "No especificado"}
 
-Desarrollo:
+🔄 DESARROLLO (${formData.duracion === "2 horas" ? "60-80 minutos" : "30-40 minutos"}):
 ${planData.planeacion?.desarrollo || "No especificado"}
 
-Cierre:
+🏁 CIERRE (15-20 minutos):
 ${planData.planeacion?.cierre || "No especificado"}
 
-RECURSOS NECESARIOS:
+RECURSOS EDUCATIVOS NECESARIOS
+------------------------------
 ${planData.recursos?.map((recurso: string) => `• ${recurso}`).join("\n") || "No especificados"}
 
-EVIDENCIAS DE APRENDIZAJE:
+EVIDENCIAS DE APRENDIZAJE
+-------------------------
 ${planData.evidencias?.map((evidencia: string) => `• ${evidencia}`).join("\n") || "No especificadas"}
 
-CRITERIOS DE EVALUACIÓN:
+CRITERIOS DE EVALUACIÓN
+-----------------------
 ${
   planData.evaluacion?.criterios
     ?.map(
       (criterio: any, index: number) => `
 ${index + 1}. ${criterio.criterio}:
-   - Nivel Básico: ${criterio.nivel1}
-   - Nivel Intermedio: ${criterio.nivel2}
-   - Nivel Avanzado: ${criterio.nivel3}
+   📊 Nivel Básico: ${criterio.nivel1}
+   📊 Nivel Intermedio: ${criterio.nivel2}
+   📊 Nivel Avanzado: ${criterio.nivel3}
 `,
     )
     .join("\n") || "No especificados"
 }
 
+CONVERSACIONES CON EL TUTOR IA
+------------------------------
+${chatContent}
+
+DISTRIBUCIÓN TEMPORAL DETALLADA
+-------------------------------
+📋 Sesión 1: ${planData.planeacion?.inicio || "Actividad de inicio"}
+📋 Sesión ${formData.sesiones}: ${planData.planeacion?.cierre || "Actividad de cierre"}
+
+${
+  Number(formData.sesiones) > 2 
+    ? `📋 Sesiones intermedias: ${planData.planeacion?.desarrollo || "Actividades de desarrollo"}\n`
+    : ""
+}
+
+NOTAS ADICIONALES
+-----------------
+• Esta planeación fue generada con la asistencia del Sistema de Planeación Didáctica
+• Las conversaciones con el Tutor IA proporcionan contexto adicional y sugerencias
+• Se recomienda revisar y adaptar según las necesidades específicas del grupo
+• Considerar el contexto socio-cultural de los estudiantes
+
 ---
-Documento generado por el Sistema de Planeación Didáctica
-Fecha: ${currentDate}
+📄 Documento generado por el Sistema de Planeación Didáctica
+📅 Fecha: ${currentDate}
+⏰ Hora: ${new Date().toLocaleTimeString("es-CO")}
+👨‍🏫 Docente: [Nombre del docente]
+🏫 Institución: [Nombre de la institución]
     `.trim()
   }
 
@@ -298,6 +363,17 @@ Fecha: ${currentDate}
     setCurrentPlanningData(null)
     setError(null)
     setSuccess(null)
+    setChatConversations([])
+  }
+
+  const handleChatUpdate = (conversations: Array<{
+    id: string
+    text: string
+    isUser: boolean
+    timestamp: Date
+    isFormatted?: boolean
+  }>) => {
+    setChatConversations(conversations)
   }
 
   return (
@@ -326,33 +402,28 @@ Fecha: ${currentDate}
         </div>
       )}
 
-      {showChat && (
-        <div className="mb-6">
-          <ChatAssistant formData={formData} setFormData={setFormData} />
-        </div>
-      )}
-
-      <form className="space-y-6">
-        <div>
-          <label htmlFor="grado" className="block text-sm font-medium text-gray-700 mb-2">
-            Grado
+      {/* Formulario unificado en tarjetas sugeridas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+          <label htmlFor="grado" className="block text-sm font-medium text-blue-800 mb-2">
+            🎓 Grado
           </label>
           <select
             id="grado"
             name="grado"
             value={formData.grado}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-blue-900"
           >
-            <option value="">Seleccionar grado</option>
+            <option value="">Seleccionar</option>
             <option value="8°">8° Grado</option>
             <option value="9°">9° Grado</option>
           </select>
         </div>
 
-        <div>
-          <label htmlFor="tema" className="block text-sm font-medium text-gray-700 mb-2">
-            Tema
+        <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
+          <label htmlFor="tema" className="block text-sm font-medium text-green-800 mb-2">
+            🎯 Tema
           </label>
           <input
             type="text"
@@ -360,31 +431,31 @@ Fecha: ${currentDate}
             name="tema"
             value={formData.tema}
             onChange={handleInputChange}
-            placeholder="Ej: Algoritmos, Fracciones, Ecosistemas..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="Ej: Algoritmos..."
+            className="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-green-900"
           />
         </div>
 
-        <div>
-          <label htmlFor="duracion" className="block text-sm font-medium text-gray-700 mb-2">
-            Duración por sesión
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4">
+          <label htmlFor="duracion" className="block text-sm font-medium text-purple-800 mb-2">
+            ⏰ Duración
           </label>
           <select
             id="duracion"
             name="duracion"
             value={formData.duracion}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-purple-900"
           >
-            <option value="">Seleccionar duración</option>
+            <option value="">Seleccionar</option>
             <option value="1 hora">1 hora</option>
             <option value="2 horas">2 horas</option>
           </select>
         </div>
 
-        <div>
-          <label htmlFor="sesiones" className="block text-sm font-medium text-gray-700 mb-2">
-            Número de sesiones
+        <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
+          <label htmlFor="sesiones" className="block text-sm font-medium text-orange-800 mb-2">
+            📅 Sesiones
           </label>
           <input
             type="number"
@@ -395,47 +466,60 @@ Fecha: ${currentDate}
             min="1"
             max="10"
             placeholder="1"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-full px-3 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-orange-900"
           />
         </div>
+      </div>
 
-        <div className="space-y-3">
-          <button
-            type="button"
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            className="w-full bg-primary text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition duration-200 font-medium disabled:bg-gray-400"
-          >
-            {isGenerating ? "⏳ Generando..." : "🎯 Generar Planeación"}
-          </button>
+      {/* Botones de acción */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={isGenerating}
+          className="bg-primary text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {isGenerating ? "⏳ Generando..." : "🎯 Generar Planeación"}
+        </button>
 
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!currentPlanningData || isSaving}
-            className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {isSaving ? "💾 Guardando..." : "💾 Guardar Planeación"}
-          </button>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={!currentPlanningData || isSaving}
+          className="bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {isSaving ? "💾 Guardando..." : "💾 Guardar Planeación"}
+        </button>
 
-          <button
-            type="button"
-            onClick={handleDownload}
-            disabled={!currentPlanningData || isExporting}
-            className="w-full bg-orange-600 text-white py-3 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {isExporting ? "📄 Exportando..." : "📄 Descargar Word"}
-          </button>
+        <button
+          type="button"
+          onClick={handleDownload}
+          disabled={!currentPlanningData || isExporting}
+          className="bg-orange-600 text-white py-3 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {isExporting ? "📄 Exportando..." : `📄 Descargar Word ${chatConversations.length > 1 ? `(${chatConversations.length - 1} conversaciones)` : ""}`}
+        </button>
 
-          <button
-            type="button"
-            onClick={handleReset}
-            className="w-full bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition duration-200 font-medium"
-          >
-            🔄 Limpiar Formulario
-          </button>
+        <button
+          type="button"
+          onClick={handleReset}
+          className="bg-gray-500 text-white py-3 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition duration-200 font-medium"
+        >
+          🔄 Limpiar Formulario
+        </button>
+      </div>
+
+      {/* Chat expandido */}
+      {showChat && (
+        <div className="w-full">
+          <ChatAssistant 
+            formData={formData} 
+            setFormData={setFormData} 
+            onChatUpdate={handleChatUpdate}
+            currentPlanningData={currentPlanningData}
+          />
         </div>
-      </form>
+      )}
     </div>
   )
 }
