@@ -57,7 +57,13 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
         throw new Error(error.message)
       }
 
-      return data || []
+      // Procesar los datos para deserializar chat_history si es necesario
+      const processedData = (data || []).map((plan: any) => ({
+        ...plan,
+        chat_history: parseChatHistory(plan.chat_history)
+      }))
+
+      return processedData
     } catch (error) {
       console.error("Error fetching plans:", error)
       setError("Error al cargar las planeaciones. Verificando conexión...")
@@ -65,6 +71,43 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
       // Si hay error, mostrar datos de ejemplo
       return getMockData()
     }
+  }
+
+  // Función para parsear el chat_history que puede venir como string o array
+  const parseChatHistory = (chatHistory: any): Array<{
+    id: string
+    text: string
+    isUser: boolean
+    timestamp: Date
+    isFormatted?: boolean
+  }> => {
+    if (!chatHistory) return []
+    
+    // Si ya es un array, retornarlo
+    if (Array.isArray(chatHistory)) {
+      return chatHistory.map(msg => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp)
+      }))
+    }
+    
+    // Si es un string, intentar parsearlo como JSON
+    if (typeof chatHistory === 'string') {
+      try {
+        const parsed = JSON.parse(chatHistory)
+        if (Array.isArray(parsed)) {
+          return parsed.map(msg => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }))
+        }
+      } catch (e) {
+        console.warn("Error parsing chat_history JSON:", e)
+      }
+    }
+    
+    // Si no se puede parsear, retornar array vacío
+    return []
   }
 
   const getMockData = (): Planeacion[] => {
@@ -100,6 +143,29 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
             ]
           }
         },
+        chat_history: [
+          {
+            id: "1",
+            text: "🎓 **ASISTENTE DE PLANEACIÓN DIDÁCTICA**\n\n¡Hola! Soy tu tutor IA para ayudarte a crear planeaciones didácticas efectivas. ¿En qué grado estás trabajando y qué tema quieres desarrollar?",
+            isUser: false,
+            timestamp: new Date(Date.now() - 3600000),
+            isFormatted: true
+          },
+          {
+            id: "2",
+            text: "Estoy trabajando con 8° grado en el tema de algoritmos y programación. ¿Puedes ayudarme a crear una planeación?",
+            isUser: true,
+            timestamp: new Date(Date.now() - 3500000),
+            isFormatted: false
+          },
+          {
+            id: "3",
+            text: "¡Excelente elección! Los algoritmos son fundamentales en programación. Te sugiero usar la estrategia de **Construcción-Fabricación** que es muy efectiva para este tema. ¿Te parece bien?",
+            isUser: false,
+            timestamp: new Date(Date.now() - 3400000),
+            isFormatted: true
+          }
+        ],
         created_at: new Date().toISOString()
       },
       {
@@ -133,6 +199,29 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
             ]
           }
         },
+        chat_history: [
+          {
+            id: "1",
+            text: "🎓 **ASISTENTE DE PLANEACIÓN DIDÁCTICA**\n\n¡Hola! Soy tu tutor IA para ayudarte a crear planeaciones didácticas efectivas. ¿En qué grado estás trabajando y qué tema quieres desarrollar?",
+            isUser: false,
+            timestamp: new Date(Date.now() - 86400000 - 3600000),
+            isFormatted: true
+          },
+          {
+            id: "2",
+            text: "Necesito una planeación para 9° grado sobre ecosistemas. ¿Qué estrategia me recomiendas?",
+            isUser: true,
+            timestamp: new Date(Date.now() - 86400000 - 3500000),
+            isFormatted: false
+          },
+          {
+            id: "3",
+            text: "Para ecosistemas, la estrategia de **Investigación-Discovery** es perfecta. Permite a los estudiantes explorar y descubrir por sí mismos. ¿Te gustaría que desarrollemos la planeación completa?",
+            isUser: false,
+            timestamp: new Date(Date.now() - 86400000 - 3400000),
+            isFormatted: true
+          }
+        ],
         created_at: new Date(Date.now() - 86400000).toISOString()
       }
     ]
@@ -148,72 +237,6 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
       setError("Error al cargar el historial: " + error.message)
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const viewPlan = async (planId: string) => {
-    try {
-      if (supabase.from === undefined) {
-        // Modo fallback - buscar en datos locales
-        const plan = planeaciones.find(p => p.id === planId)
-        if (plan) {
-          setActiveTab("generar")
-          setCurrentPlanningData(plan.contenido)
-          return
-        }
-        throw new Error("Planeación no encontrada")
-      }
-
-      const { data, error } = await supabase
-        .from("planeaciones")
-        .select("*")
-        .eq("id", planId)
-        .single()
-
-      if (error) {
-        throw new Error(error.message)
-      }
-
-      if (!data) throw new Error("Planeación no encontrada")
-
-      setActiveTab("generar")
-      setCurrentPlanningData(data.contenido)
-    } catch (error: any) {
-      alert("Error al cargar la planeación: " + error.message)
-    }
-  }
-
-  const duplicatePlan = async (planId: string) => {
-    try {
-      if (supabase.from === undefined) {
-        // Modo fallback - buscar en datos locales
-        const plan = planeaciones.find(p => p.id === planId)
-        if (plan) {
-          setCurrentPlanningData(plan.contenido)
-          setActiveTab("generar")
-          alert("Planeación duplicada. Puede modificarla y guardarla nuevamente.")
-          return
-        }
-        throw new Error("Planeación no encontrada")
-      }
-
-      const { data, error } = await supabase
-        .from("planeaciones")
-        .select("*")
-        .eq("id", planId)
-        .single()
-
-      if (error) {
-        throw new Error(error.message)
-      }
-
-      if (!data) throw new Error("Planeación no encontrada")
-
-      setCurrentPlanningData(data.contenido)
-      setActiveTab("generar")
-      alert("Planeación duplicada. Puede modificarla y guardarla nuevamente.")
-    } catch (error: any) {
-      alert("Error al duplicar la planeación: " + error.message)
     }
   }
 
@@ -447,23 +470,11 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                 </div>
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => viewPlan(plan.id)}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1 rounded hover:bg-blue-50"
-                  >
-                    👁️ Ver
-                  </button>
-                  <button
                     onClick={() => viewChatHistory(plan)}
                     className="text-purple-600 hover:text-purple-800 text-sm font-medium px-3 py-1 rounded hover:bg-purple-50"
                     title="Ver historial completo del chat"
                   >
                     💬 Chat
-                  </button>
-                  <button
-                    onClick={() => duplicatePlan(plan.id)}
-                    className="text-green-600 hover:text-green-800 text-sm font-medium px-3 py-1 rounded hover:bg-green-50"
-                  >
-                    📋 Duplicar
                   </button>
                   <button
                     onClick={() => deletePlan(plan.id)}
