@@ -37,15 +37,7 @@ interface ChatAssistantProps {
 }
 
 export default function ChatAssistant({ formData, setFormData, onChatUpdate, currentPlanningData }: ChatAssistantProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "🎓 **ASISTENTE DE PLANEACIÓN DIDÁCTICA**\n\n¡Hola! Soy tu tutor IA especializado en **planeación didáctica** para **Grados 8° y 9°**.\n\n🛠️ **Puedo ayudarte con:**\n• **Objetivos de aprendizaje** claros y medibles\n• **Actividades pedagógicas** motivadoras\n• **Recursos educativos** apropiados\n• **Estrategias de evaluación** efectivas\n\n💡 **¿En qué te puedo ayudar hoy?**",
-      isUser: false,
-      timestamp: new Date(),
-      isFormatted: true,
-    },
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([])
@@ -56,6 +48,19 @@ export default function ChatAssistant({ formData, setFormData, onChatUpdate, cur
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
+
+  // Inicializar mensajes solo en el cliente para evitar problemas de hidratación
+  useEffect(() => {
+    setMessages([
+      {
+        id: "1",
+        text: "🎓 **ASISTENTE DE PLANEACIÓN DIDÁCTICA**\n\n¡Hola! Soy tu tutor IA especializado en **planeación didáctica** para **Grados 8° y 9°**.\n\n🛠️ **Puedo ayudarte con:**\n• **Objetivos de aprendizaje** claros y medibles\n• **Actividades pedagógicas** motivadoras\n• **Recursos educativos** apropiados\n• **Estrategias de evaluación** efectivas\n\n💡 **¿En qué te puedo ayudar hoy?**",
+        isUser: false,
+        timestamp: new Date(),
+        isFormatted: true,
+      },
+    ])
+  }, [])
 
   useEffect(() => {
     scrollToBottom()

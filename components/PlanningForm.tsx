@@ -22,7 +22,6 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
-  const [showChat, setShowChat] = useState(false)
   const [formData, setFormData] = useState({
     grado: "",
     tema: "",
@@ -156,7 +155,8 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
       setCurrentPlanningData(planData)
       setSuccess("✅ Planeación generada exitosamente!")
     } catch (error: any) {
-      setError("Error al generar la planeación: " + error.message)
+      console.error("Error generating plan:", error)
+      setError("Error al generar la planeación: " + (error?.message || 'Error desconocido'))
     } finally {
       setIsGenerating(false)
     }
@@ -170,33 +170,33 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
 
     setIsSaving(true)
     setError(null)
-    setSuccess(null)
 
     try {
-      const planData = {
-        grado: formData.grado,
-        tema: formData.tema,
-        duracion: formData.duracion,
-        sesiones: Number.parseInt(formData.sesiones),
-        contenido: currentPlanningData,
-        user_id: null, // Will be set by RLS policies using auth.uid()
-      }
-
-      // Verificar si Supabase está configurado
+      // Verificar si estamos en modo fallback
       if (supabase.from === undefined) {
-        // Modo fallback - simular guardado exitoso
+        // Simular guardado en modo fallback
         await new Promise(resolve => setTimeout(resolve, 1000))
         setSuccess("✅ Planeación guardada exitosamente (modo local)")
         return
       }
 
-      const { data, error } = await supabase
+      // Preparar datos para guardar incluyendo el historial del chat
+      const dataToSave = {
+        grado: formData.grado,
+        tema: formData.tema,
+        duracion: formData.duracion,
+        sesiones: parseInt(formData.sesiones),
+        contenido: currentPlanningData,
+        chat_history: chatConversations, // Incluir el historial completo del chat
+        user_id: null
+      }
+
+      const { error } = await supabase
         .from("planeaciones")
-        .insert([planData])
-        .select()
+        .insert([dataToSave])
 
       if (error) {
-        throw new Error(error.message)
+        throw new Error(error.message || 'Error desconocido al guardar la planeación')
       }
 
       setSuccess("✅ Planeación guardada exitosamente en la base de datos!")
@@ -206,7 +206,7 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
       // setCurrentPlanningData(null)
     } catch (error: any) {
       console.error("Error saving plan:", error)
-      setError("❌ Error al guardar la planeación: " + error.message)
+      setError("❌ Error al guardar la planeación: " + (error?.message || 'Error desconocido'))
     } finally {
       setIsSaving(false)
     }
@@ -244,7 +244,7 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
       setSuccess("✅ Documento Word descargado exitosamente")
     } catch (error: any) {
       console.error("Error exporting to Word:", error)
-      setError("❌ Error al exportar a Word: " + error.message)
+      setError("❌ Error al exportar a Word: " + (error?.message || 'Error desconocido'))
     } finally {
       setIsExporting(false)
     }
@@ -380,13 +380,6 @@ NOTAS ADICIONALES
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-800">Configuración de la Planeación</h2>
-        <button
-          onClick={() => setShowChat(!showChat)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200 flex items-center gap-2"
-        >
-          <span>💬</span>
-          {showChat ? "Ocultar Chat" : "Tutor IA"}
-        </button>
       </div>
 
       {/* Mensajes de estado */}
@@ -510,16 +503,14 @@ NOTAS ADICIONALES
       </div>
 
       {/* Chat expandido */}
-      {showChat && (
-        <div className="w-full">
-          <ChatAssistant 
-            formData={formData} 
-            setFormData={setFormData} 
-            onChatUpdate={handleChatUpdate}
-            currentPlanningData={currentPlanningData}
-          />
-        </div>
-      )}
+      <div className="w-full">
+        <ChatAssistant 
+          formData={formData} 
+          setFormData={setFormData} 
+          onChatUpdate={handleChatUpdate}
+          currentPlanningData={currentPlanningData}
+        />
+      </div>
     </div>
   )
 }
