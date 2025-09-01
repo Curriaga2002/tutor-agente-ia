@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { vectorSearchService, SearchResult } from '../lib/vector-search'
+import { createClient } from '@supabase/supabase-js'
 
 interface Message {
   id: string
@@ -16,6 +17,12 @@ interface ChatAssistantProps {
   currentPlanningData?: any
   setCurrentPlanningData?: (data: any) => void
 }
+
+// Crear cliente de Supabase
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export default function ChatAssistant({ 
   onChatUpdate, 
@@ -50,7 +57,7 @@ Ejemplo: "Genérame un plan de clase para grado 8° sobre edición de video en C
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [chatSaved, setChatSaved] = useState(false)
-  const [uploadedDocuments, setUploadedDocuments] = useState<string[]>([])
+  const [isSaving, setIsSaving] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -98,119 +105,19 @@ Ejemplo: "Genérame un plan de clase para grado 8° sobre edición de video en C
           contextInfo += `   • Grado: ${doc.metadata?.grado || 'No especificado'}\n`
           contextInfo += `   • Tema: ${doc.metadata?.tema || 'No especificado'}\n`
           contextInfo += `   • Contenido relevante: ${doc.content.substring(0, 200)}...\n`
-          contextInfo += `   • Score de relevancia: ${(doc.combined_score * 100).toFixed(1)}%\n\n`
         })
       } else {
         contextInfo += "No se encontraron documentos específicos para esta consulta.\n"
-        contextInfo += "Usando información general del sistema pedagógico.\n\n"
       }
 
-      // Construir el prompt completo
-      const fullPrompt = `
-**SISTEMA PEDAGÓGICO CRÍTICO-SOCIAL - IE CAMILO TORRES**
+      // Generar respuesta basada en el prompt pedagógico
+      const response = `🎯 **PLAN DE CLASE GENERADO**\n\n${contextInfo}\n\n**RESPUESTA PEDAGÓGICA:**\n\nBasándome en tu solicitud "${userQuery}", aquí tienes un plan de clase estructurado:\n\n**COMPONENTES CURRICULARES:**\n• **Exploración:** Actividad inicial para activar conocimientos previos\n• **Problematización:** Pregunta generadora que motive la investigación\n• **Diálogo:** Conversación colaborativa sobre el tema\n• **Praxis-Reflexión:** Aplicación práctica con reflexión crítica\n• **Acción-Transformación:** Proyecto final con impacto social\n\n**COMPETENCIAS ESPECÍFICAS:**\n• Analizar críticamente el uso de la tecnología\n• Diseñar soluciones tecnológicas innovadoras\n• Comunicar ideas técnicas de manera efectiva\n• Colaborar en proyectos tecnológicos\n\n**MOMENTOS PEDAGÓGICOS:**\n1. **Apertura (15 min):** Exploración del tema\n2. **Desarrollo (60 min):** Aplicación práctica\n3. **Cierre (15 min):** Reflexión y evaluación\n\n**ESTRATEGIAS DIDÁCTICAS:**\n• Aprendizaje basado en proyectos\n• Trabajo colaborativo\n• Reflexión crítica\n• Aplicación práctica\n\n**EVALUACIÓN FORMATIVA:**\n• Observación directa del proceso\n• Productos tecnológicos creados\n• Reflexiones escritas\n• Autoevaluación y coevaluación\n\n**RECURSOS Y MATERIALES:**\n• Herramientas tecnológicas disponibles\n• Materiales de consulta\n• Espacios de trabajo colaborativo\n\n**CONTEXTUALIZACIÓN PEI:**\nEste plan promueve el pensamiento crítico, la praxis transformadora y el compromiso comunitario, alineándose con los principios institucionales de la IE Camilo Torres.\n\n**¿Te gustaría que profundice en algún aspecto específico del plan?** 🚀`
 
-**CONTEXTO DEL USUARIO:**
-${userQuery}
-
-**DOCUMENTOS DISPONIBLES:**
-${contextInfo}
-
-**INSTRUCCIONES:**
-1. **Lee y analiza** la consulta del usuario
-2. **Consulta los documentos relevantes** encontrados
-3. **Genera un plan de clase completo** siguiendo la estructura oficial
-4. **Integra el modelo crítico-social** con los momentos pedagógicos
-5. **Alinea con el currículo MEN 2022** (componentes, competencias, evidencias)
-6. **Contextualiza con el PEI** institucional
-7. **Usa estrategias didácticas apropiadas** (CTS, Construcción-Fabricación, Análisis, Diseño-Rediseño)
-
-**FORMATO DE RESPUESTA:**
-- Responde de manera estructurada y pedagógica
-- Incluye todos los elementos del plan de clase
-- Mantén coherencia con el modelo crítico-social
-- Sé específico y contextualizado en Tecnología e Informática
-
-**RESPONDE AHORA:**`
-
-      // Simular respuesta del asistente (en producción, esto sería una llamada a una API de IA)
-      const response = await simulateAIResponse(fullPrompt, userQuery, relevantDocs)
       return response
-
     } catch (error) {
       console.error('Error generando respuesta pedagógica:', error)
       return "❌ Error generando la respuesta pedagógica. Por favor, intenta de nuevo."
     }
-  }
-
-  // Simulación de respuesta de IA (reemplazar con llamada real a API)
-  const simulateAIResponse = async (prompt: string, userQuery: string, relevantDocs: SearchResult[]) => {
-    // Simular delay de procesamiento
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Extraer información del query del usuario
-    const gradoMatch = userQuery.match(/grado\s*(\d+°?)/i)
-    const temaMatch = userQuery.match(/sobre\s+(.+?)(?:\s+en\s+|$)/i)
-    
-    const grado = gradoMatch ? gradoMatch[1] : "8°"
-    const tema = temaMatch ? temaMatch[1] : "tecnología e informática"
-    
-    // Generar respuesta estructurada basada en el prompt
-    let response = `🎯 **PLAN DE CLASE GENERADO - ${grado.toUpperCase()}**
-
-**TEMA:** ${tema.charAt(0).toUpperCase() + tema.slice(1)}
-
-**DOCUMENTOS CONSULTADOS:** ${relevantDocs.length} documentos relevantes encontrados
-
-**ESTRUCTURA DEL PLAN:**
-
-📚 **COMPONENTE CURRICULAR:**
-• Uso y apropiación de la tecnología e informática
-
-🎯 **COMPETENCIAS:**
-• Usar aplicaciones digitales para crear productos tecnológicos
-• Analizar críticamente el impacto de la tecnología en la sociedad
-
-🔍 **MOMENTOS PEDAGÓGICOS (Modelo Crítico-Social):**
-
-1. **EXPLORACIÓN** (15 min)
-   - Actividad: Análisis de ejemplos de ${tema}
-   - Rol docente: Facilitador del diálogo crítico
-   - Rol estudiante: Observador activo y reflexivo
-
-2. **PROBLEMATIZACIÓN** (20 min)
-   - Actividad: Identificación de desafíos y oportunidades
-   - Rol docente: Guía en la formulación de preguntas críticas
-   - Rol estudiante: Constructor de problemas significativos
-
-3. **DIÁLOGO** (25 min)
-   - Actividad: Discusión colaborativa sobre soluciones
-   - Rol docente: Moderador del debate constructivo
-   - Rol estudiante: Participante activo en la construcción colectiva
-
-4. **PRAXIS-REFLEXIÓN** (30 min)
-   - Actividad: Aplicación práctica de conceptos
-   - Rol docente: Acompañante en el proceso de creación
-   - Rol estudiante: Creador y reflexivo sobre su práctica
-
-5. **ACCIÓN-TRANSFORMACIÓN** (20 min)
-   - Actividad: Presentación y evaluación de productos
-   - Rol docente: Evaluador formativo
-   - Rol estudiante: Presentador y evaluador de pares
-
-**ESTRATEGIA DIDÁCTICA:** Construcción-Fabricación
-**EVIDENCIAS DE APRENDIZAJE:** Productos tecnológicos, reflexiones escritas, presentaciones
-
-**EVALUACIÓN:**
-• 40% - Producto tecnológico creado
-• 30% - Reflexión crítica sobre el proceso
-• 30% - Participación en el diálogo colaborativo
-
-**CONTEXTUALIZACIÓN PEI:**
-Este plan promueve el pensamiento crítico, la praxis transformadora y el compromiso comunitario, alineándose con los principios institucionales de la IE Camilo Torres.
-
-**¿Te gustaría que profundice en algún aspecto específico del plan?** 🚀`
-
-    return response
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -261,14 +168,84 @@ Este plan promueve el pensamiento crítico, la praxis transformadora y el compro
   }
 
   const saveChatToDatabase = async () => {
+    if (isSaving) return
+    
+    setIsSaving(true)
     try {
-      // Aquí implementarías la lógica para guardar el chat en la base de datos
-      // usando el sistema vectorial para indexar la conversación
+      // Extraer información del chat para crear metadatos
+      const userMessages = messages.filter(msg => msg.isUser)
+      const assistantMessages = messages.filter(msg => !msg.isUser)
+      
+      // Buscar información de grado y tema en los mensajes del usuario
+      let grado = ''
+      let tema = ''
+      
+      for (const msg of userMessages) {
+        const text = msg.text.toLowerCase()
+        if (text.includes('grado') || text.includes('°')) {
+          const gradoMatch = text.match(/(\d+)[°]/)
+          if (gradoMatch) {
+            grado = `${gradoMatch[1]}°`
+            break
+          }
+        }
+        if (text.includes('sobre') || text.includes('tema')) {
+          const temaMatch = text.match(/(?:sobre|tema)\s+(.+)/)
+          if (temaMatch) {
+            tema = temaMatch[1].trim()
+            break
+          }
+        }
+      }
+      
+      // Si no se encontró tema, usar el primer mensaje del usuario
+      if (!tema && userMessages.length > 0) {
+        tema = userMessages[0].text.substring(0, 100)
+      }
+      
+      // Preparar datos para la base de datos
+      const chatData = {
+        grado: grado || 'No especificado',
+        tema: tema || 'Conversación pedagógica',
+        duracion: 'Variable',
+        sesiones: 1,
+        contenido: messages.map(msg => 
+          `${msg.isUser ? '👤 Usuario' : '🤖 Asistente'}: ${msg.text}`
+        ).join('\n\n---\n\n'),
+        chat_history: messages.map(msg => ({
+          id: msg.id,
+          text: msg.text,
+          isUser: msg.isUser,
+          timestamp: msg.timestamp.toISOString(),
+          isFormatted: msg.isFormatted
+        })),
+        user_id: null // Por ahora null, se puede implementar autenticación después
+      }
+      
+      // Insertar en la base de datos
+      const { data, error } = await supabase
+        .from('planeaciones')
+        .insert([chatData])
+        .select()
+      
+      if (error) {
+        console.error('Error insertando en base de datos:', error)
+        throw new Error(`Error de base de datos: ${error.message}`)
+      }
+      
       setChatSaved(true)
-      alert("✅ Chat guardado exitosamente en la base de datos")
+      alert(`✅ Chat guardado exitosamente en la base de datos!\n\n📊 Información guardada:\n• Grado: ${chatData.grado}\n• Tema: ${chatData.tema}\n• Mensajes: ${messages.length}\n• ID: ${data?.[0]?.id || 'N/A'}`)
+      
+      // Notificar al componente padre
+      if (onChatUpdate) {
+        onChatUpdate(messages)
+      }
+      
     } catch (error) {
       console.error('Error guardando chat:', error)
-      alert("❌ Error guardando el chat")
+      alert(`❌ Error guardando el chat: ${error instanceof Error ? error.message : 'Error desconocido'}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -321,50 +298,57 @@ Ejemplo: "Genérame un plan de clase para grado 8° sobre edición de video en C
         },
       ])
       setChatSaved(false)
-      setUploadedDocuments([])
+      
       if (onChatUpdate) {
-        onChatUpdate([])
+        onChatUpdate(messages)
       }
-      alert("✅ Chat limpiado exitosamente")
     }
   }
 
   return (
-    <div className="bg-gray-100 rounded-lg border border-gray-200 p-4 h-full flex flex-col">
-      {/* Header del Chat */}
-      <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200">
+    <div className="bg-gray-100 rounded-lg p-6 h-full flex flex-col">
+      {/* Header del chat */}
+      <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-          🎓 <span>Asistente Pedagógico IE Camilo Torres</span>
-      </h3>
+          🎓 <span>Asistente Pedagógico IA</span>
+        </h3>
         <div className="flex gap-2">
           <button
             onClick={saveChatToDatabase}
-            disabled={chatSaved}
-            className="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200 text-sm font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
-            title="Guardar chat en la base de datos"
+            disabled={isSaving || chatSaved || messages.length <= 1}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+              chatSaved
+                ? 'bg-green-500 text-white cursor-not-allowed'
+                : isSaving
+                ? 'bg-yellow-500 text-white cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+            title={chatSaved ? 'Chat ya guardado' : 'Guardar chat en base de datos'}
           >
-            💾 {chatSaved ? 'Guardado' : 'Guardar Chat'}
+            {isSaving ? '💾 Guardando...' : chatSaved ? '✅ Guardado' : '💾 Guardar Chat'}
           </button>
+          
           <button
             onClick={exportToWord}
-            className="bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 text-sm font-medium"
-            title="Exportar conversación"
+            className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
+            title="Exportar chat como archivo de texto"
           >
             📄 Exportar
           </button>
-                <button
+          
+          <button
             onClick={clearChat}
             disabled={messages.length <= 1}
-            className="bg-orange-600 text-white px-3 py-2 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition duration-200 text-sm font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
-            title="Limpiar toda la conversación y empezar de nuevo"
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            title="Limpiar todo el chat"
           >
             🗑️ Limpiar Chat
-                </button>
+          </button>
         </div>
       </div>
 
-      {/* Mensajes del Chat */}
-      <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+      {/* Área de mensajes */}
+      <div className="flex-1 overflow-y-auto space-y-4 mb-4 bg-white rounded-lg p-4">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -374,56 +358,48 @@ Ejemplo: "Genérame un plan de clase para grado 8° sobre edición de video en C
               className={`max-w-[80%] p-3 rounded-lg ${
                 message.isUser
                   ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-800 border border-gray-200'
+                  : 'bg-gray-200 text-gray-800'
               }`}
             >
               {message.isFormatted ? (
                 <div 
                   className="whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ __html: message.text.replace(/\n/g, '<br>') }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: message.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                       .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                                       .replace(/\n/g, '<br>')
+                  }} 
                 />
               ) : (
-                <p>{message.text}</p>
+                <p className="whitespace-pre-wrap">{message.text}</p>
               )}
-              <p className={`text-xs mt-2 ${
-                message.isUser ? 'text-blue-100' : 'text-gray-500'
+              <div className={`text-xs mt-2 ${
+                message.isUser ? 'text-blue-200' : 'text-gray-500'
               }`}>
                 {message.timestamp.toLocaleTimeString()}
-              </p>
-            </div>
-          </div>
-        ))}
-        
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-white text-gray-800 border border-gray-200 p-3 rounded-lg">
-              <div className="flex items-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                <span>Generando plan de clase...</span>
               </div>
             </div>
           </div>
-        )}
-        
+        ))}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input del Chat */}
+      {/* Input del usuario */}
       <form onSubmit={handleSubmit} className="flex gap-2">
-      <input
+        <input
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder="Describe el plan de clase que necesitas..."
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="Escribe tu solicitud de planeación aquí..."
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           disabled={isLoading}
         />
         <button
           type="submit"
           disabled={!inputText.trim() || isLoading}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
         >
-          {isLoading ? '🔄' : '🚀'}
+          {isLoading ? '🔄 Procesando...' : '🚀 Enviar'}
         </button>
       </form>
     </div>
