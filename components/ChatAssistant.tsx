@@ -24,6 +24,102 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+// Formato oficial estático del plan de clases (basado en estructura MEN)
+const OFFICIAL_PLAN_FORMAT = {
+  title: "Plan de Clases (Estructura Oficial MEN)",
+  sections: [
+    {
+      name: "IDENTIFICACIÓN",
+      content: "Datos básicos de la planeación",
+      subsections: [
+        { name: "Institución", content: "IE Camilo Torres" },
+        { name: "Área", content: "Tecnología e Informática" },
+        { name: "Grado", content: "Variable según solicitud" },
+        { name: "Tema", content: "Variable según solicitud" },
+        { name: "Duración", content: "Variable según solicitud" },
+        { name: "Docente", content: "Profesor del área" }
+      ]
+    },
+    {
+      name: "ESTÁNDARES BÁSICOS DE COMPETENCIAS",
+      content: "Competencias establecidas por el MEN",
+      subsections: [
+        { name: "Competencia 1", content: "Usar aplicaciones digitales para crear productos tecnológicos" },
+        { name: "Competencia 2", content: "Analizar críticamente el impacto de la tecnología en la sociedad" },
+        { name: "Competencia 3", content: "Diseñar soluciones tecnológicas innovadoras" },
+        { name: "Competencia 4", content: "Comunicar ideas técnicas de manera efectiva" }
+      ]
+    },
+    {
+      name: "COMPETENCIAS ESPECÍFICAS",
+      content: "Competencias específicas del área y tema",
+      subsections: [
+        { name: "Cognitiva", content: "Comprender conceptos y principios tecnológicos" },
+        { name: "Procedimental", content: "Aplicar procedimientos y técnicas tecnológicas" },
+        { name: "Actitudinal", content: "Desarrollar valores y actitudes hacia la tecnología" }
+      ]
+    },
+    {
+      name: "INDICADORES DE DESEMPEÑO",
+      content: "Criterios para evaluar el logro de competencias",
+      subsections: [
+        { name: "Indicador 1", content: "Identifica y describe elementos tecnológicos del tema" },
+        { name: "Indicador 2", content: "Aplica procedimientos tecnológicos de manera correcta" },
+        { name: "Indicador 3", content: "Demuestra interés y responsabilidad en el trabajo tecnológico" }
+      ]
+    },
+    {
+      name: "MOMENTOS PEDAGÓGICOS",
+      content: "Estructura de la clase según modelo crítico-social",
+      subsections: [
+        { name: "Exploración", content: "Activación de conocimientos previos y motivación inicial" },
+        { name: "Problematización", content: "Formulación de preguntas generadoras y desafíos" },
+        { name: "Diálogo", content: "Conversación colaborativa y construcción colectiva" },
+        { name: "Praxis-Reflexión", content: "Aplicación práctica con reflexión crítica" },
+        { name: "Acción-Transformación", content: "Proyecto final con impacto social" }
+      ]
+    },
+    {
+      name: "ESTRATEGIAS DIDÁCTICAS",
+      content: "Métodos y técnicas de enseñanza",
+      subsections: [
+        { name: "Aprendizaje Basado en Proyectos", content: "Desarrollo de proyectos tecnológicos reales" },
+        { name: "Trabajo Colaborativo", content: "Aprendizaje en equipo y cooperativo" },
+        { name: "Reflexión Crítica", content: "Análisis y evaluación de procesos tecnológicos" },
+        { name: "Aplicación Práctica", content: "Uso de herramientas y tecnologías reales" }
+      ]
+    },
+    {
+      name: "RECURSOS Y MATERIALES",
+      content: "Elementos necesarios para el desarrollo de la clase",
+      subsections: [
+        { name: "Recursos Tecnológicos", content: "Computadores, software, dispositivos móviles" },
+        { name: "Materiales de Consulta", content: "Documentos, videos, presentaciones" },
+        { name: "Espacios de Trabajo", content: "Aula de tecnología, laboratorio, espacios colaborativos" }
+      ]
+    },
+    {
+      name: "EVALUACIÓN",
+      content: "Criterios y métodos de evaluación",
+      subsections: [
+        { name: "Evaluación Formativa", content: "Observación directa del proceso de aprendizaje" },
+        { name: "Productos Tecnológicos", content: "Evaluación de productos creados por los estudiantes" },
+        { name: "Reflexiones Escritas", content: "Análisis de procesos y aprendizajes" },
+        { name: "Autoevaluación y Coevaluación", content: "Evaluación entre pares y autoevaluación" }
+      ]
+    },
+    {
+      name: "CONTEXTUALIZACIÓN PEI",
+      content: "Alineación con el Proyecto Educativo Institucional",
+      subsections: [
+        { name: "Pensamiento Crítico", content: "Desarrollo de análisis crítico y reflexivo" },
+        { name: "Praxis Transformadora", content: "Aplicación práctica con impacto transformador" },
+        { name: "Compromiso Comunitario", content: "Responsabilidad social y comunitaria" }
+      ]
+    }
+  ]
+}
+
 export default function ChatAssistant({ 
   onChatUpdate, 
   currentPlanningData, 
@@ -44,11 +140,8 @@ export default function ChatAssistant({
 **¿Qué plan de clase necesitas generar?** 
 Ejemplo: "Genérame un plan de clase para grado 8° sobre edición de video en CapCut"
 
-**Documentos disponibles para consulta:**
-📚 Plan de Clases (estructura oficial)
-📚 Revisión Sistemática del Modelo Crítico-Social
-📚 Orientaciones Curriculares MEN 2022
-📚 PEI Institucional`,
+**Formato oficial disponible:**
+📚 ${OFFICIAL_PLAN_FORMAT.title} (${OFFICIAL_PLAN_FORMAT.sections.length} secciones estructuradas)`,
       isUser: false,
       timestamp: new Date(),
       isFormatted: true,
@@ -93,7 +186,7 @@ Ejemplo: "Genérame un plan de clase para grado 8° sobre edición de video en C
     }
   }
 
-  // Función para generar respuesta usando el prompt pedagógico
+  // Función para generar respuesta usando el formato oficial
   const generatePedagogicalResponse = async (userQuery: string, relevantDocs: SearchResult[]) => {
     try {
       // Construir el contexto con los documentos encontrados
@@ -110,9 +203,42 @@ Ejemplo: "Genérame un plan de clase para grado 8° sobre edición de video en C
         contextInfo += "No se encontraron documentos específicos para esta consulta.\n"
       }
 
-      // Generar respuesta basada en el prompt pedagógico
-      const response = `🎯 **PLAN DE CLASE GENERADO**\n\n${contextInfo}\n\n**RESPUESTA PEDAGÓGICA:**\n\nBasándome en tu solicitud "${userQuery}", aquí tienes un plan de clase estructurado:\n\n**COMPONENTES CURRICULARES:**\n• **Exploración:** Actividad inicial para activar conocimientos previos\n• **Problematización:** Pregunta generadora que motive la investigación\n• **Diálogo:** Conversación colaborativa sobre el tema\n• **Praxis-Reflexión:** Aplicación práctica con reflexión crítica\n• **Acción-Transformación:** Proyecto final con impacto social\n\n**COMPETENCIAS ESPECÍFICAS:**\n• Analizar críticamente el uso de la tecnología\n• Diseñar soluciones tecnológicas innovadoras\n• Comunicar ideas técnicas de manera efectiva\n• Colaborar en proyectos tecnológicos\n\n**MOMENTOS PEDAGÓGICOS:**\n1. **Apertura (15 min):** Exploración del tema\n2. **Desarrollo (60 min):** Aplicación práctica\n3. **Cierre (15 min):** Reflexión y evaluación\n\n**ESTRATEGIAS DIDÁCTICAS:**\n• Aprendizaje basado en proyectos\n• Trabajo colaborativo\n• Reflexión crítica\n• Aplicación práctica\n\n**EVALUACIÓN FORMATIVA:**\n• Observación directa del proceso\n• Productos tecnológicos creados\n• Reflexiones escritas\n• Autoevaluación y coevaluación\n\n**RECURSOS Y MATERIALES:**\n• Herramientas tecnológicas disponibles\n• Materiales de consulta\n• Espacios de trabajo colaborativo\n\n**CONTEXTUALIZACIÓN PEI:**\nEste plan promueve el pensamiento crítico, la praxis transformadora y el compromiso comunitario, alineándose con los principios institucionales de la IE Camilo Torres.\n\n**¿Te gustaría que profundice en algún aspecto específico del plan?** 🚀`
+      // Extraer información del query del usuario
+      const gradoMatch = userQuery.match(/grado\s*(\d+°?)/i)
+      const temaMatch = userQuery.match(/sobre\s+(.+?)(?:\s+en\s+|$)/i)
+      
+      const grado = gradoMatch ? gradoMatch[1] : "8°"
+      const tema = temaMatch ? temaMatch[1] : "tecnología e informática"
 
+      // Generar respuesta usando el formato oficial
+      let response = `🎯 **PLAN DE CLASE GENERADO - ${grado.toUpperCase()}**\n\n`
+      response += `**TEMA:** ${tema.charAt(0).toUpperCase() + tema.slice(1)}\n\n`
+      response += `${contextInfo}\n\n`
+      
+      response += "**ESTRUCTURA OFICIAL DEL PLAN DE CLASES (MEN):**\n\n"
+      
+      OFFICIAL_PLAN_FORMAT.sections.forEach((section, index) => {
+        response += `📚 **${section.name.toUpperCase()}**\n`
+        
+        if (section.subsections && section.subsections.length > 0) {
+          section.subsections.forEach(subsection => {
+            response += `  • **${subsection.name}:** ${subsection.content}\n`
+          })
+        } else if (section.content.trim()) {
+          response += `  ${section.content}\n`
+        }
+        
+        response += '\n'
+      })
+      
+      response += "**CONTEXTUALIZACIÓN ESPECÍFICA PARA EL TEMA:**\n\n"
+      response += `• **Grado:** ${grado}\n`
+      response += `• **Área:** Tecnología e Informática\n`
+      response += `• **Enfoque:** Modelo pedagógico crítico-social\n`
+      response += `• **Estrategia:** Aprendizaje basado en proyectos\n\n`
+      
+      response += "**¿Te gustaría que profundice en alguna sección específica del plan?** 🚀"
+      
       return response
     } catch (error) {
       console.error('Error generando respuesta pedagógica:', error)
@@ -287,11 +413,8 @@ Ejemplo: "Genérame un plan de clase para grado 8° sobre edición de video en C
 **¿Qué plan de clase necesitas generar?** 
 Ejemplo: "Genérame un plan de clase para grado 8° sobre edición de video en CapCut"
 
-**Documentos disponibles para consulta:**
-📚 Plan de Clases (estructura oficial)
-📚 Revisión Sistemática del Modelo Crítico-Social
-📚 Orientaciones Curriculares MEN 2022
-📚 PEI Institucional`,
+**Formato oficial disponible:**
+📚 ${OFFICIAL_PLAN_FORMAT.title} (${OFFICIAL_PLAN_FORMAT.sections.length} secciones estructuradas)`,
           isUser: false,
           timestamp: new Date(),
           isFormatted: true,
@@ -344,6 +467,16 @@ Ejemplo: "Genérame un plan de clase para grado 8° sobre edición de video en C
           >
             🗑️ Limpiar Chat
           </button>
+        </div>
+      </div>
+
+      {/* Indicador de formato oficial */}
+      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="flex items-center gap-2 text-blue-800">
+          <span>📚</span>
+          <span className="text-sm font-medium">
+            Formato oficial MEN disponible: {OFFICIAL_PLAN_FORMAT.sections.length} secciones estructuradas
+          </span>
         </div>
       </div>
 
