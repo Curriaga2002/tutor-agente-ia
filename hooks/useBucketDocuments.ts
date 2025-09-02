@@ -29,29 +29,88 @@ export function useBucketDocuments(): UseBucketDocumentsReturn {
       setIsLoading(true)
       setError(null)
       
-      console.log('🔄 Cargando documentos del bucket en tiempo real...')
+      console.log('🔄 Cargando documentos del bucket...')
       
-      // Procesar todos los PDFs del bucket
-      const processedDocs = await processAllPDFs()
+      // Listar archivos del bucket
+      const { data: files, error } = await supabase.storage
+        .from('educacion')
+        .list('', {
+          limit: 1000,
+          offset: 0
+        })
       
-      if (processedDocs && processedDocs.length > 0) {
-        setDocuments(processedDocs)
-        setLastUpdated(new Date())
-        console.log(`✅ ${processedDocs.length} documentos cargados exitosamente`)
-      } else {
-        setDocuments([])
-        setError('No se encontraron documentos en el bucket')
-        console.log('⚠️ No se encontraron documentos en el bucket')
+      if (error) {
+        console.error('❌ Error listando archivos:', error)
+        setError(`Error listando archivos: ${error.message}`)
+        return
       }
       
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
-      setError(errorMessage)
-      console.error('❌ Error cargando documentos:', errorMessage)
+      if (!files || files.length === 0) {
+        console.log('📁 No se encontraron archivos en el bucket')
+        setDocuments([])
+        return
+      }
+      
+      console.log(`📁 Archivos encontrados en el bucket: ${files.length}`)
+      
+      // Filtrar archivos del sistema y archivos problemáticos
+      const validFiles = files.filter(file => {
+        // Excluir archivos del sistema
+        const systemFiles = [
+          '.emptyFolderPlaceholder',
+          '.DS_Store',
+          'Thumbs.db',
+          '.gitkeep',
+          '.gitignore'
+        ]
+        
+        if (systemFiles.includes(file.name)) {
+          console.log(`🚫 Archivo del sistema excluido: ${file.name}`)
+          return false
+        }
+        
+        // Excluir archivos ocultos
+        if (file.name.startsWith('.')) {
+          console.log(`🚫 Archivo oculto excluido: ${file.name}`)
+          return false
+        }
+        
+        // Solo incluir archivos con extensiones válidas
+        const validExtensions = ['.pdf', '.doc', '.docx', '.txt', '.rtf']
+        const hasValidExtension = validExtensions.some(ext => 
+          file.name.toLowerCase().endsWith(ext)
+        )
+        
+        if (!hasValidExtension) {
+          console.log(`🚫 Archivo sin extensión válida excluido: ${file.name}`)
+          return false
+        }
+        
+        return true
+      })
+      
+      console.log(`✅ Archivos válidos después del filtrado: ${validFiles.length}`)
+      
+      if (validFiles.length === 0) {
+        console.log('⚠️ No hay archivos válidos después del filtrado')
+        setDocuments([])
+        return
+      }
+      
+      // Procesar solo los archivos válidos
+      const processedDocs = await processAllPDFs(validFiles)
+      console.log(`📚 Documentos procesados exitosamente: ${processedDocs.length}`)
+      
+      setDocuments(processedDocs)
+      setLastUpdated(Date.now())
+      
+    } catch (error) {
+      console.error('❌ Error cargando documentos:', error)
+      setError(`Error inesperado: ${error instanceof Error ? error.message : 'Error desconocido'}`)
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [supabase.storage])
 
   // Función para refrescar documentos
   const refreshDocuments = useCallback(async () => {

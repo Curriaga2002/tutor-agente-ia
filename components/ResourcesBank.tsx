@@ -30,7 +30,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
   const [planeaciones, setPlaneaciones] = useState<Planeacion[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [filterGrado, setFilterGrado] = useState("")
+
   const [error, setError] = useState<string | null>(null)
   const [selectedPlan, setSelectedPlan] = useState<Planeacion | null>(null)
   const [showChatHistory, setShowChatHistory] = useState(false)
@@ -394,8 +394,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
   const filteredPlaneaciones = planeaciones.filter(plan => {
     const matchesSearch = plan.tema.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          plan.grado.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesGrado = !filterGrado || plan.grado === filterGrado
-    return matchesSearch && matchesGrado
+    return matchesSearch
   })
 
   useEffect(() => {
@@ -425,17 +424,6 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             />
-          </div>
-          <div className="w-32">
-            <select
-              value={filterGrado}
-              onChange={(e) => setFilterGrado(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="">Todos los grados</option>
-              <option value="8°">8° Grado</option>
-              <option value="9°">9° Grado</option>
-            </select>
           </div>
         </div>
         
@@ -468,128 +456,133 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
       )}
 
       {!isLoading && filteredPlaneaciones.length > 0 && (
-        <div className="space-y-4">
-          <div className="text-sm text-gray-600 mb-2">
+        <div className="space-y-6">
+          <div className="text-sm text-gray-600 mb-4">
             Mostrando {filteredPlaneaciones.length} de {planeaciones.length} planeaciones
           </div>
           
-          {filteredPlaneaciones.map((plan) => (
-            <div key={plan.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h3 className="font-semibold text-gray-800">{plan.tema}</h3>
-                  <p className="text-sm text-gray-600">
-                    Grado {plan.grado} • {plan.duracion} • {plan.sesiones} sesión(es)
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Creado: {new Date(plan.created_at).toLocaleDateString("es-CO")}
-                  </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPlaneaciones.map((plan) => (
+              <div 
+                key={plan.id} 
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl hover:shadow-gray-200/50 hover:border-gray-300 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-2 group-hover:text-gray-700 transition-colors">
+                      {plan.tema}
+                    </h3>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        📚 {plan.grado}
+                      </span>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        ⏱️ {plan.duracion}
+                      </span>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        📅 {plan.sesiones} sesión(es)
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Creado: {new Date(plan.created_at).toLocaleDateString("es-CO")}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex space-x-2">
+                
+                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                   <button
                     onClick={() => viewChatHistory(plan)}
-                    className="text-purple-600 hover:text-purple-800 text-sm font-medium px-3 py-1 rounded hover:bg-purple-50"
+                    className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors duration-200 text-sm font-medium group-hover:bg-blue-50 group-hover:text-blue-700"
                     title="Ver historial completo del chat"
                   >
-                    💬 Chat
+                    💬 Ver Chat
                   </button>
                   <button
                     onClick={() => deletePlan(plan.id)}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1 rounded hover:bg-red-50"
+                    className="flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors duration-200 text-sm font-medium"
                   >
                     🗑️ Eliminar
                   </button>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded p-3 text-sm">
-                <p className="text-gray-700">
-                  <strong>Objetivos:</strong>
-                </p>
-                <ul className="list-disc list-inside text-gray-600 mt-1">
-                  {plan.contenido.objetivos
-                    ?.slice(0, 2)
-                    .map((obj: string, index: number) => <li key={index}>{obj}</li>) || <li>No disponible</li>}
-                </ul>
-                {plan.contenido.objetivos?.length > 2 && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    +{plan.contenido.objetivos.length - 2} objetivo(s) más...
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
       {/* Modal para mostrar historial del chat */}
       {showChatHistory && selectedPlan && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-800">
+          <div className="bg-white rounded-2xl shadow-xl max-w-6xl w-full max-h-[95vh] overflow-hidden">
+            <div className="flex justify-between items-center p-8 border-b border-gray-200">
+              <h3 className="text-2xl font-semibold text-gray-800">
                 💬 Historial Completo del Chat - {selectedPlan.tema}
               </h3>
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button
                   onClick={() => copyToClipboard(formatChatForCopy(selectedPlan), "Chat completo")}
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-200 text-sm"
+                  className="bg-green-500 text-white px-6 py-3 rounded-xl hover:bg-green-600 transition duration-200 text-sm font-medium"
                 >
                   📋 Copiar Todo
                 </button>
                 <button
                   onClick={closeChatHistory}
-                  className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-200 text-sm"
+                  className="bg-gray-500 text-white px-6 py-3 rounded-xl hover:bg-gray-600 transition duration-200 text-sm font-medium"
                 >
                   ✕ Cerrar
                 </button>
               </div>
             </div>
 
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+            <div className="p-8 overflow-y-auto max-h-[calc(95vh-140px)]">
               {/* Información de la planeación */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <h4 className="font-semibold text-blue-800 mb-2">📚 Información de la Planeación</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-8">
+                <h4 className="font-semibold text-blue-800 mb-4 text-lg">📚 Información de la Planeación</h4>
+                <div className="grid grid-cols-2 gap-6 text-base">
                   <div>
-                    <span className="font-medium">Grado:</span> {selectedPlan.grado}
+                    <span className="font-medium text-blue-900">Grado:</span> 
+                    <span className="ml-2 text-blue-700">{selectedPlan.grado}</span>
                   </div>
                   <div>
-                    <span className="font-medium">Duración:</span> {selectedPlan.duracion}
+                    <span className="font-medium text-blue-900">Duración:</span> 
+                    <span className="ml-2 text-blue-700">{selectedPlan.duracion}</span>
                   </div>
                   <div>
-                    <span className="font-medium">Sesiones:</span> {selectedPlan.sesiones}
+                    <span className="font-medium text-blue-900">Sesiones:</span> 
+                    <span className="ml-2 text-blue-700">{selectedPlan.sesiones}</span>
                   </div>
                   <div>
-                    <span className="font-medium">Fecha:</span> {new Date(selectedPlan.created_at).toLocaleDateString("es-CO")}
+                    <span className="font-medium text-blue-900">Fecha:</span> 
+                    <span className="ml-2 text-blue-700">{new Date(selectedPlan.created_at).toLocaleDateString("es-CO")}</span>
                   </div>
                 </div>
               </div>
 
               {/* Historial del chat */}
-              <div className="space-y-4">
-                <h4 className="font-semibold text-gray-800 mb-4">💬 Conversación Completa</h4>
+              <div className="space-y-6">
+                <h4 className="font-semibold text-gray-800 mb-6 text-xl">💬 Conversación Completa</h4>
                 
                 {selectedPlan.chat_history && selectedPlan.chat_history.length > 0 ? (
                   selectedPlan.chat_history.map((message) => (
                     <div key={message.id} className={`${message.isUser ? "text-right" : "text-left"}`}>
                       <div
-                        className={`inline-block max-w-[85%] p-3 rounded-lg ${
+                        className={`inline-block max-w-[90%] p-6 rounded-2xl ${
                           message.isUser 
                             ? "bg-blue-500 text-white" 
                             : "bg-gray-100 text-gray-800 border-l-4 border-blue-400"
                         }`}
                       >
-                        <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                        <div className="text-base leading-relaxed whitespace-pre-wrap break-words">
                           {message.isFormatted ? 
                             message.text.replace(/\*\*/g, '').replace(/\*/g, '') : 
                             message.text
                           }
                         </div>
-                        <div className="flex justify-between items-center mt-2">
-                          <span className="text-xs opacity-70">
+                        <div className="flex justify-between items-center mt-4">
+                          <span className="text-sm opacity-70">
                             {new Date(message.timestamp).toLocaleTimeString("es-CO")}
                           </span>
-                          <span className="text-xs opacity-70">
+                          <span className="text-sm opacity-70 font-medium">
                             {message.isUser ? "DOCENTE" : "TUTOR IA"}
                           </span>
                         </div>
@@ -597,9 +590,9 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                     </div>
                   ))
                 ) : (
-                  <div className="text-center text-gray-500 py-8">
-                    <div className="text-4xl mb-2">💬</div>
-                    <p>No hay historial de chat disponible para esta planeación.</p>
+                  <div className="text-center text-gray-500 py-12">
+                    <div className="text-6xl mb-4">💬</div>
+                    <p className="text-lg">No hay historial de chat disponible para esta planeación.</p>
                   </div>
                 )}
               </div>

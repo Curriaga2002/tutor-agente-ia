@@ -21,9 +21,9 @@ export default function PlanningAssistant() {
     <div className="min-h-screen bg-gray-50">
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-8 py-12">
         {activeTab === 'generar' && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <ChatAssistant 
               onChatUpdate={handleChatUpdate}
               currentPlanningData={currentPlanningData}
@@ -33,13 +33,13 @@ export default function PlanningAssistant() {
         )}
         
         {activeTab === 'estado' && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <AppStatus />
           </div>
         )}
         
         {activeTab === 'historial' && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <ResourcesBank 
               setActiveTab={setActiveTab}
               setCurrentPlanningData={setCurrentPlanningData}

@@ -30,11 +30,11 @@ interface ChatAssistantProps {
 }
 
 interface PlanningConfig {
-  grado: string
+    grado: string
   asignatura: string
-  tema: string
+    tema: string
   horas: string
-  sesiones: string
+    sesiones: string
   // Campos para consulta automática de documentos institucionales
   consultarPEI: boolean
   consultarModeloPedagogico: boolean
@@ -68,150 +68,158 @@ const ConfigurationForm = ({
     setPlanningConfig((prev: PlanningConfig) => ({ ...prev, [field]: value }))
   }
 
-  return (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-      <div className="text-center mb-4">
-        <h3 className="text-lg font-semibold text-blue-800 mb-2">⚙️ Configuración Inicial Requerida</h3>
-        <p className="text-sm text-blue-600">
-          Antes de continuar, necesito que configures los parámetros básicos de tu planeación
-        </p>
-      </div>
+           return (
+           <div className="bg-white border border-gray-100 rounded-3xl p-12 mb-8 shadow-sm">
+             <div className="text-center mb-12">
+               <h3 className="text-3xl font-light text-gray-900 mb-4 tracking-tight">Configuración Inicial</h3>
+               <p className="text-xl text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
+                 Configura los parámetros básicos de tu planeación para personalizar la experiencia
+               </p>
+             </div>
       
-      <form onSubmit={handleConfigSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-blue-700 mb-1">
-              Grado *
-            </label>
-            <select
-              value={planningConfig.grado}
-              onChange={(e) => handleInputChange('grado', e.target.value)}
-              className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value="">Selecciona el grado</option>
-              <option value="1°">1° Primaria</option>
-              <option value="2°">2° Primaria</option>
-              <option value="3°">3° Primaria</option>
-              <option value="4°">4° Primaria</option>
-              <option value="5°">5° Primaria</option>
-              <option value="6°">6° Primaria</option>
-              <option value="7°">7° Secundaria</option>
-              <option value="8°">8° Secundaria</option>
-              <option value="9°">9° Secundaria</option>
-              <option value="10°">10° Secundaria</option>
-              <option value="11°">11° Secundaria</option>
-            </select>
-          </div>
+                   <form onSubmit={handleConfigSubmit} className="space-y-8">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="space-y-3">
+                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                     Grado *
+                   </label>
+                   <select
+                     value={planningConfig.grado}
+                     onChange={(e) => handleInputChange('grado', e.target.value)}
+                     className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 transition-all duration-200 bg-white text-gray-900"
+                     required
+                   >
+                     <option value="">Selecciona el grado</option>
+                     <option value="1°">1° Primaria</option>
+                     <option value="2°">2° Primaria</option>
+                     <option value="3°">3° Primaria</option>
+                     <option value="4°">4° Primaria</option>
+                     <option value="5°">5° Primaria</option>
+                     <option value="6°">6° Primaria</option>
+                     <option value="7°">7° Secundaria</option>
+                     <option value="8°">8° Secundaria</option>
+                     <option value="9°">9° Secundaria</option>
+                     <option value="10°">10° Secundaria</option>
+                     <option value="11°">11° Secundaria</option>
+                   </select>
+                 </div>
+                 
+                 <div className="space-y-3">
+                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                     Asignatura *
+                   </label>
+                   <input
+                     type="text"
+                     value={planningConfig.asignatura}
+                     onChange={(e) => handleInputChange('asignatura', e.target.value)}
+                     placeholder="Ej: Matemáticas, Ciencias, Español..."
+                     className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                     required
+                   />
+                 </div>
+                 
+                 <div className="space-y-3">
+                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                     Tema Específico *
+                   </label>
+                   <input
+                     type="text"
+                     value={planningConfig.tema}
+                     onChange={(e) => handleInputChange('tema', e.target.value)}
+                     placeholder="Ej: Suma y resta, Ecosistemas, Poesía..."
+                     className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                     required
+                   />
+                 </div>
+                 
+                 <div className="space-y-3">
+                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                     Duración Total (horas) *
+                   </label>
+                   <input
+                     type="number"
+                     min="1"
+                     max="20"
+                     value={planningConfig.horas}
+                     onChange={(e) => handleInputChange('horas', e.target.value)}
+                     placeholder="Ej: 2, 4, 6..."
+                     className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                     required
+                   />
+                 </div>
+                 
+                 <div className="md:col-span-2 space-y-3">
+                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                     Número de Sesiones *
+                   </label>
+                   <input
+                     type="number"
+                     min="1"
+                     max="10"
+                     value={planningConfig.sesiones}
+                     onChange={(e) => handleInputChange('sesiones', e.target.value)}
+                     placeholder="Ej: 2, 3, 4..."
+                     className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                     required
+                   />
+                 </div>
           
-          <div>
-            <label className="block text-sm font-medium text-blue-700 mb-1">
-              Asignatura *
-            </label>
-            <input
-              type="text"
-              value={planningConfig.asignatura}
-              onChange={(e) => handleInputChange('asignatura', e.target.value)}
-              placeholder="Ej: Matemáticas, Ciencias, Español..."
-              className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-blue-700 mb-1">
-              Tema Específico *
-            </label>
-            <input
-              type="text"
-              value={planningConfig.tema}
-              onChange={(e) => handleInputChange('tema', e.target.value)}
-              placeholder="Ej: Suma y resta, Ecosistemas, Poesía..."
-              className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-blue-700 mb-1">
-              Duración Total (horas) *
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="20"
-              value={planningConfig.horas}
-              onChange={(e) => handleInputChange('horas', e.target.value)}
-              placeholder="Ej: 2, 4, 6..."
-              className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-blue-700 mb-1">
-              Número de Sesiones *
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="10"
-              value={planningConfig.sesiones}
-              onChange={(e) => handleInputChange('sesiones', e.target.value)}
-              placeholder="Ej: 2, 3, 4..."
-              className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          
-          {/* Sección de Consulta Automática de Documentos Institucionales */}
-          <div className="md:col-span-2">
-            <div className="border-t border-blue-200 pt-4">
-              <h4 className="text-sm font-medium text-blue-800 mb-3">🔍 Consulta Automática de Documentos Institucionales</h4>
-              
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="consultarPEI"
-                    checked={planningConfig.consultarPEI}
-                    onChange={(e) => handleInputChange('consultarPEI', e.target.checked.toString())}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label htmlFor="consultarPEI" className="ml-2 text-sm text-blue-700">
-                    ✅ Consultar automáticamente el PEI de la institución
-                  </label>
-                </div>
-                
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="consultarModeloPedagogico"
-                    checked={planningConfig.consultarModeloPedagogico}
-                    onChange={(e) => handleInputChange('consultarModeloPedagogico', e.target.checked.toString())}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label htmlFor="consultarModeloPedagogico" className="ml-2 text-sm text-blue-700">
-                    🎯 Consultar automáticamente el modelo pedagógico institucional
-                  </label>
-                </div>
-                
-                <div className="ml-6 text-xs text-blue-600">
-                  <p>💡 Estos documentos se consultarán automáticamente antes de cada generación de contenido para asegurar coherencia institucional.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="text-center">
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
-          >
-            ✅ Confirmar Configuración
-          </button>
-        </div>
+                           {/* Sección de Consulta Automática de Documentos Institucionales */}
+                 <div className="md:col-span-2">
+                   <div className="border-t border-gray-200 pt-8">
+                     <h4 className="text-xl font-light text-gray-900 mb-6 flex items-center">
+                       <span className="w-10 h-10 bg-gray-100 rounded-2xl flex items-center justify-center mr-4">
+                         <span className="text-gray-600 text-lg">🔍</span>
+                       </span>
+                       Consulta Automática de Documentos Institucionales
+                     </h4>
+                     
+                     <div className="space-y-4">
+                       <div className="flex items-center p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                         <input
+                           type="checkbox"
+                           id="consultarPEI"
+                           checked={planningConfig.consultarPEI}
+                           onChange={(e) => handleInputChange('consultarPEI', e.target.checked.toString())}
+                           className="w-6 h-6 text-gray-600 border-gray-300 rounded focus:ring-gray-500 focus:ring-2"
+                         />
+                         <label htmlFor="consultarPEI" className="ml-4 text-gray-800 font-medium text-lg">
+                           ✅ Consultar automáticamente el PEI de la institución
+                         </label>
+                       </div>
+                       
+                       <div className="flex items-center p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                         <input
+                           type="checkbox"
+                           id="consultarModeloPedagogico"
+                           checked={planningConfig.consultarModeloPedagogico}
+                           onChange={(e) => handleInputChange('consultarModeloPedagogico', e.target.checked.toString())}
+                           className="w-6 h-6 text-gray-600 border-gray-300 rounded focus:ring-gray-500 focus:ring-2"
+                         />
+                         <label htmlFor="consultarModeloPedagogico" className="ml-4 text-gray-800 font-medium text-lg">
+                           🎯 Consultar automáticamente el modelo pedagógico institucional
+                         </label>
+                       </div>
+                       
+                       <div className="ml-6 p-6 bg-gray-100 rounded-2xl">
+                         <p className="text-gray-600 leading-relaxed">
+                           💡 Estos documentos se consultarán automáticamente antes de cada generación de contenido para asegurar coherencia institucional.
+                         </p>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+               
+               <div className="text-center pt-8">
+                 <button
+                   type="submit"
+                   className="inline-flex items-center px-12 py-5 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 font-medium text-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                 >
+                   <span className="mr-3">✅</span>
+                   Aceptar y Continuar
+                 </button>
+               </div>
       </form>
     </div>
   )
@@ -345,13 +353,8 @@ Ejemplos:
   const searchRelevantDocuments = async (query: string): Promise<PDFContent[]> => {
     try {
       if (bucketDocuments.length === 0) {
-        console.log('⚠️ No hay documentos disponibles para buscar')
         return []
       }
-      
-      console.log(`🔍 **BÚSQUEDA EN DOCUMENTOS ACTIVA**`)
-      console.log(`📚 Total de documentos disponibles: ${bucketDocuments.length}`)
-      console.log(`🔎 Consulta del usuario: "${query}"`)
       
       // Buscar documentos que contengan la consulta
       const relevantDocs = bucketDocuments.filter(doc => {
@@ -360,23 +363,10 @@ Ejemplos:
         const typeMatch = doc.doc_type.toLowerCase().includes(query.toLowerCase())
         
         if (titleMatch || contentMatch || typeMatch) {
-          console.log(`✅ Documento relevante encontrado: ${doc.title} (${doc.doc_type})`)
           return true
         }
         return false
       })
-      
-      console.log(`🎯 **RESULTADO DE BÚSQUEDA:**`)
-      console.log(`📊 Documentos relevantes encontrados: ${relevantDocs.length}`)
-      
-      if (relevantDocs.length > 0) {
-        relevantDocs.forEach((doc, index) => {
-          console.log(`  ${index + 1}. ${doc.title} (${doc.doc_type})`)
-        })
-      } else {
-        console.log(`⚠️ No se encontraron documentos específicos para: "${query}"`)
-        console.log(`💡 El agente usará el contexto general de los ${bucketDocuments.length} documentos disponibles`)
-      }
       
       return relevantDocs
       
@@ -389,16 +379,10 @@ Ejemplos:
   // Función para generar respuesta pedagógica usando Gemini
   const generatePedagogicalResponse = async (userInput: string, relevantDocs: PDFContent[]): Promise<string> => {
     try {
-      console.log('🤖 **GENERACIÓN DE RESPUESTA PEDAGÓGICA INICIADA**')
-      console.log('📝 Entrada del usuario:', userInput)
-      console.log('📚 Documentos relevantes pre-filtrados:', relevantDocs.length)
-      
       // Analizar entrada del usuario
       const analysis = analyzeUserInput(userInput)
-      console.log('📊 Análisis de entrada:', analysis)
       
       // CONSULTA AUTOMÁTICA DE DOCUMENTOS INSTITUCIONALES
-      console.log('🏛️ **INICIANDO CONSULTA AUTOMÁTICA DE DOCUMENTOS INSTITUCIONALES**')
       const documentosInstitucionales = await consultarDocumentosInstitucionales()
       
       // Combinar documentos relevantes de la consulta con documentos institucionales
@@ -406,88 +390,29 @@ Ejemplos:
       
       // Agregar PEI si está habilitado
       if (planningConfig.consultarPEI && documentosInstitucionales.pei.length > 0) {
-        console.log('✅ Agregando documentos del PEI a la consulta')
         relevantFiles.push(...documentosInstitucionales.pei)
       }
       
       // Agregar Modelo Pedagógico si está habilitado
       if (planningConfig.consultarModeloPedagogico && documentosInstitucionales.modeloPedagogico.length > 0) {
-        console.log('✅ Agregando documentos del Modelo Pedagógico a la consulta')
         relevantFiles.push(...documentosInstitucionales.modeloPedagogico)
       }
       
       // Agregar Orientaciones Curriculares
       if (documentosInstitucionales.orientacionesCurriculares.length > 0) {
-        console.log('✅ Agregando Orientaciones Curriculares a la consulta')
         relevantFiles.push(...documentosInstitucionales.orientacionesCurriculares)
       }
       
       // Buscar documentos adicionales si no hay suficientes
       if (relevantFiles.length === 0) {
-        console.log('🔍 **BÚSQUEDA ADICIONAL DE DOCUMENTOS**')
         const docsAdicionales = await searchRelevantDocuments(userInput)
         relevantFiles.push(...docsAdicionales)
-        console.log('📚 Documentos encontrados en búsqueda adicional:', docsAdicionales.length)
       }
       
       // Eliminar duplicados basados en ID
       const uniqueDocs = relevantFiles.filter((doc, index, self) => 
         index === self.findIndex(d => d.id === doc.id)
       )
-      
-      console.log('🚀 **ENVIANDO A GEMINI CON CONTEXTO INSTITUCIONAL COMPLETO**')
-      console.log('📋 Parámetros para Gemini:', {
-        grado: analysis.grado,
-        tema: analysis.tema,
-        asignatura: analysis.asignatura,
-        horas: analysis.horas,
-        sesiones: analysis.sesiones,
-        context: analysis.context,
-        relevantDocsCount: uniqueDocs.length,
-        totalDocsAvailable: bucketDocuments.length,
-        peiIncluido: planningConfig.consultarPEI && documentosInstitucionales.pei.length > 0,
-        modeloPedagogicoIncluido: planningConfig.consultarModeloPedagogico && documentosInstitucionales.modeloPedagogico.length > 0
-      })
-      
-      // Mostrar qué documentos se están enviando a Gemini
-      if (uniqueDocs.length > 0) {
-        console.log('📖 **DOCUMENTOS COMPLETOS ENVIADOS A GEMINI:**')
-        
-        // Agrupar por tipo
-        const docsPorTipo = {
-          'PEI': uniqueDocs.filter(doc => 
-            doc.title.toLowerCase().includes('pei') || 
-            doc.title.toLowerCase().includes('proyecto educativo')
-          ),
-          'Modelo Pedagógico': uniqueDocs.filter(doc => 
-            doc.title.toLowerCase().includes('modelo pedagógico') || 
-            doc.title.toLowerCase().includes('enfoque pedagógico')
-          ),
-          'Orientaciones Curriculares': uniqueDocs.filter(doc => 
-            doc.title.toLowerCase().includes('orientaciones') || 
-            doc.title.toLowerCase().includes('curricular')
-          ),
-          'Otros': uniqueDocs.filter(doc => 
-            !doc.title.toLowerCase().includes('pei') && 
-            !doc.title.toLowerCase().includes('modelo pedagógico') && 
-            !doc.title.toLowerCase().includes('orientaciones') && 
-            !doc.title.toLowerCase().includes('curricular')
-          )
-        }
-        
-        Object.entries(docsPorTipo).forEach(([tipo, docs]) => {
-          if (docs.length > 0) {
-            console.log(`  📁 ${tipo}: ${docs.length} documentos`)
-            docs.forEach((doc, index) => {
-              console.log(`     ${index + 1}. ${doc.title} (${doc.doc_type})`)
-              console.log(`        Contenido: ${doc.content.substring(0, 100)}...`)
-            })
-          }
-        })
-      } else {
-        console.log('⚠️ **NO HAY DOCUMENTOS DISPONIBLES**')
-        console.log('💡 Gemini usará el contexto general de todos los documentos disponibles')
-      }
       
       // Usar Gemini para generar el plan de clase
       const geminiResponse = await geminiService.generateClassPlan(
@@ -497,20 +422,11 @@ Ejemplos:
         uniqueDocs
       )
       
-      console.log('📨 **RESPUESTA DE GEMINI RECIBIDA:**')
-      console.log('✅ Éxito:', geminiResponse.success)
-      console.log('📝 Longitud:', geminiResponse.text?.length || 0)
-      
       if (geminiResponse.success) {
-        console.log('✅ **PLAN DE CLASE GENERADO EXITOSAMENTE**')
-        console.log('🎯 Basado en:', uniqueDocs.length > 0 ? `${uniqueDocs.length} documentos (incluyendo institucionales)` : 'contexto general de documentos')
         return geminiResponse.text
       } else {
-        console.error('❌ **ERROR EN GEMINI:**', geminiResponse.error)
-        
         // Verificar si es error de cuota excedida
         if (geminiResponse.error && (geminiResponse.error.includes('quota') || geminiResponse.error.includes('429'))) {
-          console.log('🔄 **CUOTA EXCEDIDA DETECTADA - ACTIVANDO SISTEMA DE FALLBACK**')
           return await generateFallbackResponse(userInput, relevantDocs)
         }
         
@@ -551,8 +467,6 @@ Ejemplos:
   // Función de fallback cuando Gemini excede la cuota
   const generateFallbackResponse = async (userInput: string, relevantDocs: PDFContent[]): Promise<string> => {
     try {
-      console.log('🔄 **GENERANDO RESPUESTA DE FALLBACK** (Gemini excedió cuota)')
-      
       // Analizar entrada del usuario
       const analysis = analyzeUserInput(userInput)
       
@@ -575,8 +489,6 @@ Ejemplos:
       const uniqueDocs = allDocs.filter((doc, index, self) => 
         index === self.findIndex(d => d.id === doc.id)
       )
-      
-      console.log(`📚 Generando respuesta basada en ${uniqueDocs.length} documentos del bucket`)
       
       // Generar respuesta estructurada basada en los documentos disponibles
       let response = `🎓 **PLAN DE CLASE GENERADO (Sistema de Fallback)**
@@ -642,10 +554,7 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
     orientacionesCurriculares: PDFContent[]
   }> => {
     try {
-      console.log('🏛️ **CONSULTA AUTOMÁTICA DE DOCUMENTOS INSTITUCIONALES**')
-      
       if (bucketDocuments.length === 0) {
-        console.log('⚠️ No hay documentos disponibles para consulta institucional')
         return { pei: [], modeloPedagogico: [], orientacionesCurriculares: [] }
       }
       
@@ -675,22 +584,6 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
         doc.content.toLowerCase().includes('orientaciones curriculares') ||
         doc.doc_type.toLowerCase().includes('curricular')
       )
-      
-      console.log('📋 **DOCUMENTOS INSTITUCIONALES ENCONTRADOS:**')
-      console.log(`🏛️ PEI: ${peiDocs.length} documentos`)
-      peiDocs.forEach((doc, index) => {
-        console.log(`   ${index + 1}. ${doc.title} (${doc.doc_type})`)
-      })
-      
-      console.log(`🎯 Modelo Pedagógico: ${modeloPedagogicoDocs.length} documentos`)
-      modeloPedagogicoDocs.forEach((doc, index) => {
-        console.log(`   ${index + 1}. ${doc.title} (${doc.doc_type})`)
-      })
-      
-      console.log(`📚 Orientaciones Curriculares: ${orientacionesCurricularesDocs.length} documentos`)
-      orientacionesCurricularesDocs.forEach((doc, index) => {
-        console.log(`   ${index + 1}. ${doc.title} (${doc.doc_type})`)
-      })
       
       return {
         pei: peiDocs,
@@ -822,19 +715,16 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
         user_id: null // Se asignará automáticamente por RLS
       }
 
-      console.log('💾 Guardando planeación en base de datos:', chatData)
-
       // Guardar en la base de datos
       const { data, error } = await supabase
         .from('planeaciones')
         .insert([chatData])
         .select()
-
+       
       if (error) {
         console.error('❌ Error guardando planeación:', error)
         alert(`❌ Error al guardar: ${error.message}`)
       } else {
-        console.log('✅ Planeación guardada exitosamente:', data)
         alert('✅ Planeación guardada exitosamente en la base de datos')
         
         // Actualizar datos de planeación actual
@@ -982,23 +872,23 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  return (
-    <div className="flex flex-col h-full bg-gray-100 rounded-lg">
-      {/* Header del Chat */}
-      <div className="bg-white border-b border-gray-200 p-4 rounded-t-lg">
+    return (
+    <div className="flex flex-col h-full bg-gray-50 rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      {/* Header del Chat - Estilo Apple */}
+      <div className="bg-white border-b border-gray-100 p-8">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-gray-800">💬 Asistente Pedagógico IA</h2>
-            <p className="text-sm text-gray-600">
-              Sistema de planeación inteligente con IA
+            <h2 className="text-3xl font-light text-gray-900 mb-3 tracking-tight">💬 Asistente Pedagógico IA</h2>
+            <p className="text-lg text-gray-500 font-light">
+              Sistema de planeación inteligente con inteligencia artificial
             </p>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-4">
             <button
               onClick={clearChat}
               disabled={isLoading || isSaving}
-              className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 disabled:opacity-50"
+              className="px-6 py-3 text-sm bg-gray-100 text-gray-700 rounded-2xl hover:bg-gray-200 disabled:opacity-50 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
               title="Limpiar conversación"
             >
               🗑️ Limpiar
@@ -1006,7 +896,7 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
             <button
               onClick={exportToWord}
               disabled={isLoading || isSaving || !isConfigured}
-              className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 disabled:opacity-50"
+              className="px-6 py-3 text-sm bg-blue-100 text-blue-700 rounded-2xl hover:bg-blue-200 disabled:opacity-50 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
               title="Exportar planeación"
             >
               📄 Exportar
@@ -1014,7 +904,7 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
             <button
               onClick={saveChatToDatabase}
               disabled={isLoading || isSaving || !isConfigured}
-              className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 disabled:opacity-50"
+              className="px-6 py-3 text-sm bg-green-100 text-green-700 rounded-2xl hover:bg-green-200 disabled:opacity-50 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
               title="Guardar planeación"
             >
               💾 Guardar
@@ -1034,9 +924,9 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
               setIsConfigured(true)
               const configMessage: Message = {
                 id: Date.now().toString(),
-                text: `✅ **CONFIGURACIÓN INICIAL COMPLETADA**
+                text: `✅ **CONFIGURACIÓN COMPLETADA EXITOSAMENTE**
 
-**Detalles de la planeación:**
+**🎯 Detalles de tu planeación:**
 • **Grado:** ${planningConfig.grado}
 • **Asignatura:** ${planningConfig.asignatura}
 • **Tema:** ${planningConfig.tema}
@@ -1047,10 +937,10 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
 • **PEI:** ${planningConfig.consultarPEI ? '✅ Habilitado' : '❌ Deshabilitado'}
 • **Modelo Pedagógico:** ${planningConfig.consultarModeloPedagogico ? '✅ Habilitado' : '❌ Deshabilitado'}
 
-**Estado:** Sistema listo para generar el plan de clase
-**Próximo paso:** Escribe tu consulta específica en el chat de abajo.
+**🚀 ¡Sistema listo!** 
+El chat ya está habilitado y puedes comenzar a escribir tu consulta específica.
 
-💡 **Nota:** El sistema consultará automáticamente los documentos institucionales antes de cada generación para asegurar coherencia con la identidad de la institución.`,
+**💡 Próximo paso:** Escribe tu consulta en el campo de texto de abajo para generar el plan de clase personalizado.`,
                 isUser: false,
                 timestamp: new Date(),
                 isFormatted: true,
@@ -1060,9 +950,9 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
           />
         )}
         
-        {/* Mensajes del Chat */}
+        {/* Mensajes del Chat - Siempre visible */}
         <div className="space-y-4">
-          {messages.map((message) => (
+        {messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
@@ -1118,46 +1008,55 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
                   })}
                 </div>
               </div>
-            </div>
-          ))}
+          </div>
+        ))}
           
           {isLoading && (
             <div className="flex justify-start">
               <div className="bg-white border border-gray-200 px-4 py-3 rounded-lg">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b border-blue-600"></div>
                   <span className="text-gray-600">Generando respuesta...</span>
                 </div>
-              </div>
             </div>
-          )}
+          </div>
+        )}
           
-          <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Input del Chat - Solo visible si está configurado */}
-      {isConfigured && (
-        <div className="bg-white border-t border-gray-200 p-4 rounded-b-lg">
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <input
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder="Escribe tu consulta específica para el plan de clase..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isLoading || isSaving}
-            />
-            <button
-              type="submit"
-              disabled={!inputText.trim() || isLoading || isSaving}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {isLoading ? '🔄' : '📤'} Enviar
-            </button>
-          </form>
-        </div>
-      )}
+                 {/* Input del Chat - Siempre visible pero deshabilitado hasta confirmar */}
+           <div className="bg-white border-t border-gray-100 p-8">
+             {isConfigured ? (
+               <form onSubmit={handleSubmit} className="flex gap-6">
+                 <input
+                   type="text"
+                   value={inputText}
+                   onChange={(e) => setInputText(e.target.value)}
+                   placeholder="Escribe tu consulta específica para el plan de clase..."
+                   className="flex-1 px-8 py-5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 transition-all duration-200 text-gray-900 placeholder-gray-400 text-lg"
+                   disabled={isLoading || isSaving}
+                 />
+                 <button
+                   type="submit"
+                   disabled={!inputText.trim() || isLoading || isSaving}
+                   className="px-10 py-5 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-200 disabled:opacity-50 transition-all duration-200 font-medium text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none"
+                 >
+                   {isLoading ? '🔄' : '📤'} Enviar
+                 </button>
+               </form>
+             ) : (
+               <div className="text-center text-gray-500">
+                 <div className="w-16 h-16 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                   <span className="text-gray-400 text-2xl">💡</span>
+                 </div>
+                 <p className="text-gray-600 font-medium text-lg">
+                   <strong>Completa la configuración inicial</strong> para comenzar a usar el chat
+                 </p>
+               </div>
+             )}
+           </div>
     </div>
   )
 }
