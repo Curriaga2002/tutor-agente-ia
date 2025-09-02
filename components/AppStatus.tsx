@@ -38,7 +38,7 @@ export default function AppStatus() {
       </div>
 
       {/* Tarjeta Principal de Estado - Estilo Apple Card */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 mb-12">
+      <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-lg shadow-black/5 border border-white/30 p-12 mb-12">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-light text-gray-900">Estado General</h2>
           <div className={`flex items-center space-x-2 ${getStatusColor()}`}>
@@ -83,7 +83,7 @@ export default function AppStatus() {
       {/* Detalles del Sistema - Estilo Apple */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Sistema de Documentos */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-lg shadow-black/5 border border-white/30 p-8">
           <div className="flex items-center mb-6">
             <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mr-4">
               <span className="text-xl">📚</span>
@@ -125,7 +125,7 @@ export default function AppStatus() {
         </div>
 
         {/* Sistema de IA */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-lg shadow-black/5 border border-white/30 p-8">
           <div className="flex items-center mb-6">
             <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center mr-4">
               <span className="text-xl">🤖</span>
@@ -183,7 +183,7 @@ export default function AppStatus() {
                   <h4 className="text-sm font-medium text-gray-800 line-clamp-2 leading-relaxed">{doc.title}</h4>
                   <span className="text-xs text-gray-400 ml-2 flex-shrink-0">#{index + 1}</span>
                 </div>
-                <p className="text-xs text-gray-500 bg-white px-3 py-1 rounded-full inline-block">
+                <p className="text-xs text-gray-500 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full inline-block">
                   {doc.doc_type}
                 </p>
               </div>
@@ -221,7 +221,7 @@ export default function AppStatus() {
         <button
           onClick={refreshDocuments}
           disabled={documentsLoading}
-          className="inline-flex items-center px-8 py-4 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 font-medium text-lg shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center px-8 py-4 bg-gray-900/90 backdrop-blur-sm text-white rounded-2xl hover:bg-gray-800/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium text-lg shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="mr-3">{documentsLoading ? '⏳' : '🔄'}</span>
           {documentsLoading ? 'Actualizando...' : 'Actualizar Estado del Sistema'}

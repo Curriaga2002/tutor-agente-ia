@@ -686,7 +686,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
   }, [])
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow-lg shadow-black/5 p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-800">Banco de Recursos - Planeaciones Guardadas</h2>
         <button
@@ -749,7 +749,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
             {filteredPlaneaciones.map((plan) => (
               <div 
                 key={plan.id} 
-                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl hover:shadow-gray-200/50 hover:border-gray-300 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group"
+                className="bg-white/70 backdrop-blur-sm border border-white/40 rounded-2xl p-6 hover:shadow-xl hover:shadow-gray-200/50 hover:border-white/60 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
@@ -797,7 +797,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
       {/* Modal para mostrar historial del chat */}
       {showChatHistory && selectedPlan && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-6xl w-full max-h-[95vh] overflow-hidden">
+          <div className="bg-white/80 backdrop-blur-2xl rounded-2xl shadow-xl shadow-black/10 max-w-6xl w-full max-h-[95vh] overflow-hidden">
             <div className="flex justify-between items-center p-8 border-b border-gray-200">
               <h3 className="text-2xl font-semibold text-gray-800">
                 💬 Historial Completo del Chat - {selectedPlan.tema}
@@ -805,19 +805,19 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
               <div className="flex gap-3">
                 <button
                   onClick={() => copyToClipboard(formatChatForCopy(selectedPlan), "Chat completo")}
-                  className="bg-green-500 text-white px-6 py-3 rounded-xl hover:bg-green-600 transition duration-200 text-sm font-medium"
+                  className="bg-green-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-green-600/90 transition duration-300 text-sm font-medium shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/30"
                 >
                   📋 Copiar Todo
                 </button>
                 <button
                   onClick={() => exportChatToWord(selectedPlan)}
-                  className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition duration-200 text-sm font-medium"
+                  className="bg-blue-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-blue-600/90 transition duration-300 text-sm font-medium shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30"
                 >
                   📄 Descargar Word
                 </button>
                 <button
                   onClick={closeChatHistory}
-                  className="bg-gray-500 text-white px-6 py-3 rounded-xl hover:bg-gray-600 transition duration-200 text-sm font-medium"
+                  className="bg-gray-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-gray-600/90 transition duration-300 text-sm font-medium shadow-lg shadow-gray-500/25 hover:shadow-xl hover:shadow-gray-500/30"
                 >
                   ✕ Cerrar
                 </button>
@@ -856,10 +856,10 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                   selectedPlan.chat_history.map((message) => (
                     <div key={message.id} className={`${message.isUser ? "text-right" : "text-left"}`}>
                       <div
-                        className={`inline-block max-w-[90%] p-6 rounded-2xl ${
+                        className={`inline-block max-w-[90%] p-6 rounded-2xl backdrop-blur-sm ${
                           message.isUser 
-                            ? "bg-blue-500 text-white" 
-                            : "bg-gray-100 text-gray-800 border-l-4 border-blue-400"
+                            ? "bg-blue-500/90 text-white shadow-lg shadow-blue-500/25" 
+                            : "bg-gray-100/80 text-gray-800 border-l-4 border-blue-400 shadow-md shadow-gray-200/50"
                         }`}
                       >
                         <div className="text-base leading-relaxed whitespace-pre-wrap break-words">
