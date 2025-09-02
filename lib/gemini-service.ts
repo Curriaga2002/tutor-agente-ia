@@ -147,7 +147,9 @@ export class GeminiService {
     grado: string, 
     tema: string, 
     context: string,
-    relevantDocs: any[]
+    relevantDocs: any[],
+    recursos?: string,
+    nombreDocente?: string
   ): Promise<GeminiResponse> {
     try {
       console.log('🎯 Gemini: Iniciando generación de plan de clase...')
@@ -185,34 +187,61 @@ export class GeminiService {
     context: string,
     relevantDocs: any[]
   ): string {
-    let prompt = `Eres un asistente pedagógico experto especializado en la creación de planes de clase personalizados.
+    let prompt = `# Rol del agente
+Eres un asistente pedagógico especializado en generar planes de clase para el área de Tecnología e Informática de la IE Camilo Torres. Debes seguir las orientaciones curriculares, el modelo pedagógico crítico-social y mantener un estilo formal, claro y completo.
 
-Tu misión es generar planes de clase completos y adaptados que integren:
-• Modelos pedagógicos modernos y adaptativos
-• Orientaciones curriculares actualizadas
-• Metodologías de enseñanza efectivas
-• Competencias específicas del área y nivel
+# Entrada esperada
+El docente proporcionará:
+- Institución: IE Camilo Torres
+- Área: Tecnología e Informática
+- Grado: ${grado}
+- Tema: ${tema}
+- Duración: ${context.includes('horas') ? context : '2 horas'}
+- Número de sesiones: ${context.includes('sesiones') ? context : '2'}
+- Recursos tecnológicos disponibles: Computadores, internet, software educativo
+- Nombre del docente: [A definir por el docente]
 
-GENERA UN PLAN DE CLASE COMPLETO Y ÚNICO para:
-• Grado: ${grado}
-• Tema: ${tema}
-• Contexto: ${context}
+# Salida esperada
+Debes generar un **plan de clase completo en lenguaje natural**, estructurado en los siguientes apartados y siempre en este orden:
 
-REQUISITOS DEL PLAN:
-1. Debe ser completamente original y personalizado
-2. NO uses plantillas preestablecidas
-3. Genera contenido dinámico y relevante para el tema específico
-4. Incluye actividades específicas y prácticas para el tema
-5. Adapta la metodología al nivel educativo
-6. Sé creativo, específico y pedagógicamente sólido
-7. Incluye objetivos de aprendizaje claros
-8. Proporciona estrategias de evaluación apropiadas
-9. Sugiere recursos y materiales necesarios
-10. Considera la diversidad de estilos de aprendizaje
+## IDENTIFICACIÓN
+- Institución: IE Camilo Torres
+- Área: Tecnología e Informática
+- Grado: ${grado}
+- Tema: ${tema}
+- Duración: ${context.includes('horas') ? context : '2 horas'}
+- Sesiones: ${context.includes('sesiones') ? context : '2'}
+- Recursos Tecnológicos Disponibles: Computadores, internet, software educativo
+- Docente: [A definir por el docente]
 
-FORMATO DE SALIDA:
-Usa markdown con emojis para hacer el contenido atractivo y fácil de leer. 
-Estructura el plan de manera clara y profesional.
+## 📚 COMPONENTE CURRICULAR
+Selecciona uno o varios de los siguientes: Naturaleza y Evolución de la Tecnología, Uso y Apropiación de la Tecnología, Solución de Problemas con Tecnología, Tecnología, Informática y Sociedad.
+
+## 🎯 COMPETENCIAS
+Redacta la(s) competencia(s) de acuerdo con el grado y al componente curricular seleccionado.
+
+## 🎯 Estrategia a Desarrollar
+Elige una de las siguientes estrategias: construcción-fabricación, diseño y rediseño, análisis de los productos tecnológicos, enfoques CTS.  
+Explica detalladamente la estrategia en mínimo 80 palabras y cómo se relaciona con los momentos pedagógicos.
+
+## 🔍 MOMENTOS PEDAGÓGICOS (Modelo Crítico-Social)
+Para cada momento (Exploración, Problematización, Diálogo, Praxis-Reflexión, Acción-Transformación) redacta:
+- **Actividad**: texto completo, mínimo 100 palabras dividido en subsecciones si es necesario.  
+- **Rol docente**: texto de 30 a 50 palabras.  
+- **Rol estudiante**: texto de 30 a 50 palabras.  
+
+## 📂 EVIDENCIAS DE APRENDIZAJE
+Genera evidencias específicas relacionadas con las competencias y el grado.
+
+## 📝 EVALUACIÓN
+Explica qué se evaluará en cada criterio según la Tabla 7 (orientaciones oficiales).  
+Asigna porcentajes de evaluación que sumen 100%.  
+Aclara la escala: 1.0 a 5.0, con nota mínima aprobatoria 3.2.
+
+# Condiciones adicionales
+- La respuesta debe estar siempre completa y nunca en formato JSON.  
+- Usa títulos y subtítulos claros.  
+- Sé detallado, pero mantén un estilo pedagógico y fluido en español.
 
 ${relevantDocs.length > 0 ? `
 DOCUMENTOS DISPONIBLES PARA REFERENCIA:
@@ -221,7 +250,7 @@ ${relevantDocs.map((doc, index) => `${index + 1}. ${doc.title} (${doc.doc_type})
 Usa estos documentos como referencia para enriquecer el plan, pero NO copies contenido literal. Crea contenido original inspirado en las mejores prácticas.
 ` : 'DOCUMENTOS: No hay documentos específicos disponibles. Genera un plan basado en las mejores prácticas pedagógicas.'}
 
-Genera un plan de clase completo, original, específico para el tema y nivel solicitado, y pedagógicamente sólido.` 
+Genera el plan de clase completo siguiendo EXACTAMENTE la estructura especificada arriba.` 
 
     return prompt
   }

@@ -8,6 +8,7 @@ import {
   EducationalDocument, 
   PlanStructure 
 } from '../lib/educational-content-service'
+import jsPDF from 'jspdf'
 import { 
   PDFContent, 
   searchInPDFs 
@@ -35,6 +36,8 @@ interface PlanningConfig {
     tema: string
   horas: string
     sesiones: string
+  recursos: string
+  nombreDocente: string
   // Campos para consulta automática de documentos institucionales
   consultarPEI: boolean
   consultarModeloPedagogico: boolean
@@ -59,7 +62,7 @@ const ConfigurationForm = ({
 }) => {
   const handleConfigSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (planningConfig.grado && planningConfig.asignatura && planningConfig.tema && planningConfig.horas && planningConfig.sesiones) {
+    if (planningConfig.grado && planningConfig.asignatura && planningConfig.tema && planningConfig.horas && planningConfig.sesiones && planningConfig.recursos && planningConfig.nombreDocente) {
       onSubmit()
     }
   }
@@ -148,7 +151,7 @@ const ConfigurationForm = ({
                    />
                  </div>
                  
-                 <div className="md:col-span-2 space-y-3">
+                 <div className="space-y-3">
                    <label className="block text-lg font-medium text-gray-900 mb-3">
                      Número de Sesiones *
                    </label>
@@ -159,6 +162,34 @@ const ConfigurationForm = ({
                      value={planningConfig.sesiones}
                      onChange={(e) => handleInputChange('sesiones', e.target.value)}
                      placeholder="Ej: 2, 3, 4..."
+                     className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                     required
+                   />
+                 </div>
+                 
+                 <div className="space-y-3">
+                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                     Recursos Disponibles *
+                   </label>
+                   <input
+                     type="text"
+                     value={planningConfig.recursos}
+                     onChange={(e) => handleInputChange('recursos', e.target.value)}
+                     placeholder="Ej: Computadores, internet, software educativo..."
+                     className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                     required
+                   />
+                 </div>
+                 
+                 <div className="md:col-span-2 space-y-3">
+                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                     Nombre del Docente *
+                   </label>
+                   <input
+                     type="text"
+                     value={planningConfig.nombreDocente}
+                     onChange={(e) => handleInputChange('nombreDocente', e.target.value)}
+                     placeholder="Ej: María González, Juan Pérez..."
                      className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
                      required
                    />
@@ -241,6 +272,8 @@ export default function ChatAssistant({
     tema: '',
     horas: '',
     sesiones: '',
+    recursos: '',
+    nombreDocente: '',
     // Campos para consulta automática de documentos institucionales
     consultarPEI: true,
     consultarModeloPedagogico: true,
@@ -424,7 +457,7 @@ Ejemplos:
       
       if (geminiResponse.success) {
         return geminiResponse.text
-      } else {
+        } else {
         // Verificar si es error de cuota excedida
         if (geminiResponse.error && (geminiResponse.error.includes('quota') || geminiResponse.error.includes('429'))) {
           return await generateFallbackResponse(userInput, relevantDocs)
@@ -740,8 +773,8 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
     }
   }
 
-  // Función para exportar el chat como Word
-  const exportToWord = () => {
+  // Función para exportar el chat como PDF
+  const exportToPDF = async () => {
     if (messages.length <= 1) {
       alert('No hay planeación para exportar')
       return
@@ -753,7 +786,7 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
     }
 
     try {
-      // Crear contenido HTML formateado con información de configuración
+      // Crear contenido HTML que mantenga el formato del chat
       let htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -761,14 +794,143 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
           <meta charset="UTF-8">
           <title>Planeación Didáctica - Conversación Completa</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-            .config-info { background-color: #e3f2fd; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
-            .user { background-color: #f0f0f0; padding: 10px; margin: 10px 0; border-left: 4px solid #007bff; border-radius: 4px; }
-            .assistant { background-color: #e8f5e8; padding: 10px; margin: 10px 0; border-left: 4px solid #28a745; border-radius: 4px; }
-            .timestamp { color: #666; font-size: 12px; margin-top: 8px; }
-            .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
-            .config-item { background-color: white; padding: 8px; border-radius: 4px; border: 1px solid #ddd; }
+            @page {
+              size: A4;
+              margin: 2cm;
+            }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+              margin: 0; 
+              padding: 0; 
+              line-height: 1.6;
+              color: #333;
+              background: white;
+            }
+            .header { 
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+              color: white; 
+              padding: 30px; 
+              text-align: center;
+              margin-bottom: 20px;
+              border-radius: 12px;
+            }
+            .header h1 { 
+              margin: 0 0 10px 0; 
+              font-size: 24px; 
+              font-weight: 300;
+            }
+            .header p { 
+              margin: 5px 0; 
+              opacity: 0.9;
+            }
+            .config-info { 
+              background-color: #f0f8ff; 
+              padding: 20px; 
+              border: 1px solid #007bff;
+              margin-bottom: 20px;
+              border-radius: 8px;
+            }
+            .config-info h2 { 
+              margin: 0 0 15px 0; 
+              color: #007bff; 
+              font-size: 18px;
+            }
+            .config-grid { 
+              display: grid; 
+              grid-template-columns: 1fr 1fr 1fr; 
+              gap: 10px; 
+            }
+            .config-item { 
+              background-color: white; 
+              padding: 10px; 
+              border: 1px solid #ddd; 
+              border-radius: 4px;
+              font-size: 12px;
+            }
+            .chat-section { 
+              margin-top: 20px;
+            }
+            .chat-section h2 { 
+              margin: 0 0 20px 0; 
+              color: #007bff; 
+              font-size: 20px; 
+              border-bottom: 2px solid #007bff; 
+              padding-bottom: 10px;
+            }
+            .message { 
+              margin: 20px 0; 
+              padding: 15px; 
+              border-radius: 12px; 
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .user-message { 
+              background-color: #e3f2fd; 
+              border-left: 4px solid #2196f3; 
+            }
+            .assistant-message { 
+              background-color: #f1f8e9; 
+              border-left: 4px solid #4caf50; 
+            }
+            .message-header { 
+              font-weight: bold; 
+              margin-bottom: 10px; 
+              font-size: 14px;
+            }
+            .user-header { 
+              color: #1976d2; 
+            }
+            .assistant-header { 
+              color: #388e3c; 
+            }
+            .message-content { 
+              font-size: 13px; 
+              line-height: 1.6;
+            }
+            .timestamp { 
+              color: #666; 
+              font-size: 11px; 
+              margin-top: 10px; 
+              font-style: italic;
+            }
+            /* Estilos para markdown */
+            h1, h2, h3, h4, h5, h6 { 
+              color: #2c3e50; 
+              margin: 15px 0 10px 0; 
+            }
+            h1 { font-size: 20px; }
+            h2 { font-size: 18px; }
+            h3 { font-size: 16px; }
+            h4 { font-size: 14px; }
+            strong { font-weight: bold; }
+            em { font-style: italic; }
+            ul, ol { 
+              margin: 10px 0; 
+              padding-left: 20px; 
+            }
+            li { 
+              margin: 5px 0; 
+            }
+            code { 
+              background-color: #f4f4f4; 
+              padding: 2px 4px; 
+              border-radius: 3px; 
+              font-family: monospace; 
+            }
+            blockquote { 
+              border-left: 4px solid #ddd; 
+              margin: 10px 0; 
+              padding-left: 15px; 
+              color: #666; 
+            }
+            .footer { 
+              margin-top: 30px; 
+              padding: 20px; 
+              background-color: #f8f9fa; 
+              border-radius: 8px; 
+              text-align: center; 
+              color: #666; 
+              font-size: 12px;
+            }
           </style>
         </head>
         <body>
@@ -796,45 +958,96 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
               <div class="config-item">
                 <strong>Sesiones:</strong> ${planningConfig.sesiones}
               </div>
+              <div class="config-item">
+                <strong>Recursos:</strong> ${planningConfig.recursos}
+              </div>
+              <div class="config-item">
+                <strong>Docente:</strong> ${planningConfig.nombreDocente}
+              </div>
             </div>
           </div>
           
-          <h2>💬 Conversación Completa</h2>
-          <hr>
+          <div class="chat-section">
+            <h2>💬 Conversación Completa</h2>
       `
 
+      // Agregar cada mensaje del chat manteniendo el formato
       messages.forEach((message, index) => {
         if (index === 0) return // Saltar mensaje inicial
         
-        const messageClass = message.isUser ? 'user' : 'assistant'
-        const sender = message.isUser ? 'Usuario' : 'Asistente IA'
+        const messageClass = message.isUser ? 'user-message' : 'assistant-message'
+        const headerClass = message.isUser ? 'user-header' : 'assistant-header'
+        const sender = message.isUser ? '👤 DOCENTE' : '🤖 ASISTENTE IA'
+        const timestamp = message.timestamp.toLocaleString('es-ES')
+        
+        // Convertir markdown a HTML manteniendo el formato
+        let formattedText = message.text
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+          .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+          .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+          .replace(/^\- (.*$)/gim, '<li>$1</li>')
+          .replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
+          .replace(/`(.*?)`/g, '<code>$1</code>')
+          .replace(/\n/g, '<br>')
+        
+        // Envolver listas
+        formattedText = formattedText.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
         
         htmlContent += `
-          <div class="${messageClass}">
-            <strong>${sender}:</strong><br>
-            ${message.text.replace(/\n/g, '<br>')}
-            <div class="timestamp">${message.timestamp.toLocaleString('es-ES')}</div>
+          <div class="message ${messageClass}">
+            <div class="message-header ${headerClass}">${sender}</div>
+            <div class="message-content">${formattedText}</div>
+            <div class="timestamp">${timestamp}</div>
           </div>
         `
       })
 
       htmlContent += `
+          </div>
+          
+          <div class="footer">
+            <p>Este documento fue generado automáticamente por el Asistente Pedagógico IA</p>
+            <p>Fecha de generación: ${new Date().toLocaleString('es-ES')}</p>
+          </div>
         </body>
         </html>
       `
 
-      // Crear y descargar archivo
-      const blob = new Blob([htmlContent], { type: 'text/html' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `plan-clase-chat-${new Date().toISOString().split('T')[0]}.html`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-
-      alert('✅ Planeación exportada exitosamente como HTML')
+      // Crear ventana temporal para generar PDF
+      const printWindow = window.open('', '_blank', 'width=800,height=600')
+      
+      if (printWindow) {
+        printWindow.document.write(htmlContent)
+        printWindow.document.close()
+        
+        // Esperar a que se cargue el contenido y luego imprimir
+        printWindow.onload = () => {
+          setTimeout(() => {
+            printWindow.print()
+            // Cerrar ventana después de imprimir
+            setTimeout(() => {
+              printWindow.close()
+            }, 1000)
+          }, 500)
+        }
+        
+        alert('✅ PDF generado - Se abrirá el diálogo de impresión. Selecciona "Guardar como PDF"')
+      } else {
+        // Fallback: crear archivo HTML para descarga
+        const blob = new Blob([htmlContent], { type: 'text/html' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `plan-clase-chat-${new Date().toISOString().split('T')[0]}.html`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        
+        alert('✅ Archivo HTML descargado (popup bloqueado). Puedes abrirlo e imprimirlo como PDF.')
+      }
     } catch (error) {
       console.error('❌ Error exportando chat:', error)
       alert('❌ Error al exportar el chat')
@@ -872,7 +1085,7 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-    return (
+  return (
     <div className="flex flex-col h-full bg-gray-50 rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
       {/* Header del Chat - Estilo Apple */}
       <div className="bg-white border-b border-gray-100 p-8">
@@ -894,21 +1107,21 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
               🗑️ Limpiar
             </button>
             <button
-              onClick={exportToWord}
+              onClick={exportToPDF}
               disabled={isLoading || isSaving || !isConfigured}
               className="px-6 py-3 text-sm bg-blue-100 text-blue-700 rounded-2xl hover:bg-blue-200 disabled:opacity-50 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
-              title="Exportar planeación"
+              title="Exportar chat completo como PDF"
             >
-              📄 Exportar
+              📄 Exportar PDF
             </button>
-            <button
+                <button
               onClick={saveChatToDatabase}
               disabled={isLoading || isSaving || !isConfigured}
               className="px-6 py-3 text-sm bg-green-100 text-green-700 rounded-2xl hover:bg-green-200 disabled:opacity-50 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
               title="Guardar planeación"
             >
               💾 Guardar
-            </button>
+                </button>
           </div>
         </div>
       </div>
@@ -1007,7 +1220,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
                     minute: '2-digit' 
                   })}
                 </div>
-              </div>
+            </div>
           </div>
         ))}
           
@@ -1017,7 +1230,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
               <div className="flex items-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b border-blue-600"></div>
                   <span className="text-gray-600">Generando respuesta...</span>
-                </div>
+              </div>
             </div>
           </div>
         )}
@@ -1030,21 +1243,21 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
            <div className="bg-white border-t border-gray-100 p-8">
              {isConfigured ? (
                <form onSubmit={handleSubmit} className="flex gap-6">
-                 <input
+      <input
                    type="text"
                    value={inputText}
                    onChange={(e) => setInputText(e.target.value)}
                    placeholder="Escribe tu consulta específica para el plan de clase..."
                    className="flex-1 px-8 py-5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-400 transition-all duration-200 text-gray-900 placeholder-gray-400 text-lg"
                    disabled={isLoading || isSaving}
-                 />
-                 <button
+        />
+        <button
                    type="submit"
                    disabled={!inputText.trim() || isLoading || isSaving}
                    className="px-10 py-5 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-200 disabled:opacity-50 transition-all duration-200 font-medium text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none"
                  >
                    {isLoading ? '🔄' : '📤'} Enviar
-                 </button>
+        </button>
                </form>
              ) : (
                <div className="text-center text-gray-500">
@@ -1056,7 +1269,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
                  </p>
                </div>
              )}
-           </div>
+      </div>
     </div>
   )
 }

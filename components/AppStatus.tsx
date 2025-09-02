@@ -2,7 +2,7 @@ import React from 'react'
 import { useBucketDocuments } from '../hooks/useBucketDocuments'
 
 export default function AppStatus() {
-  const { documents: bucketDocuments, isLoading: documentsLoading, error: documentsError, documentCount, lastUpdated } = useBucketDocuments()
+  const { documents: bucketDocuments, isLoading: documentsLoading, error: documentsError, documentCount, lastUpdated, refreshDocuments } = useBucketDocuments()
 
   const getStatusColor = () => {
     if (documentsLoading) return 'text-amber-500'
@@ -219,11 +219,12 @@ export default function AppStatus() {
       {/* Botón de Actualización - Estilo Apple */}
       <div className="text-center mt-12">
         <button
-          onClick={() => window.location.reload()}
-          className="inline-flex items-center px-8 py-4 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 font-medium text-lg shadow-sm hover:shadow-md"
+          onClick={refreshDocuments}
+          disabled={documentsLoading}
+          className="inline-flex items-center px-8 py-4 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 font-medium text-lg shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span className="mr-3">🔄</span>
-          Actualizar Estado del Sistema
+          <span className="mr-3">{documentsLoading ? '⏳' : '🔄'}</span>
+          {documentsLoading ? 'Actualizando...' : 'Actualizar Estado del Sistema'}
         </button>
       </div>
     </div>
