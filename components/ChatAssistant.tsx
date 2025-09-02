@@ -246,18 +246,19 @@ export default function ChatAssistant({
 
 ¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
 
-**Mi misión es ayudarte a planificar clases completas** usando **documentos oficiales reales** del sistema:
-• **Orientaciones curriculares oficiales**
-• **Estructuras de planes de clase**
-• **Proyectos educativos institucionales**
-• **Modelos pedagógicos validados**
+**Mi misión es ayudarte a planificar clases completas** usando documentos oficiales del sistema educativo:
+• Orientaciones curriculares oficiales
+• Estructuras de planes de clase
+• Proyectos educativos institucionales
+• Modelos pedagógicos validados
 
-**Estado del sistema:** 🔄 Inicializando conexión...
 **¿Qué plan de clase necesitas generar?** 
 Ejemplos: 
 • "Plan de clase para 5° sobre ecosistemas"
 • "Plan de clase para 9° sobre ecuaciones cuadráticas"
-• "Plan de clase para 11° sobre literatura latinoamericana"`,
+• "Plan de clase para 11° sobre literatura latinoamericana"
+
+**💡 Antes de comenzar:** Completa la configuración inicial para personalizar tu planeación.`,
       isUser: false,
       timestamp: new Date(),
       isFormatted: true,
@@ -279,60 +280,62 @@ Ejemplos:
 
 ¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
 
-**Mi misión es ayudarte a planificar clases completas** usando **documentos oficiales reales** del sistema:
-• **Orientaciones curriculares oficiales**
-• **Estructuras de planes de clase**
-• **Proyectos educativos institucionales**
-• **Modelos pedagógicos validados**
+**Mi misión es ayudarte a planificar clases completas** usando documentos oficiales del sistema educativo:
+• Orientaciones curriculares oficiales
+• Estructuras de planes de clase
+• Proyectos educativos institucionales
+• Modelos pedagógicos validados
 
-**Estado del sistema:** 🔄 Cargando documentos del sistema...
+**Estado del sistema:** 🔄 Inicializando...
+
 **¿Qué plan de clase necesitas generar?** 
 Ejemplos: 
 • "Plan de clase para 5° sobre ecosistemas"
 • "Plan de clase para 9° sobre ecuaciones cuadráticas"
-• "Plan de clase para 11° sobre literatura latinoamericana"`
-        } else if (documentsError) {
-          initialMessage.text = `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
+• "Plan de clase para 11° sobre literatura latinoamericana"
+
+**💡 Antes de comenzar:** Completa la configuración inicial para personalizar tu planeación.`
+      } else if (documentsError) {
+        initialMessage.text = `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
 
 ¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
 
-**Mi misión es ayudarte a planificar clases completas** usando **documentos oficiales reales** del sistema:
-• **Orientaciones curriculares oficiales**
-• **Estructuras de planes de clase**
-• **Proyectos educativos institucionales**
-• **Modelos pedagógicos validados**
+**Mi misión es ayudarte a planificar clases completas** usando documentos oficiales del sistema educativo:
+• Orientaciones curriculares oficiales
+• Estructuras de planes de clase
+• Proyectos educativos institucionales
+• Modelos pedagógicos validados
 
-**⚠️ Estado del sistema:**
-❌ Error de conexión: ${documentsError}
-🔄 Reintentando conexión...
+**Estado del sistema:** ⚠️ Verificando conexión...
 
 **¿Qué plan de clase necesitas generar?** 
 Ejemplos: 
 • "Plan de clase para 5° sobre ecosistemas"
 • "Plan de clase para 9° sobre ecuaciones cuadráticas"
-• "Plan de clase para 11° sobre literatura latinoamericana"`
-        } else if (bucketDocuments.length > 0) {
-          initialMessage.text = `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
+• "Plan de clase para 11° sobre literatura latinoamericana"
+
+**💡 Antes de comenzar:** Completa la configuración inicial para personalizar tu planeación.`
+      } else if (bucketDocuments.length > 0) {
+        initialMessage.text = `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
 
 ¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
 
-**Mi misión es ayudarte a planificar clases completas** usando **documentos oficiales reales** del sistema:
-• **Orientaciones curriculares oficiales**
-• **Estructuras de planes de clase**
-• **Proyectos educativos institucionales**
-• **Modelos pedagógicos validados**
+**Mi misión es ayudarte a planificar clases completas** usando documentos oficiales del sistema educativo:
+• Orientaciones curriculares oficiales
+• Estructuras de planes de clase
+• Proyectos educativos institucionales
+• Modelos pedagógicos validados
 
-**✅ Estado del sistema:**
-✅ Conectado al sistema de documentos
-📚 ${documentCount} documentos disponibles
-🔄 Monitoreo en tiempo real activo
+**Estado del sistema:** ✅ Sistema listo
 
 **¿Qué plan de clase necesitas generar?** 
 Ejemplos: 
 • "Plan de clase para 5° sobre ecosistemas"
 • "Plan de clase para 9° sobre ecuaciones cuadráticas"
-• "Plan de clase para 11° sobre literatura latinoamericana"`
-        }
+• "Plan de clase para 11° sobre literatura latinoamericana"
+
+**💡 Antes de comenzar:** Completa la configuración inicial para personalizar tu planeación.`
+      }
       
       setMessages(updatedMessages)
     }
@@ -987,19 +990,8 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
           <div>
             <h2 className="text-lg font-semibold text-gray-800">💬 Asistente Pedagógico IA</h2>
             <p className="text-sm text-gray-600">
-              {documentsLoading ? '🔄 Conectando al sistema...' : 
-               documentsError ? '❌ Error de conexión' : 
-               `✅ ${documentCount} documentos disponibles`}
+              Sistema de planeación inteligente con IA
             </p>
-            {/* Indicador del estado de la API */}
-            <div className="mt-1">
-              <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
-                🤖 Gemini API: Activa
-              </span>
-              <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 ml-2">
-                🔄 Sistema de Fallback: Disponible
-              </span>
-            </div>
           </div>
           
           <div className="flex gap-2">

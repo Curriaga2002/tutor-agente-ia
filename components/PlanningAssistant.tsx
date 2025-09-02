@@ -1,34 +1,50 @@
 "use client"
 
-import { useState } from "react"
-import Header from "./Header"
-import Navigation from "./Navigation"
-import PlanningForm from "./PlanningForm"
-import ResourcesBank from "./ResourcesBank"
-import BucketStatus from "./BucketStatus"
+import React, { useState } from 'react'
+import Navigation from './Navigation'
+import ChatAssistant from './ChatAssistant'
+import ResourcesBank from './ResourcesBank'
+import AppStatus from './AppStatus'
+
+type ActiveTab = 'generar' | 'estado' | 'historial'
 
 export default function PlanningAssistant() {
-  const [activeTab, setActiveTab] = useState<"generar" | "historial">("generar")
-  const [currentPlanningData, setCurrentPlanningData] = useState(null)
+  const [activeTab, setActiveTab] = useState<ActiveTab>('generar')
+  const [currentPlanningData, setCurrentPlanningData] = useState<any>(null)
+  const [chatHistory, setChatHistory] = useState<any[]>([])
+
+  const handleChatUpdate = (messages: any[]) => {
+    setChatHistory(messages)
+  }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <Header />
-        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-
-        {activeTab === "generar" && (
-          <div className="w-full space-y-6">
-            {/* Estado del Bucket en Tiempo Real */}
-            <BucketStatus />
-            
-            {/* Formulario de Planeación */}
-            <PlanningForm currentPlanningData={currentPlanningData} setCurrentPlanningData={setCurrentPlanningData} />
+    <div className="min-h-screen bg-gray-50">
+      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeTab === 'generar' && (
+          <div className="space-y-6">
+            <ChatAssistant 
+              onChatUpdate={handleChatUpdate}
+              currentPlanningData={currentPlanningData}
+              setCurrentPlanningData={setCurrentPlanningData}
+            />
           </div>
         )}
-
-        {activeTab === "historial" && (
-          <ResourcesBank setActiveTab={setActiveTab} setCurrentPlanningData={setCurrentPlanningData} />
+        
+        {activeTab === 'estado' && (
+          <div className="space-y-6">
+            <AppStatus />
+          </div>
+        )}
+        
+        {activeTab === 'historial' && (
+          <div className="space-y-6">
+            <ResourcesBank 
+              setActiveTab={setActiveTab}
+              setCurrentPlanningData={setCurrentPlanningData}
+            />
+          </div>
         )}
       </div>
     </div>
