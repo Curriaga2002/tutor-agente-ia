@@ -8,7 +8,8 @@ import {
   EducationalDocument, 
   PlanStructure 
 } from '../lib/educational-content-service'
-import jsPDF from 'jspdf'
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx'
+import { saveAs } from 'file-saver'
 import { 
   PDFContent, 
   searchInPDFs 
@@ -775,8 +776,8 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
     }
   }
 
-  // Función para exportar el chat como PDF
-  const exportToPDF = async () => {
+  // Función para exportar el chat como Word
+  const exportToWord = async () => {
     if (messages.length <= 1) {
       alert('No hay planeación para exportar')
       return
@@ -788,268 +789,268 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
     }
 
     try {
-      // Crear contenido HTML que mantenga el formato del chat
-      let htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>Planeación Didáctica - Conversación Completa</title>
-          <style>
-            @page {
-              size: A4;
-              margin: 2cm;
-            }
-            body { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-              margin: 0; 
-              padding: 0; 
-              line-height: 1.6;
-              color: #333;
-              background: white;
-            }
-            .header { 
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-              color: white; 
-              padding: 30px; 
-              text-align: center;
-              margin-bottom: 20px;
-              border-radius: 12px;
-            }
-            .header h1 { 
-              margin: 0 0 10px 0; 
-              font-size: 24px; 
-              font-weight: 300;
-            }
-            .header p { 
-              margin: 5px 0; 
-              opacity: 0.9;
-            }
-            .config-info { 
-              background-color: #f0f8ff; 
-              padding: 20px; 
-              border: 1px solid #007bff;
-              margin-bottom: 20px;
-              border-radius: 8px;
-            }
-            .config-info h2 { 
-              margin: 0 0 15px 0; 
-              color: #007bff; 
-              font-size: 18px;
-            }
-            .config-grid { 
-              display: grid; 
-              grid-template-columns: 1fr 1fr 1fr; 
-              gap: 10px; 
-            }
-            .config-item { 
-              background-color: white; 
-              padding: 10px; 
-              border: 1px solid #ddd; 
-              border-radius: 4px;
-              font-size: 12px;
-            }
-            .chat-section { 
-              margin-top: 20px;
-            }
-            .chat-section h2 { 
-              margin: 0 0 20px 0; 
-              color: #007bff; 
-              font-size: 20px; 
-              border-bottom: 2px solid #007bff; 
-              padding-bottom: 10px;
-            }
-            .message { 
-              margin: 20px 0; 
-              padding: 15px; 
-              border-radius: 12px; 
-              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            .user-message { 
-              background-color: #e3f2fd; 
-              border-left: 4px solid #2196f3; 
-            }
-            .assistant-message { 
-              background-color: #f1f8e9; 
-              border-left: 4px solid #4caf50; 
-            }
-            .message-header { 
-              font-weight: bold; 
-              margin-bottom: 10px; 
-              font-size: 14px;
-            }
-            .user-header { 
-              color: #1976d2; 
-            }
-            .assistant-header { 
-              color: #388e3c; 
-            }
-            .message-content { 
-              font-size: 13px; 
-              line-height: 1.6;
-            }
-            .timestamp { 
-              color: #666; 
-              font-size: 11px; 
-              margin-top: 10px; 
-              font-style: italic;
-            }
-            /* Estilos para markdown */
-            h1, h2, h3, h4, h5, h6 { 
-              color: #2c3e50; 
-              margin: 15px 0 10px 0; 
-            }
-            h1 { font-size: 20px; }
-            h2 { font-size: 18px; }
-            h3 { font-size: 16px; }
-            h4 { font-size: 14px; }
-            strong { font-weight: bold; }
-            em { font-style: italic; }
-            ul, ol { 
-              margin: 10px 0; 
-              padding-left: 20px; 
-            }
-            li { 
-              margin: 5px 0; 
-            }
-            code { 
-              background-color: #f4f4f4; 
-              padding: 2px 4px; 
-              border-radius: 3px; 
-              font-family: monospace; 
-            }
-            blockquote { 
-              border-left: 4px solid #ddd; 
-              margin: 10px 0; 
-              padding-left: 15px; 
-              color: #666; 
-            }
-            .footer { 
-              margin-top: 30px; 
-              padding: 20px; 
-              background-color: #f8f9fa; 
-              border-radius: 8px; 
-              text-align: center; 
-              color: #666; 
-              font-size: 12px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Planeación Didáctica - Conversación Completa</h1>
-            <p><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES')}</p>
-            <p><strong>Generado por:</strong> Asistente Pedagógico IA</p>
-          </div>
-          
-          <div class="config-info">
-            <h2>📋 Configuración de la Planeación</h2>
-            <div class="config-grid">
-              <div class="config-item">
-                <strong>Grado:</strong> ${planningConfig.grado}
-              </div>
-              <div class="config-item">
-                <strong>Asignatura:</strong> ${planningConfig.asignatura}
-              </div>
-              <div class="config-item">
-                <strong>Tema:</strong> ${planningConfig.tema}
-              </div>
-              <div class="config-item">
-                <strong>Duración:</strong> ${planningConfig.horas} horas
-              </div>
-              <div class="config-item">
-                <strong>Sesiones:</strong> ${planningConfig.sesiones}
-              </div>
-              <div class="config-item">
-                <strong>Recursos:</strong> ${planningConfig.recursos}
-              </div>
-              <div class="config-item">
-                <strong>Docente:</strong> ${planningConfig.nombreDocente}
-              </div>
-            </div>
-          </div>
-          
-          <div class="chat-section">
-            <h2>💬 Conversación Completa</h2>
-      `
+      // Crear párrafos del documento
+      const paragraphs: Paragraph[] = []
 
-      // Agregar cada mensaje del chat manteniendo el formato
+      // Header del documento
+      paragraphs.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "📚 Planeación Didáctica - Conversación Completa",
+              bold: true,
+              size: 32,
+              color: "2c3e50"
+            })
+          ],
+          heading: HeadingLevel.TITLE,
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 400 }
+        })
+      )
+
+      // Información de fecha y generador
+      paragraphs.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `📅 Fecha: ${new Date().toLocaleDateString('es-ES')}`,
+              size: 22,
+              color: "7f8c8d"
+            })
+          ],
+          spacing: { after: 200 }
+        })
+      )
+
+      paragraphs.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `🤖 Generado por: Asistente Pedagógico IA`,
+              size: 22,
+              color: "7f8c8d"
+            })
+          ],
+          spacing: { after: 400 }
+        })
+      )
+
+      // Información de la planeación
+      paragraphs.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "📋 Configuración de la Planeación",
+              bold: true,
+              size: 28,
+              color: "3498db"
+            })
+          ],
+          heading: HeadingLevel.HEADING_1,
+          spacing: { after: 300 }
+        })
+      )
+
+      // Datos de la planeación
+      const planData = [
+        { icon: "🎓", label: "Grado", value: planningConfig.grado },
+        { icon: "📖", label: "Asignatura", value: planningConfig.asignatura },
+        { icon: "📝", label: "Tema", value: planningConfig.tema },
+        { icon: "⏰", label: "Duración", value: `${planningConfig.horas} horas` },
+        { icon: "📚", label: "Sesiones", value: planningConfig.sesiones },
+        { icon: "💻", label: "Recursos", value: planningConfig.recursos },
+        { icon: "👤", label: "Docente", value: planningConfig.nombreDocente }
+      ]
+
+      planData.forEach(data => {
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${data.icon} ${data.label}: `,
+                bold: true,
+                size: 24,
+                color: "2c3e50"
+              }),
+              new TextRun({
+                text: data.value,
+                size: 24,
+                color: "2c3e50"
+              })
+            ],
+            spacing: { after: 200 }
+          })
+        )
+      })
+
+      // Espacio antes de la conversación
+      paragraphs.push(
+        new Paragraph({
+          children: [new TextRun({ text: "" })],
+          spacing: { after: 600 }
+        })
+      )
+
+      // Título de la conversación
+      paragraphs.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "💬 Conversación Completa",
+              bold: true,
+              size: 28,
+              color: "27ae60"
+            })
+          ],
+          heading: HeadingLevel.HEADING_1,
+          spacing: { after: 400 }
+        })
+      )
+
+      // Agregar cada mensaje del chat
       messages.forEach((message, index) => {
         if (index === 0) return // Saltar mensaje inicial
         
-        const messageClass = message.isUser ? 'user-message' : 'assistant-message'
-        const headerClass = message.isUser ? 'user-header' : 'assistant-header'
-        const sender = message.isUser ? '👤 DOCENTE' : '🤖 ASISTENTE IA'
+        const sender = message.isUser ? '👤 Docente' : '🤖 Asistente IA'
         const timestamp = message.timestamp.toLocaleString('es-ES')
+        const senderColor = message.isUser ? "e74c3c" : "27ae60"
         
-        // Convertir markdown a HTML manteniendo el formato
-        let formattedText = message.text
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\*(.*?)\*/g, '<em>$1</em>')
-          .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-          .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-          .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-          .replace(/^\- (.*$)/gim, '<li>$1</li>')
-          .replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
-          .replace(/`(.*?)`/g, '<code>$1</code>')
-          .replace(/\n/g, '<br>')
+        // Nombre del emisor
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: sender,
+                bold: true,
+                size: 24,
+                color: senderColor
+              })
+            ],
+            spacing: { after: 100 }
+          })
+        )
+
+        // Timestamp
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `📅 ${timestamp}`,
+                size: 18,
+                color: "7f8c8d",
+                italics: true
+              })
+            ],
+            spacing: { after: 200 }
+          })
+        )
+
+        // Contenido del mensaje
+        let cleanText = message.text
+          .replace(/\*\*(.*?)\*\*/g, '$1') // Limpiar negritas
+          .replace(/\*(.*?)\*/g, '$1') // Limpiar cursivas
+          .replace(/^### (.*$)/gim, '$1') // Títulos como texto normal
+          .replace(/^## (.*$)/gim, '$1') // Títulos como texto normal
+          .replace(/^# (.*$)/gim, '$1') // Títulos como texto normal
+          .replace(/^\- (.*$)/gim, '• $1') // Listas con viñetas
+          .replace(/^\d+\. (.*$)/gim, '• $1') // Listas numeradas como viñetas
+
+        // Dividir el texto en párrafos
+        const textParagraphs = cleanText.split('\n').filter(p => p.trim() !== '')
         
-        // Envolver listas
-        formattedText = formattedText.replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
-        
-        htmlContent += `
-          <div class="message ${messageClass}">
-            <div class="message-header ${headerClass}">${sender}</div>
-            <div class="message-content">${formattedText}</div>
-            <div class="timestamp">${timestamp}</div>
-          </div>
-        `
+        textParagraphs.forEach(textPara => {
+          paragraphs.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: textPara,
+                  size: 22,
+                  color: "2c3e50"
+                })
+              ],
+              spacing: { after: 200 }
+            })
+          )
+        })
+
+        // Espacio entre mensajes
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: "" })],
+            spacing: { after: 400 }
+          })
+        )
       })
 
-      htmlContent += `
-          </div>
-          
-          <div class="footer">
-            <p>Este documento fue generado automáticamente por el Asistente Pedagógico IA</p>
-            <p>Fecha de generación: ${new Date().toLocaleString('es-ES')}</p>
-          </div>
-        </body>
-        </html>
-      `
+      // Footer
+      paragraphs.push(
+        new Paragraph({
+          children: [new TextRun({ text: "" })],
+          spacing: { after: 600 }
+        })
+      )
 
-      // Crear ventana temporal para generar PDF
-      const printWindow = window.open('', '_blank', 'width=800,height=600')
+      paragraphs.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "✨ Fin del documento",
+              bold: true,
+              size: 24,
+              color: "2c3e50"
+            })
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 300 }
+        })
+      )
+
+      paragraphs.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `🤖 Generado automáticamente por el Asistente Pedagógico IA`,
+              size: 18,
+              color: "7f8c8d"
+            })
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 }
+        })
+      )
+
+      paragraphs.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `📅 ${new Date().toLocaleString('es-ES')}`,
+              size: 18,
+              color: "7f8c8d"
+            })
+          ],
+          alignment: AlignmentType.CENTER
+        })
+      )
+
+      // Crear el documento
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: paragraphs
+        }]
+      })
+
+      // Generar y descargar el archivo
+      const buffer = await Packer.toBuffer(doc)
+      const blob = new Blob([buffer], { 
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
+      })
       
-      if (printWindow) {
-        printWindow.document.write(htmlContent)
-        printWindow.document.close()
-        
-        // Esperar a que se cargue el contenido y luego imprimir
-        printWindow.onload = () => {
-          setTimeout(() => {
-            printWindow.print()
-            // Cerrar ventana después de imprimir
-            setTimeout(() => {
-              printWindow.close()
-            }, 1000)
-          }, 500)
-        }
-        
-        alert('✅ PDF generado - Se abrirá el diálogo de impresión. Selecciona "Guardar como PDF"')
-      } else {
-        // Fallback: crear archivo HTML para descarga
-        const blob = new Blob([htmlContent], { type: 'text/html' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `plan-clase-chat-${new Date().toISOString().split('T')[0]}.html`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
-        
-        alert('✅ Archivo HTML descargado (popup bloqueado). Puedes abrirlo e imprimirlo como PDF.')
-      }
+      const fileName = `plan-clase-${planningConfig.tema.replace(/[^a-zA-Z0-9]/g, '-')}-${new Date().toISOString().split('T')[0]}.docx`
+      saveAs(blob, fileName)
+
+      alert('✅ Chat exportado exitosamente como Word')
     } catch (error) {
       console.error('❌ Error exportando chat:', error)
       alert('❌ Error al exportar el chat')
@@ -1111,12 +1112,12 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
               🗑️ Limpiar
             </button>
             <button
-              onClick={exportToPDF}
+              onClick={exportToWord}
               disabled={isLoading || isSaving || !isConfigured}
               className="px-6 py-3 text-sm bg-blue-100 text-blue-700 rounded-2xl hover:bg-blue-200 disabled:opacity-50 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
-              title="Exportar chat completo como PDF"
+              title="Exportar chat completo como Word"
             >
-              📄 Exportar PDF
+              📄 Exportar Word
             </button>
                 <button
               onClick={saveChatToDatabase}
