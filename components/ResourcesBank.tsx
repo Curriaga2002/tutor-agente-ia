@@ -114,31 +114,31 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
     return [
       {
         id: "1",
-        grado: "8°",
-        tema: "Algoritmos y Programación",
-        duracion: "2 horas",
-        sesiones: 3,
+        grado: "Ejemplo",
+        tema: "Plan de demostración",
+        duracion: "Variable",
+        sesiones: 1,
         contenido: {
-          estrategia: "Construcción-Fabricación",
+          estrategia: "Metodología adaptativa",
           objetivos: [
-            "Comprender los conceptos fundamentales de algoritmos",
-            "Aplicar pasos secuenciales en la resolución de problemas",
-            "Crear algoritmos simples para situaciones cotidianas"
+            "Este es un ejemplo de plan generado",
+            "Demuestra la funcionalidad del sistema",
+            "Los planes reales serán generados dinámicamente"
           ],
           planeacion: {
-            inicio: "Actividad motivadora con problemas del mundo real",
-            desarrollo: "Trabajo colaborativo en grupos pequeños",
-            cierre: "Socialización de resultados y retroalimentación"
+            inicio: "Plan de ejemplo para demostración",
+            desarrollo: "Contenido generado dinámicamente por IA",
+            cierre: "Los planes reales serán únicos y personalizados"
           },
-          recursos: ["Computadores", "Material didáctico", "Internet"],
-          evidencias: ["Diagrama de flujo", "Algoritmo escrito"],
+          recursos: ["Recursos adaptativos", "Materiales personalizados"],
+          evidencias: ["Productos únicos", "Evaluación personalizada"],
           evaluacion: {
             criterios: [
               {
-                criterio: "Comprensión conceptual",
-                nivel1: "Identifica conceptos principales",
-                nivel2: "Relaciona conceptos entre sí",
-                nivel3: "Aplica conceptos en nuevas situaciones"
+                criterio: "Ejemplo de criterio",
+                nivel1: "Criterios adaptativos",
+                nivel2: "Evaluación personalizada",
+                nivel3: "Resultados específicos"
               }
             ]
           }
@@ -146,21 +146,21 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
         chat_history: [
           {
             id: "1",
-            text: "🎓 **ASISTENTE DE PLANEACIÓN DIDÁCTICA**\n\n¡Hola! Soy tu tutor IA para ayudarte a crear planeaciones didácticas efectivas. ¿En qué grado estás trabajando y qué tema quieres desarrollar?",
+            text: "🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**\n\n¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.",
             isUser: false,
             timestamp: new Date(Date.now() - 3600000),
             isFormatted: true
           },
           {
             id: "2",
-            text: "Estoy trabajando con 8° grado en el tema de algoritmos y programación. ¿Puedes ayudarme a crear una planeación?",
+            text: "Este es un plan de ejemplo para demostrar la funcionalidad del sistema.",
             isUser: true,
             timestamp: new Date(Date.now() - 3500000),
             isFormatted: false
           },
           {
             id: "3",
-            text: "¡Excelente elección! Los algoritmos son fundamentales en programación. Te sugiero usar la estrategia de **Construcción-Fabricación** que es muy efectiva para este tema. ¿Te parece bien?",
+            text: "Los planes reales serán generados dinámicamente por la IA según tus necesidades específicas.",
             isUser: false,
             timestamp: new Date(Date.now() - 3400000),
             isFormatted: true
@@ -173,7 +173,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
         grado: "9°",
         tema: "Ecosistemas y Biodiversidad",
         duracion: "1 hora",
-        sesiones: 2,
+        sesiones: 1,
         contenido: {
           estrategia: "Investigación-Discovery",
           objetivos: [
@@ -226,6 +226,23 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
       }
     ]
   }
+
+  // Datos de ejemplo para el desarrollo (remover en producción)
+  const mockPlans = [
+    {
+      id: 1,
+      grado: "Ejemplo",
+      tema: "Plan de ejemplo",
+      duracion: "Variable",
+      sesiones: "Por definir",
+      contenido: "Este es un plan de ejemplo para demostrar la funcionalidad.",
+      created_at: new Date().toISOString(),
+      chat_history: [
+        { id: "1", text: "Plan de ejemplo", isUser: true, timestamp: new Date() },
+        { id: "2", text: "Este es un plan generado como ejemplo.", isUser: false, timestamp: new Date() }
+      ]
+    }
+  ]
 
   const loadHistorial = async () => {
     setIsLoading(true)

@@ -91,7 +91,7 @@ export default function LoginForm() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">Sistema de planeación didáctica para grados 8° y 9°</p>
+            <p className="text-sm text-gray-600">Sistema de planeación didáctica inteligente y personalizado</p>
           </div>
         </div>
       </div>
