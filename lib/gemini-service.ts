@@ -155,7 +155,7 @@ export class GeminiService {
       console.log('🎯 Gemini: Iniciando generación de plan de clase...')
       console.log('📋 Parámetros recibidos:', { grado, tema, context, relevantDocsCount: relevantDocs.length })
       
-      const prompt = this.buildClassPlanPrompt(grado, tema, context, relevantDocs)
+      const prompt = this.buildClassPlanPrompt(grado, tema, context, relevantDocs, recursos, nombreDocente)
       console.log('📝 Prompt construido:', prompt.substring(0, 200) + '...')
       
       console.log('🚀 Llamando a generateResponse...')
@@ -185,7 +185,9 @@ export class GeminiService {
     grado: string, 
     tema: string, 
     context: string,
-    relevantDocs: any[]
+    relevantDocs: any[],
+    recursos?: string,
+    nombreDocente?: string
   ): string {
     let prompt = `# Rol del agente
 Eres un asistente pedagógico especializado en generar planes de clase para el área de Tecnología e Informática de la IE Camilo Torres. Debes seguir las orientaciones curriculares, el modelo pedagógico crítico-social y mantener un estilo formal, claro y completo.
@@ -198,8 +200,8 @@ El docente proporcionará:
 - Tema: ${tema}
 - Duración: ${context.includes('horas') ? context : '2 horas'}
 - Número de sesiones: ${context.includes('sesiones') ? context : '2'}
-- Recursos tecnológicos disponibles: Computadores, internet, software educativo
-- Nombre del docente: [A definir por el docente]
+- Recursos tecnológicos disponibles: ${recursos || 'Computadores, internet, software educativo'}
+- Nombre del docente: ${nombreDocente || '[A definir por el docente]'}
 
 # Salida esperada
 Debes generar un **plan de clase completo en lenguaje natural**, estructurado en los siguientes apartados y siempre en este orden:
@@ -211,8 +213,8 @@ Debes generar un **plan de clase completo en lenguaje natural**, estructurado en
 - Tema: ${tema}
 - Duración: ${context.includes('horas') ? context : '2 horas'}
 - Sesiones: ${context.includes('sesiones') ? context : '2'}
-- Recursos Tecnológicos Disponibles: Computadores, internet, software educativo
-- Docente: [A definir por el docente]
+- Recursos Tecnológicos Disponibles: ${recursos || 'Computadores, internet, software educativo'}
+- Docente: ${nombreDocente || '[A definir por el docente]'}
 
 ## 📚 COMPONENTE CURRICULAR
 Selecciona uno o varios de los siguientes: Naturaleza y Evolución de la Tecnología, Uso y Apropiación de la Tecnología, Solución de Problemas con Tecnología, Tecnología, Informática y Sociedad.

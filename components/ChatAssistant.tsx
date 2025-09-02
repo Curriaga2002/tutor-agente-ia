@@ -452,7 +452,9 @@ Ejemplos:
         analysis.grado,
         analysis.tema,
         analysis.context,
-        uniqueDocs
+        uniqueDocs,
+        planningConfig.recursos,
+        planningConfig.nombreDocente
       )
       
       if (geminiResponse.success) {
@@ -993,7 +995,7 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
           .replace(/\n/g, '<br>')
         
         // Envolver listas
-        formattedText = formattedText.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+        formattedText = formattedText.replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
         
         htmlContent += `
           <div class="message ${messageClass}">
@@ -1070,6 +1072,8 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
         tema: '',
         horas: '',
         sesiones: '',
+        recursos: '',
+        nombreDocente: '',
         // Campos para consulta automática de documentos institucionales
         consultarPEI: true,
         consultarModeloPedagogico: true,
