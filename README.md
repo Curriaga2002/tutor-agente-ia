@@ -388,6 +388,4 @@ SUPABASE_STORAGE_SECRET_KEY=tu_secret_key
 
 Este proyecto está bajo la licencia MIT. Ver archivo LICENSE para más detalles.
 
-## Contacto
 
-Para soporte técnico o consultas sobre el proyecto, contactar al equipo de desarrollo.
