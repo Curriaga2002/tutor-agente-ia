@@ -32,72 +32,22 @@ export default function UserAdmin() {
     setError(null)
     
     try {
-      // Obtener usuarios únicos de la tabla planeaciones
-      const { data: planeaciones, error: planeacionesError } = await supabase
-        .from('planeaciones')
-        .select('user_id, created_at')
-        .order('created_at', { ascending: false })
+      // Llamar a la API de administración (versión simplificada para testing)
+      const response = await fetch('/api/admin/users', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
 
-      if (planeacionesError) {
-        console.error('Error al obtener planeaciones:', planeacionesError)
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al obtener usuarios')
       }
 
-      // Obtener usuarios únicos de las planeaciones
-      const uniqueUserIds = [...new Set(planeaciones?.map(p => p.user_id).filter(Boolean) || [])]
+      const data = await response.json()
+      setUsers(data.users)
       
-      // Crear usuarios reales basados en los IDs encontrados
-      const realUsers = uniqueUserIds.map((id, index) => ({
-        id: id || `user-${index}`,
-        email: `usuario${index + 1}@institucion.edu.co`,
-        created_at: planeaciones?.find(p => p.user_id === id)?.created_at || new Date().toISOString(),
-        last_sign_in_at: new Date().toISOString(),
-        email_confirmed_at: new Date().toISOString()
-      }))
-
-      // Agregar el usuario admin actual
-      const currentUser = await supabase.auth.getUser()
-      if (currentUser.data.user) {
-        realUsers.unshift({
-          id: currentUser.data.user.id,
-          email: currentUser.data.user.email || 'admin@admin.com',
-          created_at: currentUser.data.user.created_at,
-          last_sign_in_at: currentUser.data.user.last_sign_in_at,
-          email_confirmed_at: currentUser.data.user.email_confirmed_at
-        })
-      }
-
-      // Si no hay usuarios en planeaciones, mostrar al menos el admin
-      if (realUsers.length === 0 && currentUser.data.user) {
-        realUsers.push({
-          id: currentUser.data.user.id,
-          email: currentUser.data.user.email || 'admin@admin.com',
-          created_at: currentUser.data.user.created_at,
-          last_sign_in_at: currentUser.data.user.last_sign_in_at,
-          email_confirmed_at: currentUser.data.user.email_confirmed_at
-        })
-      }
-
-      // Agregar usuarios de prueba para demostración si no hay suficientes usuarios reales
-      if (realUsers.length <= 1) {
-        realUsers.push({
-          id: 'demo-user-1',
-          email: 'demo1@institucion.edu.co',
-          created_at: new Date(Date.now() - 86400000).toISOString(), // 1 día atrás
-          last_sign_in_at: new Date().toISOString(),
-          email_confirmed_at: new Date().toISOString()
-        })
-        realUsers.push({
-          id: 'demo-user-2',
-          email: 'demo2@institucion.edu.co',
-          created_at: new Date(Date.now() - 172800000).toISOString(), // 2 días atrás
-          last_sign_in_at: new Date(Date.now() - 3600000).toISOString(), // 1 hora atrás
-          email_confirmed_at: new Date().toISOString()
-        })
-      }
-
-      console.log('Usuarios encontrados:', realUsers.length)
-      console.log('Usuarios:', realUsers)
-      setUsers(realUsers)
     } catch (err: any) {
       console.error('Error en fetchUsers:', err)
       setError(err.message)
@@ -116,26 +66,32 @@ export default function UserAdmin() {
       // Generar contraseña aleatoria
       const randomPassword = generateRandomPassword()
       
-      const { data, error } = await supabase.auth.signUp({
-        email: newUser.email,
-        password: randomPassword,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
-        }
+      // Llamar a la API de administración para crear usuario
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: newUser.email,
+          password: randomPassword
+        })
       })
 
-      if (error) throw error
-
-      if (data.user) {
-        // Guardar la contraseña generada y email para mostrar
-        setGeneratedPassword(randomPassword)
-        setCreatedUserEmail(newUser.email)
-        setNewUser({ email: '', password: '' })
-        setShowCreateForm(false)
-        
-        // Actualizar la lista inmediatamente
-        await fetchUsers()
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al crear usuario')
       }
+
+      // Guardar la contraseña generada y email para mostrar
+      setGeneratedPassword(randomPassword)
+      setCreatedUserEmail(newUser.email)
+      setNewUser({ email: '', password: '' })
+      setShowCreateForm(false)
+      
+      // Actualizar la lista inmediatamente
+      await fetchUsers()
+      
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -158,8 +114,22 @@ export default function UserAdmin() {
     setError(null)
 
     try {
-      // En producción esto requeriría service role
-      alert('⚠️ Función de eliminación requiere permisos de service role')
+      // Llamar a la API de administración para eliminar usuario
+      const response = await fetch(`/api/admin/users?userId=${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al eliminar usuario')
+      }
+
+      // Actualizar la lista inmediatamente
+      await fetchUsers()
+      
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -168,7 +138,7 @@ export default function UserAdmin() {
   }
 
   // Reset de contraseña
-  const resetUserPassword = async (userEmail: string) => {
+  const resetUserPassword = async (userId: string, userEmail: string) => {
     if (!confirm(`¿Estás seguro de que quieres resetear la contraseña de ${userEmail}?`)) {
       return
     }
@@ -180,16 +150,25 @@ export default function UserAdmin() {
       // Generar nueva contraseña aleatoria
       const newPassword = generateRandomPassword()
       
-      // En un entorno real, esto requeriría service role
-      // Por ahora, solo mostramos la contraseña generada
-      setResetPassword(newPassword)
-      
-      // También enviar email de reset
-      const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
-        redirectTo: `${window.location.origin}/reset-password`
+      // Llamar a la API de administración para resetear contraseña
+      const response = await fetch('/api/admin/users/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: userId,
+          newPassword: newPassword
+        })
       })
 
-      if (error) throw error
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al resetear contraseña')
+      }
+
+      // Mostrar la nueva contraseña
+      setResetPassword(newPassword)
 
     } catch (err: any) {
       setError(err.message)
@@ -347,7 +326,7 @@ export default function UserAdmin() {
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => resetUserPassword(user.email)}
+                        onClick={() => resetUserPassword(user.id, user.email || '')}
                         className="px-4 py-2 bg-yellow-500/90 backdrop-blur-sm text-white rounded-xl hover:bg-yellow-600/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium shadow-lg shadow-yellow-500/25 hover:shadow-xl hover:shadow-yellow-500/30"
                         title="Resetear contraseña"
                       >
@@ -355,7 +334,7 @@ export default function UserAdmin() {
                       </button>
                       {user.email !== 'admin@admin.com' && (
                         <button
-                          onClick={() => deleteUser(user.id, user.email)}
+                          onClick={() => deleteUser(user.id, user.email || '')}
                           className="px-4 py-2 bg-red-500/90 backdrop-blur-sm text-white rounded-xl hover:bg-red-600/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/30"
                           title="Eliminar usuario"
                         >
