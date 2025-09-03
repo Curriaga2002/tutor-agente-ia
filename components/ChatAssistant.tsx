@@ -298,6 +298,7 @@ export default function ChatAssistant({
   
   // Estado para controlar la configuración inicial
   const [isConfigured, setIsConfigured] = useState(false)
+  const [hasShownConfigMessage, setHasShownConfigMessage] = useState(false)
   const [planningConfig, setPlanningConfig] = useState<PlanningConfig>({
     grado: '',
     asignatura: '',
@@ -452,6 +453,8 @@ Ejemplos:
       const documentosInstitucionales = await consultarDocumentosInstitucionales()
       
       // Combinar documentos relevantes de la consulta con documentos institucionales
+      // y priorizar por asignatura para evitar mezclar áreas
+      const subject = (planningConfig.asignatura || '').toLowerCase()
       let relevantFiles = [...relevantDocs]
       
       // Agregar PEI si está habilitado
@@ -467,6 +470,17 @@ Ejemplos:
       // Agregar Orientaciones Curriculares
       if (documentosInstitucionales.orientacionesCurriculares.length > 0) {
         relevantFiles.push(...documentosInstitucionales.orientacionesCurriculares)
+      }
+
+      // Filtro por asignatura cuando sea posible
+      if (subject) {
+        const subjectKeywords = [subject]
+        relevantFiles = relevantFiles.filter(doc => {
+          const t = (doc.title || '').toLowerCase()
+          const c = (doc.content || '').toLowerCase()
+          const d = (doc.doc_type || '').toLowerCase()
+          return subjectKeywords.some(k => t.includes(k) || c.includes(k) || d.includes(k))
+        })
       }
       
       // Buscar documentos adicionales si no hay suficientes
@@ -515,9 +529,10 @@ Ejemplos:
         `3) Distribuye el tiempo en ${sesionesNum} sesiones; la suma total debe ser ${horasNum} horas.\n` +
         `4) Trabaja únicamente en minutos en toda la respuesta. No uses horas ni decimales.\n` +
         `5) No agregues sesiones extra; si necesitas más tiempo, prioriza y sintetiza.\n` +
-        `6) Incluye una sección de "Distribución temporal (minutos)" con ${sesionesNum} líneas que sumen ${totalMinutes} min.\n` +
-        `7) Añade una línea de verificación: "Verificación: suma de sesiones = ${totalMinutes} min".\n` +
-        `8) Mantén la sección de duración total (min) y sesiones al inicio exactamente con estos valores.\n\n` +
+        `6) No incluyas "Institución" ni "Área" en la salida. No generes tu propia sección IDENTIFICACIÓN.\n` +
+        `7) Incluye una sección de "Distribución temporal (minutos)" con ${sesionesNum} líneas que sumen ${totalMinutes} min.\n` +
+        `8) Añade una línea de verificación: "Verificación: suma de sesiones = ${totalMinutes} min".\n` +
+        `9) Mantén la sección de duración total (min) y sesiones al inicio exactamente con estos valores.\n\n` +
         `Historial reciente del chat (usar como guía contextual, no repetir literalmente):\n${conversationTranscript}`
 
       // Usar Gemini para generar el plan de clase con el contexto combinado
@@ -565,6 +580,38 @@ Ejemplos:
               }).join('\n') + `\n• Verificación: suma de sesiones = ${totalMinutes} min`
             text = text.replace(/(\*\*Informaci[óo]n de la Planeaci[óo]n:\*\*[\s\S]*?\n)/, `$1${bloque}\n`)
           }
+
+          // Estandarizar sección IDENTIFICACIÓN: eliminar variantes previas y crear una única sección clara
+          const identificacion = [
+            '**IDENTIFICACIÓN**',
+            `• Grado: ${planningConfig.grado || 'No especificado'}`,
+            `• Asignatura: ${planningConfig.asignatura || 'No especificada'}`,
+            `• Tema: ${planningConfig.tema || 'No especificado'}`,
+            `• Duración: ${horasNum} horas`,
+            `• Sesiones: ${sesionesNum}`,
+            `• Docente: ${planningConfig.nombreDocente || 'No especificado'}`,
+            `• Recursos disponibles: ${planningConfig.recursos || 'No especificados'}`,
+          ].join('\n')
+
+          // Eliminar cualquier bloque IDENTIFICACIÓN anterior (incluyendo variantes entre paréntesis)
+          text = text
+            .replace(/^\s*IDENTIFICACI[ÓO]N\s*$(?:[\s\S]*?)(?=\n\n|\n\*\*|$)/gim, '')
+            .replace(/\(\s*•\s*(Instituci[óo]n|Área|Duraci[óo]n)[\s\S]*?\)/gim, '')
+            .replace(/^•\s*Instituci[óo]n:[^\n]*\n?/gim, '')
+            .replace(/^•\s*Área:[^\n]*\n?/gim, '')
+            .replace(/^•\s*Duraci[óo]n:\s*Configuraci[óo]n inicial proporcionada por el docente:?\s*\n?/gim, '')
+
+          // Insertar IDENTIFICACIÓN al inicio del documento (antes de la primera sección fuerte si existe)
+          if (/^\*\*/m.test(text)) {
+            text = identificacion + '\n\n' + text
+          } else {
+            text = identificacion + '\n\n' + text
+          }
+
+          // Eliminar cualquier IDENTIFICACIÓN remanente adicional después de la primera
+          text = text.replace(/^(?:(?!\A)[\s\S])*^IDENTIFICACI[ÓO]N\s*(?:\n[\s\S]*?)(?=\n\n|\n\*\*|\n[📚🎯🔍📝✅📂🕒]|$)/gim, '')
+          // Limpieza de saltos repetidos
+          text = text.replace(/\n{3,}/g, '\n\n')
         } catch {}
         return text
         } else {
@@ -700,6 +747,22 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         .replace(/^•\s*Instituci[óo]n:[^\n]*\n?/gim, '')
         .replace(/^•\s*Área:[^\n]*\n?/gim, '')
         .replace(/^•\s*Duraci[óo]n:\s*\n?/gim, '')
+        .replace(/\n{3,}/g, '\n\n')
+
+      // Insertar sección IDENTIFICACIÓN estandarizada al inicio del fallback
+      const identificacion = [
+        '**IDENTIFICACIÓN**',
+        `• Grado: ${planningConfig.grado || 'No especificado'}`,
+        `• Asignatura: ${planningConfig.asignatura || 'No especificada'}`,
+        `• Tema: ${planningConfig.tema || 'No especificado'}`,
+        `• Duración: ${horasNum} horas`,
+        `• Sesiones: ${sesionesNum}`,
+        `• Docente: ${planningConfig.nombreDocente || 'No especificado'}`,
+        `• Recursos disponibles: ${planningConfig.recursos || 'No especificados'}`,
+      ].join('\n')
+      response = identificacion + '\n\n' + response
+      // Remover posibles duplicados de IDENTIFICACIÓN tras inserción
+      response = response.replace(/^(?:(?!\A)[\s\S])*^IDENTIFICACI[ÓO]N\s*(?:\n[\s\S]*?)(?=\n\n|\n\*\*|\n[📚🎯🔍📝✅📂🕒]|$)/gim, '')
         .replace(/\n{3,}/g, '\n\n')
 
       return response
@@ -1272,9 +1335,10 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
             setPlanningConfig={setPlanningConfig} 
             onSubmit={() => {
               setIsConfigured(true)
-              const configMessage: Message = {
-                id: Date.now().toString(),
-                text: `✅ **CONFIGURACIÓN COMPLETADA EXITOSAMENTE**
+              if (!hasShownConfigMessage) {
+                const configMessage: Message = {
+                  id: Date.now().toString(),
+                  text: `✅ **CONFIGURACIÓN COMPLETADA EXITOSAMENTE**
 
 **🎯 Detalles de tu planeación:**
 • **Grado:** ${planningConfig.grado}
@@ -1291,11 +1355,13 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
 El chat ya está habilitado y puedes comenzar a escribir tu consulta específica.
 
 **💡 Próximo paso:** Escribe tu consulta en el campo de texto de abajo para generar el plan de clase personalizado.`,
-                isUser: false,
-                timestamp: new Date(),
-                isFormatted: true,
+                  isUser: false,
+                  timestamp: new Date(),
+                  isFormatted: true,
+                }
+                setMessages(prev => [...prev, configMessage])
+                setHasShownConfigMessage(true)
               }
-              setMessages(prev => [...prev, configMessage])
             }}
           />
         )}
