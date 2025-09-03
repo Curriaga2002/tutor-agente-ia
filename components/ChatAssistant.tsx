@@ -172,10 +172,10 @@ const ConfigurationForm = ({
                      Duración Total (horas) *
                    </label>
                    <select
-                    value={planningConfig.horas}
-                    onChange={(e) => handleInputChange('horas', e.target.value)}
-                    className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
-                    required
+                     value={planningConfig.horas}
+                     onChange={(e) => handleInputChange('horas', e.target.value)}
+                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
+                     required
                   >
                     <option value="">Selecciona horas</option>
                     <option value="1">1</option>
@@ -188,10 +188,10 @@ const ConfigurationForm = ({
                      Número de Sesiones *
                    </label>
                    <select
-                    value={planningConfig.sesiones}
-                    onChange={(e) => handleInputChange('sesiones', e.target.value)}
-                    className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
-                    required
+                     value={planningConfig.sesiones}
+                     onChange={(e) => handleInputChange('sesiones', e.target.value)}
+                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
+                     required
                   >
                     <option value="">Selecciona sesiones</option>
                     <option value="1">1</option>
@@ -316,7 +316,7 @@ export default function ChatAssistant({
   const [messages, setMessages] = useState<Message[]>([])
   const [initialMessage, setInitialMessage] = useState<Message>({
     id: "initial",
-    text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
+      text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
 
 ¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
 
@@ -333,9 +333,9 @@ Ejemplos:
 • "Plan de clase para 11° sobre literatura latinoamericana"
 
 `,
-    isUser: false,
-    timestamp: new Date(),
-    isFormatted: true,
+      isUser: false,
+      timestamp: new Date(),
+      isFormatted: true,
   })
   const [inputText, setInputText] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -344,7 +344,7 @@ Ejemplos:
 
   // Actualizar mensaje inicial cuando cambie el estado de los documentos
   useEffect(() => {
-    if (documentsLoading) {
+      if (documentsLoading) {
       setInitialMessage(prev => ({
         ...prev,
         text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
@@ -367,7 +367,7 @@ Ejemplos:
 
 `
       }))
-    } else if (documentsError) {
+      } else if (documentsError) {
       setInitialMessage(prev => ({
         ...prev,
         text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
@@ -390,7 +390,7 @@ Ejemplos:
 
 `
       }))
-    } else if (bucketDocuments.length > 0) {
+      } else if (bucketDocuments.length > 0) {
       setInitialMessage(prev => ({
         ...prev,
         text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
@@ -471,27 +471,6 @@ Ejemplos:
       if (documentosInstitucionales.orientacionesCurriculares.length > 0) {
         relevantFiles.push(...documentosInstitucionales.orientacionesCurriculares)
       }
-
-      // Priorizar documentos clave (PEI/Modelo/Orientaciones)
-      const priorityTerms = [
-        'modelo-pedagogico-critico-social',
-        'modelo pedagógico crítico-social',
-        'pei',
-        'proyecto educativo institucional',
-        'orientaciones curriculares',
-        'orientaciones_curricures_tecnologia',
-        'orientaciones curricures tecnologia',
-      ]
-      relevantFiles.sort((a, b) => {
-        const score = (doc: any) => {
-          const hay = (s: string) => {
-            const t = (s || '').toLowerCase()
-            return priorityTerms.some(p => t.includes(p)) ? 1 : 0
-          }
-          return hay(doc.title) + hay(doc.doc_type)
-        }
-        return score(b) - score(a)
-      })
 
       // Filtro por asignatura cuando sea posible
       if (subject) {
@@ -592,31 +571,6 @@ Ejemplos:
             .replace(/^•\s*Área:[^\n]*\n?/gim, '')
             .replace(/^•\s*Duraci[óo]n:\s*\n?/gim, '')
             .replace(/\n{3,}/g, '\n\n')
-          // Inyectar bloque de Documentos aplicados
-          const docsAplicados = uniqueDocs.slice(0, 5).map((d, i) => `• ${i + 1}. ${d.title} (${d.doc_type})`).join('\n') || '• (No se hallaron documentos relevantes; usar configuración y conocimiento base)'
-          const documentosAplicadosBlock = `\n\n**📂 Documentos aplicados (uso obligatorio de Orientaciones y PEI si están disponibles):**\n${docsAplicados}`
-          if (!/Documentos aplicados/gi.test(text)) {
-            text = text.replace(/(\*\*IDENTIFICACI[ÓO]N\*\*[\s\S]*?\n)/, `$1${documentosAplicadosBlock}\n`)
-          }
-
-          // Inyectar bloque de Referencias (páginas/secciones aproximadas si es posible)
-          const buildReference = (doc: any): string => {
-            const title = doc.title || 'Documento'
-            const page = (doc.page !== undefined && doc.page !== null) ? `, p. ${doc.page}` : ''
-            let section = ''
-            try {
-              const content = (doc.content || '').toString()
-              const m = content.match(/(?:cap[ií]tulo|secci[óo]n|t[ií]tulo)\s+\d+[^\n]{0,80}/i)
-              if (m) section = ` — ${m[0].trim()}`
-            } catch {}
-            return `• ${title}${page}${section}`
-          }
-          const referencias = uniqueDocs.slice(0, 5).map(buildReference).join('\n')
-          if (referencias && !/Referencias de apoyo/gi.test(text)) {
-            const referenciasBlock = `\n\n**🔎 Referencias de apoyo (aproximadas):**\n${referencias}`
-            text = text.replace(/(\*\*Documentos aplicados[\s\S]*?\n)/i, `$1${referenciasBlock}\n`)
-          }
-
           // Inyectar bloque de distribución temporal al inicio si no existe
           if (!/Distribuci[óo]n temporal/gi.test(text)) {
             const bloque = `\n\n**🕒 Distribución temporal (minutos):**\n` +
@@ -774,11 +728,6 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
    • Criterios alineados con el PEI
    • Instrumentos del modelo pedagógico
    • Estándares curriculares oficiales
-
-**📂 Documentos aplicados (uso obligatorio de Orientaciones y PEI si están disponibles):**
-• 1. modelo-pedagogico-critico-social.pdf (PEI/modelo)
-• 2. Orientaciones_Curricures_Tecnologia.pdf (Orientaciones Curriculares)
-• 3. pei-institucion-educativa.pdf (PEI)
 
 **🕒 Distribución temporal (minutos):**
 ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === sesionesNum - 1 ? Math.floor((horasNum * 60) / sesionesNum) + ((horasNum * 60) - (Math.floor((horasNum * 60) / sesionesNum) * sesionesNum)) : Math.floor((horasNum * 60) / sesionesNum)} min`).join('\n')}
@@ -1387,9 +1336,9 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
             onSubmit={() => {
               setIsConfigured(true)
               if (!hasShownConfigMessage) {
-                const configMessage: Message = {
-                  id: Date.now().toString(),
-                  text: `✅ **CONFIGURACIÓN COMPLETADA EXITOSAMENTE**
+              const configMessage: Message = {
+                id: Date.now().toString(),
+                text: `✅ **CONFIGURACIÓN COMPLETADA EXITOSAMENTE**
 
 **🎯 Detalles de tu planeación:**
 • **Grado:** ${planningConfig.grado}
@@ -1406,11 +1355,11 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
 El chat ya está habilitado y puedes comenzar a escribir tu consulta específica.
 
 **💡 Próximo paso:** Escribe tu consulta en el campo de texto de abajo para generar el plan de clase personalizado.`,
-                  isUser: false,
-                  timestamp: new Date(),
-                  isFormatted: true,
-                }
-                setMessages(prev => [...prev, configMessage])
+                isUser: false,
+                timestamp: new Date(),
+                isFormatted: true,
+              }
+              setMessages(prev => [...prev, configMessage])
                 setHasShownConfigMessage(true)
               }
             }}
@@ -1461,7 +1410,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
           </div>
         </div>
         )}
-
+        
         {/* Mensajes del Chat - Siempre visible */}
         <div className="space-y-4">
         {messages.map((message) => (
@@ -1534,34 +1483,34 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
                   </div>
                   <span className="text-gray-600 text-sm">El asistente está pensando...</span>
                   <span className="sr-only">Generando respuesta</span>
-                </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
           
         <div ref={messagesEndRef} />
         </div>
       </div>
 
                  {/* Input del Chat - Siempre visible */}
-      <div className="bg-white border-t border-gray-100 p-8">
-        <form onSubmit={handleSubmit} className="flex gap-6">
-          <input
-            type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+           <div className="bg-white border-t border-gray-100 p-8">
+               <form onSubmit={handleSubmit} className="flex gap-6">
+      <input
+                   type="text"
+                   value={inputText}
+                   onChange={(e) => setInputText(e.target.value)}
             placeholder={isConfigured ? "Escribe tu consulta específica para el plan de clase..." : "Completa la configuración inicial para habilitar el chat"}
             className="flex-1 px-8 py-5 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duración-300 text-gray-900 placeholder-gray-500 text-lg bg-white"
             disabled={!isConfigured || isLoading || isSaving}
-          />
-          <button
-            type="submit"
+        />
+        <button
+                   type="submit"
             disabled={!isConfigured || !inputText.trim() || isLoading || isSaving}
             className="px-10 py-5 bg-gray-900/90 backdrop-blur-sm text-white rounded-2xl hover:bg-gray-800/90 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all duración-300 font-medium text-lg shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 transform hover:-translate-y-0.5 disabled:transform-none"
-          >
-            {isLoading ? '🔄' : '📤'} Enviar
-          </button>
-        </form>
+                 >
+                   {isLoading ? '🔄' : '📤'} Enviar
+        </button>
+               </form>
       </div>
     </div>
   )
