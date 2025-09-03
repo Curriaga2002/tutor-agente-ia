@@ -150,23 +150,30 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
         chat_history: [
           {
             id: "1",
-            text: "🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**\n\n¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.",
-            isUser: false,
-            timestamp: new Date(Date.now() - 3600000),
-            isFormatted: true
-          },
-          {
-            id: "2",
-            text: "Este es un plan de ejemplo para demostrar la funcionalidad del sistema.",
+            text: "Necesito un plan de clase para 8° sobre fracciones",
             isUser: true,
-            timestamp: new Date(Date.now() - 3500000),
+            timestamp: new Date(Date.now() - 3600000),
             isFormatted: false
           },
           {
-            id: "3",
-            text: "Los planes reales serán generados dinámicamente por la IA según tus necesidades específicas.",
+            id: "2",
+            text: "Perfecto, te ayudo a crear un plan de clase sobre fracciones para 8°. Basándome en los documentos curriculares disponibles, voy a estructurar una clase completa con objetivos, actividades y evaluación.",
             isUser: false,
+            timestamp: new Date(Date.now() - 3500000),
+            isFormatted: true
+          },
+          {
+            id: "3",
+            text: "¿Podrías incluir actividades prácticas con material concreto?",
+            isUser: true,
             timestamp: new Date(Date.now() - 3400000),
+            isFormatted: false
+          },
+          {
+            id: "4",
+            text: "¡Por supuesto! He incluido actividades con material concreto como círculos de fracciones, barras de fracciones y ejercicios con pizzas para hacer el aprendizaje más visual y práctico.",
+            isUser: false,
+            timestamp: new Date(Date.now() - 3300000),
             isFormatted: true
           }
         ],

@@ -281,10 +281,10 @@ export default function ChatAssistant({
     filtrosInstitucionales: ['Orientaciones Curriculares', 'Estructuras de Planes de Clase', 'Proyectos Educativos', 'Modelos Pedagógicos']
   })
   
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
+  const [messages, setMessages] = useState<Message[]>([])
+  const [initialMessage, setInitialMessage] = useState<Message>({
+    id: "initial",
+    text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
 
 ¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
 
@@ -301,11 +301,10 @@ Ejemplos:
 • "Plan de clase para 11° sobre literatura latinoamericana"
 
 **💡 Antes de comenzar:** Completa la configuración inicial para personalizar tu planeación.`,
-      isUser: false,
-      timestamp: new Date(),
-      isFormatted: true,
-    }
-  ])
+    isUser: false,
+    timestamp: new Date(),
+    isFormatted: true,
+  })
   const [inputText, setInputText] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -313,12 +312,10 @@ Ejemplos:
 
   // Actualizar mensaje inicial cuando cambie el estado de los documentos
   useEffect(() => {
-    if (messages.length > 0) {
-      const updatedMessages = [...messages]
-      const initialMessage = updatedMessages[0]
-      
-      if (documentsLoading) {
-        initialMessage.text = `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
+    if (documentsLoading) {
+      setInitialMessage(prev => ({
+        ...prev,
+        text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
 
 ¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
 
@@ -337,8 +334,11 @@ Ejemplos:
 • "Plan de clase para 11° sobre literatura latinoamericana"
 
 **💡 Antes de comenzar:** Completa la configuración inicial para personalizar tu planeación.`
-      } else if (documentsError) {
-        initialMessage.text = `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
+      }))
+    } else if (documentsError) {
+      setInitialMessage(prev => ({
+        ...prev,
+        text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
 
 ¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
 
@@ -357,8 +357,11 @@ Ejemplos:
 • "Plan de clase para 11° sobre literatura latinoamericana"
 
 **💡 Antes de comenzar:** Completa la configuración inicial para personalizar tu planeación.`
-      } else if (bucketDocuments.length > 0) {
-        initialMessage.text = `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
+      }))
+    } else if (bucketDocuments.length > 0) {
+      setInitialMessage(prev => ({
+        ...prev,
+        text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
 
 ¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
 
@@ -377,9 +380,7 @@ Ejemplos:
 • "Plan de clase para 11° sobre literatura latinoamericana"
 
 **💡 Antes de comenzar:** Completa la configuración inicial para personalizar tu planeación.`
-      }
-      
-      setMessages(updatedMessages)
+      }))
     }
   }, [documentsLoading, documentsError, bucketDocuments, documentCount])
 
@@ -448,11 +449,28 @@ Ejemplos:
         index === self.findIndex(d => d.id === doc.id)
       )
       
-      // Usar Gemini para generar el plan de clase
+      // Construir contexto enriquecido con configuración inicial + historial reciente del chat
+      const configContext = `Configuración inicial proporcionada por el docente:\n` +
+        `• Grado: ${planningConfig.grado || 'No especificado'}\n` +
+        `• Asignatura: ${planningConfig.asignatura || 'No especificada'}\n` +
+        `• Tema: ${planningConfig.tema || 'No especificado'}\n` +
+        `• Duración: ${planningConfig.horas || 'No especificada'} horas\n` +
+        `• Sesiones: ${planningConfig.sesiones || 'No especificado'}\n` +
+        `• Docente: ${planningConfig.nombreDocente || 'No especificado'}\n` +
+        `• Recursos disponibles: ${planningConfig.recursos || 'No especificados'}`
+
+      const recentMessages = messages.slice(-10)
+      const conversationTranscript = recentMessages
+        .map(m => `${m.isUser ? 'Docente' : 'Asistente'}: ${m.text}`)
+        .join('\n\n')
+
+      const combinedContext = `${configContext}\n\nHistorial reciente del chat (usar como guía contextual, no repetir literalmente):\n${conversationTranscript}`
+
+      // Usar Gemini para generar el plan de clase con el contexto combinado
       const geminiResponse = await geminiService.generateClassPlan(
         analysis.grado,
         analysis.tema,
-        analysis.context,
+        combinedContext,
         uniqueDocs,
         planningConfig.recursos,
         planningConfig.nombreDocente
@@ -526,15 +544,17 @@ Ejemplos:
         index === self.findIndex(d => d.id === doc.id)
       )
       
-      // Generar respuesta estructurada basada en los documentos disponibles
+      // Generar respuesta estructurada basada en los documentos disponibles e integrando la configuración inicial
       let response = `🎓 **PLAN DE CLASE GENERADO (Sistema de Fallback)**
 
 **Información de la Planeación:**
-• **Grado:** ${analysis.grado}
-• **Asignatura:** ${analysis.asignatura}
-• **Tema:** ${analysis.tema}
-• **Duración:** ${analysis.horas} horas
-• **Sesiones:** ${analysis.sesiones}
+• **Grado:** ${planningConfig.grado || analysis.grado}
+• **Asignatura:** ${planningConfig.asignatura || analysis.asignatura}
+• **Tema:** ${planningConfig.tema || analysis.tema}
+• **Duración:** ${planningConfig.horas || analysis.horas} horas
+• **Sesiones:** ${planningConfig.sesiones || analysis.sesiones}
+• **Docente:** ${planningConfig.nombreDocente || 'No especificado'}
+• **Recursos disponibles:** ${planningConfig.recursos || 'No especificados'}
 
 **📋 Contexto Institucional Disponible:**
 ${documentosInstitucionales.pei.length > 0 ? `• **PEI:** ${documentosInstitucionales.pei.map(d => d.title).join(', ')}\n` : ''}
@@ -561,7 +581,7 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
 **3. METODOLOGÍA**
    • Seguir el modelo pedagógico institucional
    • Aplicar estrategias validadas
-   • Usar recursos disponibles
+   • Usar recursos disponibles (${planningConfig.recursos || 'no especificados'})
 
 **4. EVALUACIÓN**
    • Criterios alineados con el PEI
@@ -697,7 +717,7 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
 
       setMessages(prev => [...prev, assistantMessage])
       
-      // Notificar actualización del chat
+      // Notificar actualización del chat (solo mensajes reales, no el mensaje inicial)
       if (onChatUpdate) {
         onChatUpdate([...messages, userMessage, assistantMessage])
       }
@@ -747,7 +767,7 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
         duracion,
         sesiones,
         contenido: messages.map(m => `${m.isUser ? 'Usuario' : 'Asistente'}: ${m.text}`).join('\n\n'),
-        chat_history: messages,
+        chat_history: messages, // Solo mensajes reales del chat, no el mensaje inicial
         user_id: null // Se asignará automáticamente por RLS
       }
 
@@ -1168,6 +1188,49 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
           />
         )}
         
+        {/* Mensaje inicial del asistente */}
+        <div className="space-y-4">
+          <div className="flex justify-start">
+            <div className="max-w-3xl px-4 py-3 rounded-lg backdrop-blur-sm bg-white/80 border border-white/50 shadow-lg shadow-gray-200/60">
+              {initialMessage.isFormatted ? (
+                <div 
+                  className="prose prose-sm max-w-none"
+                  style={{
+                    lineHeight: '1.6',
+                    fontSize: '14px'
+                  }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: `
+                      <style>
+                        .prose li { margin-bottom: 8px; }
+                        .prose h1, .prose h2, .prose h3 { color: #1f2937; }
+                        .prose strong { color: #1f2937; font-weight: 600; }
+                        .prose code { background-color: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+                        .prose pre { background-color: #f3f4f6; padding: 12px; border-radius: 6px; border: 1px solid #d1d5db; }
+                      </style>
+                      ${initialMessage.text
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/```(.*?)```/g, '<pre><code>$1</code></pre>')
+                        .replace(/`(.*?)`/g, '<code>$1</code>')
+                        .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                        .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                        .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                        .replace(/^- (.*$)/gm, '<li>• $1</li>')
+                        .replace(/^\d+\. (.*$)/gm, '<li>$&</li>')
+                        .replace(/\n\n/g, '<br><br>')
+                        .replace(/\n/g, '<br>')
+                      }
+                    `
+                  }} 
+                />
+              ) : (
+                <p className="whitespace-pre-wrap">{initialMessage.text}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Mensajes del Chat - Siempre visible */}
         <div className="space-y-4">
         {messages.map((message) => (
