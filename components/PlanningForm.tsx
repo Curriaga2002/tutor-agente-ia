@@ -212,7 +212,7 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
     }
   }
 
-  const handleDownload = async () => {
+  const handleDownload = async (exportType: 'complete' | 'agent-only' = 'complete') => {
     if (!currentPlanningData) {
       setError("Primero debe generar una planeación antes de descargarla.")
       return
@@ -222,15 +222,18 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
     setError(null)
 
     try {
-      // Generate Word document content
-      const docContent = generateWordContent(currentPlanningData, formData)
+      // Generate Word document content based on export type
+      const docContent = exportType === 'agent-only' 
+        ? generateAgentOnlyContent(currentPlanningData, formData)
+        : generateWordContent(currentPlanningData, formData)
 
       // Create and download the file
       const blob = new Blob([docContent], {
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       })
 
-      const fileName = `Planeacion_Didactica_${formData.grado}_${formData.tema.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}_${new Date().toLocaleTimeString("es-CO", { hour: '2-digit', minute: '2-digit' }).replace(/:/g, "-")}.docx`
+      const suffix = exportType === 'agent-only' ? '_Solo_Agente' : '_Completa'
+      const fileName = `Planeacion_Didactica_${formData.grado}_${formData.tema.replace(/\s+/g, "_")}${suffix}_${new Date().toISOString().split("T")[0]}_${new Date().toLocaleTimeString("es-CO", { hour: '2-digit', minute: '2-digit' }).replace(/:/g, "-")}.docx`
 
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement("a")
@@ -241,13 +244,44 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
 
-      setSuccess("✅ Documento Word descargado exitosamente")
+      const message = exportType === 'agent-only' 
+        ? "✅ Documento Word (solo agente) descargado exitosamente"
+        : "✅ Documento Word completo descargado exitosamente"
+      setSuccess(message)
     } catch (error: any) {
       console.error("Error exporting to Word:", error)
       setError("❌ Error al exportar a Word: " + (error?.message || 'Error desconocido'))
     } finally {
       setIsExporting(false)
     }
+  }
+
+  const generateAgentOnlyContent = (planData: any, formData: any): string => {
+    // Extraer solo las respuestas del agente (no del usuario)
+    const agentMessages = chatConversations.filter(msg => 
+      !msg.isUser && msg.id !== "1" && msg.text.trim().length > 0
+    )
+
+    if (agentMessages.length === 0) {
+      return "No hay contenido del agente disponible para exportar."
+    }
+
+    // Tomar la última respuesta del agente (que debería ser el plan completo)
+    const lastAgentMessage = agentMessages[agentMessages.length - 1]
+    
+    // Limpiar el texto del agente
+    let agentContent = lastAgentMessage.text
+    
+    // Remover emojis y formateo markdown básico
+    agentContent = agentContent
+      .replace(/\*\*/g, '') // Remover **bold**
+      .replace(/\*/g, '')   // Remover *italic*
+      .replace(/`/g, '')    // Remover `code`
+      .replace(/#{1,6}\s/g, '') // Remover headers markdown
+      .replace(/^\s*[-*+]\s/gm, '• ') // Normalizar listas
+      .replace(/\n{3,}/g, '\n\n') // Limpiar saltos múltiples
+    
+    return agentContent
   }
 
   const generateWordContent = (planData: any, formData: any): string => {

@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
       users = result.data.users
       error = result.error
     } else {
-      // Fallback: crear usuarios mock basados en los que vemos en la imagen
+      // Fallback: crear usuarios mock basados en los que vemos en la imagen (sin admin@admin.com)
       users = [
         {
           id: 'ef3a32e0-a863-421d-b908-10a942ab7540',
@@ -53,13 +53,6 @@ export async function GET(request: NextRequest) {
           created_at: '2025-09-01T23:30:08.000Z',
           last_sign_in_at: '2025-09-03T00:00:00.000Z',
           email_confirmed_at: '2025-09-01T23:30:08.000Z'
-        },
-        {
-          id: '178081e2-9dd5-48bb-ade5-6ef651448fda',
-          email: 'admin@admin.com',
-          created_at: '2025-09-01T23:28:08.000Z',
-          last_sign_in_at: '2025-09-03T00:00:00.000Z',
-          email_confirmed_at: '2025-09-01T23:28:08.000Z'
         }
       ]
     }
@@ -69,15 +62,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: `Failed to fetch users: ${error.message}` }, { status: 500 })
     }
 
-    // Filtrar y formatear los datos de usuarios
-    const formattedUsers = users.map(user => ({
-      id: user.id,
-      email: user.email,
-      created_at: user.created_at,
-      last_sign_in_at: user.last_sign_in_at,
-      email_confirmed_at: user.email_confirmed_at,
-      is_admin: user.email === 'admin@admin.com'
-    }))
+    // Filtrar y formatear los datos de usuarios (excluir admin@admin.com)
+    const formattedUsers = users
+      .filter(user => user.email !== 'admin@admin.com')
+      .map(user => ({
+        id: user.id,
+        email: user.email,
+        created_at: user.created_at,
+        last_sign_in_at: user.last_sign_in_at,
+        email_confirmed_at: user.email_confirmed_at,
+        is_admin: false // Ya no mostramos admin@admin.com, así que todos son false
+      }))
 
     return NextResponse.json({ users: formattedUsers })
 

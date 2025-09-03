@@ -1042,7 +1042,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
   }
 
   // Función para exportar el chat como Word
-  const exportToWord = async () => {
+  const exportToWord = async (exportType: 'complete' | 'agent-only' = 'complete') => {
     if (messages.length <= 1) {
       alert('No hay planeación para exportar')
       return
@@ -1057,6 +1057,50 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
       // Crear párrafos del documento
       const paragraphs: Paragraph[] = []
 
+      if (exportType === 'agent-only') {
+        // Modo: Solo contenido del agente
+        const agentMessages = messages.filter(msg => !msg.isUser && msg.id !== "initial")
+        
+        if (agentMessages.length === 0) {
+          alert('No hay contenido del agente para exportar')
+          return
+        }
+
+        // Tomar la última respuesta del agente (el plan completo)
+        const lastAgentMessage = agentMessages[agentMessages.length - 1]
+        
+        // Limpiar el contenido del agente
+        let agentContent = lastAgentMessage.text
+        agentContent = agentContent
+          .replace(/\*\*/g, '') // Remover **bold**
+          .replace(/\*/g, '')   // Remover *italic*
+          .replace(/`/g, '')    // Remover `code`
+          .replace(/#{1,6}\s/g, '') // Remover headers markdown
+          .replace(/^\s*[-*+]\s/gm, '• ') // Normalizar listas
+          .replace(/\n{3,}/g, '\n\n') // Limpiar saltos múltiples
+
+        // Dividir el contenido en párrafos
+        const contentLines = agentContent.split('\n').filter(line => line.trim())
+        
+        contentLines.forEach(line => {
+          if (line.trim()) {
+            paragraphs.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: line.trim(),
+                    size: 24,
+                    color: "2c3e50"
+                  })
+                ],
+                spacing: { after: 200 }
+              })
+            )
+          }
+        })
+
+      } else {
+        // Modo: Conversación completa (código original)
       // Header del documento
       paragraphs.push(
         new Paragraph({
@@ -1149,13 +1193,13 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         )
       })
 
-      // Espacio antes de la conversación
-      paragraphs.push(
-        new Paragraph({
-          children: [new TextRun({ text: "" })],
-          spacing: { after: 600 }
-        })
-      )
+              // Espacio antes de la conversación
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: "" })],
+            spacing: { after: 600 }
+          })
+        )
 
       // Título de la conversación
       paragraphs.push(
@@ -1297,6 +1341,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
           alignment: AlignmentType.CENTER
         })
       )
+      }
 
       // Crear el documento
       const doc = new Document({
@@ -1312,10 +1357,14 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
       })
       
-      const fileName = `plan-clase-${planningConfig.tema.replace(/[^a-zA-Z0-9]/g, '-')}-${new Date().toISOString().split('T')[0]}.docx`
+      const suffix = exportType === 'agent-only' ? '-solo-agente' : '-completo'
+      const fileName = `plan-clase-${planningConfig.tema.replace(/[^a-zA-Z0-9]/g, '-')}${suffix}-${new Date().toISOString().split('T')[0]}.docx`
       saveAs(blob, fileName)
 
-      alert('✅ Chat exportado exitosamente como Word')
+      const message = exportType === 'agent-only' 
+        ? '✅ Plan de clase (solo agente) exportado exitosamente como Word'
+        : '✅ Chat completo exportado exitosamente como Word'
+      alert(message)
     } catch (error) {
       console.error('❌ Error exportando chat:', error)
       alert('❌ Error al exportar el chat')
@@ -1377,10 +1426,10 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
               🗑️ Limpiar
             </button>
             <button
-              onClick={exportToWord}
+              onClick={() => exportToWord('agent-only')}
               disabled={isLoading || isSaving || !isConfigured}
               className="px-6 py-3 text-sm bg-blue-100/80 backdrop-blur-sm text-blue-700 rounded-2xl hover:bg-blue-200/80 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-blue-200/50 hover:shadow-lg hover:shadow-blue-200/60"
-              title="Exportar chat completo como Word"
+              title="Exportar plan de clase como Word"
             >
               📄 Exportar Word
             </button>
