@@ -472,6 +472,27 @@ Ejemplos:
         relevantFiles.push(...documentosInstitucionales.orientacionesCurriculares)
       }
 
+      // Priorizar documentos clave (PEI/Modelo/Orientaciones)
+      const priorityTerms = [
+        'modelo-pedagogico-critico-social',
+        'modelo pedagógico crítico-social',
+        'pei',
+        'proyecto educativo institucional',
+        'orientaciones curriculares',
+        'orientaciones_curricures_tecnologia',
+        'orientaciones curricures tecnologia',
+      ]
+      relevantFiles.sort((a, b) => {
+        const score = (doc: any) => {
+          const hay = (s: string) => {
+            const t = (s || '').toLowerCase()
+            return priorityTerms.some(p => t.includes(p)) ? 1 : 0
+          }
+          return hay(doc.title) + hay(doc.doc_type)
+        }
+        return score(b) - score(a)
+      })
+
       // Filtro por asignatura cuando sea posible
       if (subject) {
         const subjectKeywords = [subject]
@@ -571,6 +592,31 @@ Ejemplos:
             .replace(/^•\s*Área:[^\n]*\n?/gim, '')
             .replace(/^•\s*Duraci[óo]n:\s*\n?/gim, '')
             .replace(/\n{3,}/g, '\n\n')
+          // Inyectar bloque de Documentos aplicados
+          const docsAplicados = uniqueDocs.slice(0, 5).map((d, i) => `• ${i + 1}. ${d.title} (${d.doc_type})`).join('\n') || '• (No se hallaron documentos relevantes; usar configuración y conocimiento base)'
+          const documentosAplicadosBlock = `\n\n**📂 Documentos aplicados (uso obligatorio de Orientaciones y PEI si están disponibles):**\n${docsAplicados}`
+          if (!/Documentos aplicados/gi.test(text)) {
+            text = text.replace(/(\*\*IDENTIFICACI[ÓO]N\*\*[\s\S]*?\n)/, `$1${documentosAplicadosBlock}\n`)
+          }
+
+          // Inyectar bloque de Referencias (páginas/secciones aproximadas si es posible)
+          const buildReference = (doc: any): string => {
+            const title = doc.title || 'Documento'
+            const page = (doc.page !== undefined && doc.page !== null) ? `, p. ${doc.page}` : ''
+            let section = ''
+            try {
+              const content = (doc.content || '').toString()
+              const m = content.match(/(?:cap[ií]tulo|secci[óo]n|t[ií]tulo)\s+\d+[^\n]{0,80}/i)
+              if (m) section = ` — ${m[0].trim()}`
+            } catch {}
+            return `• ${title}${page}${section}`
+          }
+          const referencias = uniqueDocs.slice(0, 5).map(buildReference).join('\n')
+          if (referencias && !/Referencias de apoyo/gi.test(text)) {
+            const referenciasBlock = `\n\n**🔎 Referencias de apoyo (aproximadas):**\n${referencias}`
+            text = text.replace(/(\*\*Documentos aplicados[\s\S]*?\n)/i, `$1${referenciasBlock}\n`)
+          }
+
           // Inyectar bloque de distribución temporal al inicio si no existe
           if (!/Distribuci[óo]n temporal/gi.test(text)) {
             const bloque = `\n\n**🕒 Distribución temporal (minutos):**\n` +
@@ -728,6 +774,11 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
    • Criterios alineados con el PEI
    • Instrumentos del modelo pedagógico
    • Estándares curriculares oficiales
+
+**📂 Documentos aplicados (uso obligatorio de Orientaciones y PEI si están disponibles):**
+• 1. modelo-pedagogico-critico-social.pdf (PEI/modelo)
+• 2. Orientaciones_Curricures_Tecnologia.pdf (Orientaciones Curriculares)
+• 3. pei-institucion-educativa.pdf (PEI)
 
 **🕒 Distribución temporal (minutos):**
 ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === sesionesNum - 1 ? Math.floor((horasNum * 60) / sesionesNum) + ((horasNum * 60) - (Math.floor((horasNum * 60) / sesionesNum) * sesionesNum)) : Math.floor((horasNum * 60) / sesionesNum)} min`).join('\n')}
