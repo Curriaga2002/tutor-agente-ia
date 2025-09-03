@@ -38,7 +38,7 @@ export default function AppStatus() {
       </div>
 
       {/* Tarjeta Principal de Estado - Estilo Apple Card */}
-      <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-lg shadow-black/5 border border-white/30 p-12 mb-12">
+      <div className="bg-white/85 backdrop-blur-xl rounded-3xl shadow-xl shadow-black/10 border border-white/40 p-12 mb-12">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-light text-gray-900">Estado General</h2>
           <div className={`flex items-center space-x-2 ${getStatusColor()}`}>
@@ -83,7 +83,7 @@ export default function AppStatus() {
       {/* Detalles del Sistema - Estilo Apple */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Sistema de Documentos */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-lg shadow-black/5 border border-white/30 p-8">
+        <div className="bg-white/85 backdrop-blur-xl rounded-3xl shadow-xl shadow-black/10 border border-white/40 p-8">
           <div className="flex items-center mb-6">
             <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mr-4">
               <span className="text-xl">📚</span>
@@ -125,7 +125,7 @@ export default function AppStatus() {
         </div>
 
         {/* Sistema de IA */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-lg shadow-black/5 border border-white/30 p-8">
+        <div className="bg-white/85 backdrop-blur-xl rounded-3xl shadow-xl shadow-black/10 border border-white/40 p-8">
           <div className="flex items-center mb-6">
             <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center mr-4">
               <span className="text-xl">🤖</span>

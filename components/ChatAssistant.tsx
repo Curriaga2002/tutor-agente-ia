@@ -73,7 +73,7 @@ const ConfigurationForm = ({
   }
 
            return (
-           <div className="bg-white/70 backdrop-blur-xl border border-white/30 rounded-3xl p-12 mb-8 shadow-lg shadow-black/5">
+           <div className="bg-white/85 backdrop-blur-xl border border-white/40 rounded-3xl p-12 mb-8 shadow-xl shadow-black/10">
              <div className="text-center mb-12">
                <h3 className="text-3xl font-light text-gray-900 mb-4 tracking-tight">Configuración Inicial</h3>
                <p className="text-xl text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
@@ -90,7 +90,7 @@ const ConfigurationForm = ({
                    <select
                      value={planningConfig.grado}
                      onChange={(e) => handleInputChange('grado', e.target.value)}
-                     className="w-full px-6 py-4 border border-white/40 rounded-2xl focus:outline-none focus:ring-4 focus:ring-white/20 focus:border-white/60 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 placeholder-gray-500"
+                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
                      required
                    >
                      <option value="">Selecciona el grado</option>
@@ -117,7 +117,7 @@ const ConfigurationForm = ({
                      value={planningConfig.asignatura}
                      onChange={(e) => handleInputChange('asignatura', e.target.value)}
                      placeholder="Ej: Matemáticas, Ciencias, Español..."
-                     className="w-full px-6 py-4 border border-white/40 rounded-2xl focus:outline-none focus:ring-4 focus:ring-white/20 focus:border-white/60 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 placeholder-gray-500"
+                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
                      required
                    />
                  </div>
@@ -131,7 +131,7 @@ const ConfigurationForm = ({
                      value={planningConfig.tema}
                      onChange={(e) => handleInputChange('tema', e.target.value)}
                      placeholder="Ej: Suma y resta, Ecosistemas, Poesía..."
-                     className="w-full px-6 py-4 border border-white/40 rounded-2xl focus:outline-none focus:ring-4 focus:ring-white/20 focus:border-white/60 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 placeholder-gray-500"
+                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
                      required
                    />
                  </div>
@@ -147,7 +147,7 @@ const ConfigurationForm = ({
                      value={planningConfig.horas}
                      onChange={(e) => handleInputChange('horas', e.target.value)}
                      placeholder="Ej: 2, 4, 6..."
-                     className="w-full px-6 py-4 border border-white/40 rounded-2xl focus:outline-none focus:ring-4 focus:ring-white/20 focus:border-white/60 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 placeholder-gray-500"
+                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
                      required
                    />
                  </div>
@@ -163,7 +163,7 @@ const ConfigurationForm = ({
                      value={planningConfig.sesiones}
                      onChange={(e) => handleInputChange('sesiones', e.target.value)}
                      placeholder="Ej: 2, 3, 4..."
-                     className="w-full px-6 py-4 border border-white/40 rounded-2xl focus:outline-none focus:ring-4 focus:ring-white/20 focus:border-white/60 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 placeholder-gray-500"
+                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
                      required
                    />
                  </div>
@@ -177,7 +177,7 @@ const ConfigurationForm = ({
                      value={planningConfig.recursos}
                      onChange={(e) => handleInputChange('recursos', e.target.value)}
                      placeholder="Ej: Computadores, internet, software educativo..."
-                     className="w-full px-6 py-4 border border-white/40 rounded-2xl focus:outline-none focus:ring-4 focus:ring-white/20 focus:border-white/60 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 placeholder-gray-500"
+                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
                      required
                    />
                  </div>
@@ -191,7 +191,7 @@ const ConfigurationForm = ({
                      value={planningConfig.nombreDocente}
                      onChange={(e) => handleInputChange('nombreDocente', e.target.value)}
                      placeholder="Ej: María González, Juan Pérez..."
-                     className="w-full px-6 py-4 border border-white/40 rounded-2xl focus:outline-none focus:ring-4 focus:ring-white/20 focus:border-white/60 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 placeholder-gray-500"
+                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
                      required
                    />
                  </div>
@@ -1179,7 +1179,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
                 className={`max-w-3xl px-4 py-3 rounded-lg backdrop-blur-sm ${
                   message.isUser
                     ? 'bg-blue-600/90 text-white shadow-lg shadow-blue-600/25'
-                    : 'bg-white/70 border border-white/40 shadow-md shadow-gray-200/50'
+                    : 'bg-white/80 border border-white/50 shadow-lg shadow-gray-200/60'
                 }`}
               >
                 {message.isFormatted ? (
@@ -1253,7 +1253,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
                    value={inputText}
                    onChange={(e) => setInputText(e.target.value)}
                    placeholder="Escribe tu consulta específica para el plan de clase..."
-                   className="flex-1 px-8 py-5 border border-white/40 rounded-2xl focus:outline-none focus:ring-4 focus:ring-white/20 focus:border-white/60 transition-all duration-300 text-gray-900 placeholder-gray-500 text-lg bg-white/50 backdrop-blur-sm"
+                   className="flex-1 px-8 py-5 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 text-gray-900 placeholder-gray-500 text-lg bg-white"
                    disabled={isLoading || isSaving}
         />
         <button

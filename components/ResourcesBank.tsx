@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { createClient } from "../lib/supabase/client"
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'docx'
 import { saveAs } from 'file-saver'
+import { useAuth } from '../hooks/useAuth'
 
 interface ResourcesBankProps {
   setActiveTab: (tab: "generar" | "historial") => void
@@ -38,6 +39,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
   const [showChatHistory, setShowChatHistory] = useState(false)
   const [copiedText, setCopiedText] = useState<string | null>(null)
 
+  const { isAdmin } = useAuth()
   const supabase = createClient()
 
   const fetchAllPlans = async (): Promise<Planeacion[]> => {
@@ -296,6 +298,34 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
   const closeChatHistory = () => {
     setShowChatHistory(false)
     setSelectedPlan(null)
+  }
+
+  // Función para eliminar planeación (solo administradores)
+  const deletePlaneacion = async (id: string) => {
+    if (!isAdmin) {
+      alert('No tienes permisos para eliminar planeaciones')
+      return
+    }
+
+    if (!confirm('¿Estás seguro de que quieres eliminar esta planeación? Esta acción no se puede deshacer.')) {
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('planeaciones')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      // Recargar la lista
+      await loadHistorial()
+      alert('Planeación eliminada exitosamente')
+    } catch (error) {
+      console.error('Error eliminando planeación:', error)
+      alert('Error al eliminar la planeación')
+    }
   }
 
   // Función para exportar el chat como Word
@@ -686,7 +716,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
   }, [])
 
   return (
-    <div className="bg-white/70 backdrop-blur-xl rounded-lg shadow-lg shadow-black/5 p-6">
+            <div className="bg-white rounded-lg shadow-xl shadow-black/10 p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-800">Banco de Recursos - Planeaciones Guardadas</h2>
         <button
@@ -749,7 +779,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
             {filteredPlaneaciones.map((plan) => (
               <div 
                 key={plan.id} 
-                className="bg-white/70 backdrop-blur-sm border border-white/40 rounded-2xl p-6 hover:shadow-xl hover:shadow-gray-200/50 hover:border-white/60 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group"
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-2xl hover:shadow-gray-200/60 hover:border-gray-300 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
@@ -768,8 +798,8 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                       </span>
                     </div>
                     <p className="text-xs text-gray-500">
-                      Creado: {new Date(plan.created_at).toLocaleDateString("es-CO")}
-                    </p>
+                    Creado: {new Date(plan.created_at).toLocaleDateString("es-CO")}
+                  </p>
                   </div>
                 </div>
                 
@@ -781,12 +811,15 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                   >
                     💬 Ver Chat
                   </button>
+                  {isAdmin && (
                   <button
-                    onClick={() => deletePlan(plan.id)}
-                    className="flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors duration-200 text-sm font-medium"
+                      onClick={() => deletePlaneacion(plan.id)}
+                      className="flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors duration-200 text-sm font-medium"
+                      title="Eliminar planeación (solo administradores)"
                   >
                     🗑️ Eliminar
                   </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -796,39 +829,41 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
 
       {/* Modal para mostrar historial del chat */}
       {showChatHistory && selectedPlan && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white/80 backdrop-blur-2xl rounded-2xl shadow-xl shadow-black/10 max-w-6xl w-full max-h-[95vh] overflow-hidden">
-            <div className="flex justify-between items-center p-8 border-b border-gray-200">
-              <h3 className="text-2xl font-semibold text-gray-800">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl shadow-black/20 w-full max-w-7xl h-[95vh] sm:h-[90vh] flex flex-col overflow-hidden">
+            {/* Header responsive */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-6 lg:p-8 border-b border-gray-200 bg-white">
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-800 mb-4 sm:mb-0 pr-4">
                 💬 Historial Completo del Chat - {selectedPlan.tema}
               </h3>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
                 <button
                   onClick={() => copyToClipboard(formatChatForCopy(selectedPlan), "Chat completo")}
-                  className="bg-green-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-green-600/90 transition duration-300 text-sm font-medium shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/30"
+                  className="bg-green-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl hover:bg-green-700 transition duration-300 text-xs sm:text-sm font-medium shadow-lg shadow-green-600/25 hover:shadow-xl hover:shadow-green-600/30 flex-1 sm:flex-none"
                 >
-                  📋 Copiar Todo
+                  📋 Copiar
                 </button>
                 <button
                   onClick={() => exportChatToWord(selectedPlan)}
-                  className="bg-blue-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-blue-600/90 transition duration-300 text-sm font-medium shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30"
+                  className="bg-blue-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl hover:bg-blue-700 transition duration-300 text-xs sm:text-sm font-medium shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/30 flex-1 sm:flex-none"
                 >
-                  📄 Descargar Word
+                  📄 Word
                 </button>
                 <button
                   onClick={closeChatHistory}
-                  className="bg-gray-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-gray-600/90 transition duration-300 text-sm font-medium shadow-lg shadow-gray-500/25 hover:shadow-xl hover:shadow-gray-500/30"
+                  className="bg-gray-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl hover:bg-gray-700 transition duration-300 text-xs sm:text-sm font-medium shadow-lg shadow-gray-600/25 hover:shadow-xl hover:shadow-gray-600/30 flex-1 sm:flex-none"
                 >
                   ✕ Cerrar
                 </button>
               </div>
             </div>
 
-            <div className="p-8 overflow-y-auto max-h-[calc(95vh-140px)]">
+            {/* Contenido responsive */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-white">
               {/* Información de la planeación */}
-              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-8">
-                <h4 className="font-semibold text-blue-800 mb-4 text-lg">📚 Información de la Planeación</h4>
-                <div className="grid grid-cols-2 gap-6 text-base">
+                             <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-lg shadow-blue-100/50">
+                <h4 className="font-semibold text-blue-800 mb-3 sm:mb-4 text-base sm:text-lg">📚 Información de la Planeación</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 text-sm sm:text-base">
                   <div>
                     <span className="font-medium text-blue-900">Grado:</span> 
                     <span className="ml-2 text-blue-700">{selectedPlan.grado}</span>
@@ -849,30 +884,30 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
               </div>
 
               {/* Historial del chat */}
-              <div className="space-y-6">
-                <h4 className="font-semibold text-gray-800 mb-6 text-xl">💬 Conversación Completa</h4>
+              <div className="space-y-4 sm:space-y-6">
+                <h4 className="font-semibold text-gray-800 mb-4 sm:mb-6 text-lg sm:text-xl">💬 Conversación Completa</h4>
                 
                 {selectedPlan.chat_history && selectedPlan.chat_history.length > 0 ? (
                   selectedPlan.chat_history.map((message) => (
                     <div key={message.id} className={`${message.isUser ? "text-right" : "text-left"}`}>
                       <div
-                        className={`inline-block max-w-[90%] p-6 rounded-2xl backdrop-blur-sm ${
-                          message.isUser 
-                            ? "bg-blue-500/90 text-white shadow-lg shadow-blue-500/25" 
-                            : "bg-gray-100/80 text-gray-800 border-l-4 border-blue-400 shadow-md shadow-gray-200/50"
-                        }`}
+                                                 className={`inline-block max-w-[95%] sm:max-w-[90%] p-4 sm:p-6 rounded-2xl ${
+                           message.isUser
+                             ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
+                             : "bg-gray-50 text-gray-800 border-l-4 border-blue-400 shadow-lg shadow-gray-200/60"
+                         }`}
                       >
-                        <div className="text-base leading-relaxed whitespace-pre-wrap break-words">
+                        <div className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap break-words">
                           {message.isFormatted ? 
                             message.text.replace(/\*\*/g, '').replace(/\*/g, '') : 
                             message.text
                           }
                         </div>
-                        <div className="flex justify-between items-center mt-4">
-                          <span className="text-sm opacity-70">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 sm:mt-4 gap-1 sm:gap-0">
+                          <span className="text-xs sm:text-sm opacity-70">
                             {new Date(message.timestamp).toLocaleTimeString("es-CO")}
                           </span>
-                          <span className="text-sm opacity-70 font-medium">
+                          <span className="text-xs sm:text-sm opacity-70 font-medium">
                             {message.isUser ? "DOCENTE" : "TUTOR IA"}
                           </span>
                         </div>
@@ -880,9 +915,9 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                     </div>
                   ))
                 ) : (
-                  <div className="text-center text-gray-500 py-12">
-                    <div className="text-6xl mb-4">💬</div>
-                    <p className="text-lg">No hay historial de chat disponible para esta planeación.</p>
+                  <div className="text-center text-gray-500 py-8 sm:py-12">
+                    <div className="text-4xl sm:text-6xl mb-4">💬</div>
+                    <p className="text-base sm:text-lg">No hay historial de chat disponible para esta planeación.</p>
                   </div>
                 )}
               </div>

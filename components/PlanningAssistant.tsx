@@ -5,48 +5,58 @@ import Navigation from './Navigation'
 import ChatAssistant from './ChatAssistant'
 import ResourcesBank from './ResourcesBank'
 import AppStatus from './AppStatus'
+import UserAdmin from './UserAdmin'
+import ProtectedRoute from './ProtectedRoute'
+import { useAuth } from '../hooks/useAuth'
 
-type ActiveTab = 'generar' | 'estado' | 'historial'
+type ActiveTab = 'generar' | 'estado' | 'historial' | 'usuarios'
 
 export default function PlanningAssistant() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('generar')
   const [currentPlanningData, setCurrentPlanningData] = useState<any>(null)
   const [chatHistory, setChatHistory] = useState<any[]>([])
+  const { user, isAdmin } = useAuth()
 
   const handleChatUpdate = (messages: any[]) => {
     setChatHistory(messages)
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      
-      <div className="max-w-6xl mx-auto px-8 py-12">
-        {activeTab === 'generar' && (
-          <div className="space-y-8">
-            <ChatAssistant 
-              onChatUpdate={handleChatUpdate}
-              currentPlanningData={currentPlanningData}
-              setCurrentPlanningData={setCurrentPlanningData}
-            />
-          </div>
-        )}
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
         
-        {activeTab === 'estado' && (
-          <div className="space-y-8">
-            <AppStatus />
-          </div>
-        )}
-        
-        {activeTab === 'historial' && (
-          <div className="space-y-8">
-            <ResourcesBank 
-              setActiveTab={setActiveTab}
-              setCurrentPlanningData={setCurrentPlanningData}
-            />
-          </div>
-        )}
+        <div className="max-w-6xl mx-auto px-8 py-12">
+          {activeTab === 'generar' && (
+            <div className="space-y-8">
+              <ChatAssistant 
+                onChatUpdate={handleChatUpdate}
+                currentPlanningData={currentPlanningData}
+                setCurrentPlanningData={setCurrentPlanningData}
+              />
+            </div>
+          )}
+          
+          {activeTab === 'estado' && isAdmin && (
+            <div className="space-y-8">
+              <AppStatus />
+            </div>
+          )}
+          
+          {activeTab === 'historial' && (
+            <div className="space-y-8">
+              <ResourcesBank 
+                setActiveTab={setActiveTab}
+                setCurrentPlanningData={setCurrentPlanningData}
+              />
+            </div>
+          )}
+          
+          {activeTab === 'usuarios' && isAdmin && (
+            <UserAdmin />
+          )}
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   )
 }
