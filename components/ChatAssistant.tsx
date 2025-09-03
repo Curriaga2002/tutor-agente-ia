@@ -227,51 +227,6 @@ const ConfigurationForm = ({
                    />
                  </div>
           
-                           {/* Sección de Consulta Automática de Documentos Institucionales */}
-                 <div className="md:col-span-2">
-                   <div className="border-t border-gray-200 pt-8">
-                     <h4 className="text-xl font-light text-gray-900 mb-6 flex items-center">
-                       <span className="w-10 h-10 bg-gray-100 rounded-2xl flex items-center justify-center mr-4">
-                         <span className="text-gray-600 text-lg">🔍</span>
-                       </span>
-                       Consulta Automática de Documentos Institucionales
-                     </h4>
-                     
-                     <div className="space-y-4">
-                       <div className="flex items-center p-6 bg-gray-50 rounded-2xl border border-gray-100">
-                         <input
-                           type="checkbox"
-                           id="consultarPEI"
-                           checked={planningConfig.consultarPEI}
-                           onChange={(e) => handleInputChange('consultarPEI', e.target.checked.toString())}
-                           className="w-6 h-6 text-gray-600 border-gray-300 rounded focus:ring-gray-500 focus:ring-2"
-                         />
-                         <label htmlFor="consultarPEI" className="ml-4 text-gray-800 font-medium text-lg">
-                           ✅ Consultar automáticamente el PEI de la institución
-                         </label>
-                       </div>
-                       
-                       <div className="flex items-center p-6 bg-gray-50 rounded-2xl border border-gray-100">
-                         <input
-                           type="checkbox"
-                           id="consultarModeloPedagogico"
-                           checked={planningConfig.consultarModeloPedagogico}
-                           onChange={(e) => handleInputChange('consultarModeloPedagogico', e.target.checked.toString())}
-                           className="w-6 h-6 text-gray-600 border-gray-300 rounded focus:ring-gray-500 focus:ring-2"
-                         />
-                         <label htmlFor="consultarModeloPedagogico" className="ml-4 text-gray-800 font-medium text-lg">
-                           🎯 Consultar automáticamente el modelo pedagógico institucional
-                         </label>
-                       </div>
-                       
-                       <div className="ml-6 p-6 bg-gray-100 rounded-2xl">
-                         <p className="text-gray-600 leading-relaxed">
-                           💡 Estos documentos se consultarán automáticamente antes de cada generación de contenido para asegurar coherencia institucional.
-                         </p>
-                       </div>
-                     </div>
-                   </div>
-                 </div>
                </div>
                
                <div className="text-center pt-8">
@@ -298,7 +253,6 @@ export default function ChatAssistant({
   
   // Estado para controlar la configuración inicial
   const [isConfigured, setIsConfigured] = useState(false)
-  const [hasShownConfigMessage, setHasShownConfigMessage] = useState(false)
   const [planningConfig, setPlanningConfig] = useState<PlanningConfig>({
     grado: '',
     asignatura: '',
@@ -341,6 +295,21 @@ Ejemplos:
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const configShownRef = useRef<boolean>(false)
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const [pendingInputs, setPendingInputs] = useState<string[]>([])
+  const [sessionRestored, setSessionRestored] = useState(false)
+  const [consultedDocuments, setConsultedDocuments] = useState<{
+    pei: PDFContent[]
+    modeloPedagogico: PDFContent[]
+    orientacionesCurriculares: PDFContent[]
+    relevantDocs: PDFContent[]
+  }>({
+    pei: [],
+    modeloPedagogico: [],
+    orientacionesCurriculares: [],
+    relevantDocs: []
+  })
 
   // Actualizar mensaje inicial cuando cambie el estado de los documentos
   useEffect(() => {
@@ -416,6 +385,58 @@ Ejemplos:
     }
   }, [documentsLoading, documentsError, bucketDocuments, documentCount])
 
+  // Persistencia de sesión (rehidratación y guardado)
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('chatSession')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed.planningConfig) setPlanningConfig(parsed.planningConfig)
+        if (Array.isArray(parsed.messages)) {
+          // Filtrar mensajes que no deberían estar en el array de mensajes
+          const filteredMessages = parsed.messages
+            .filter((m: any) => 
+              m.id !== "initial" && 
+              !m.text.includes('ASISTENTE PEDAGÓGICO INTELIGENTE') &&
+              !m.text.includes('CONFIGURACIÓN COMPLETADA EXITOSAMENTE')
+            )
+            .map((m: any) => ({...m, timestamp: new Date(m.timestamp)}))
+          
+          // Si se encontró un mensaje no deseado en el array, limpiar localStorage
+          if (parsed.messages.some((m: any) => 
+            m.id === "initial" || 
+            m.text.includes('ASISTENTE PEDAGÓGICO INTELIGENTE') ||
+            m.text.includes('CONFIGURACIÓN COMPLETADA EXITOSAMENTE')
+          )) {
+            console.log('🧹 Limpiando localStorage - mensajes no deseados encontrados en array')
+            localStorage.removeItem('chatSession')
+          }
+          
+          setMessages(filteredMessages)
+        }
+        if (typeof parsed.isConfigured === 'boolean') {
+          setIsConfigured(parsed.isConfigured)
+          // Si ya está configurado, marcar que el mensaje de configuración ya se mostró
+          if (parsed.isConfigured) {
+            configShownRef.current = true
+          }
+        }
+      }
+    } catch {}
+    setSessionRestored(true)
+  }, [])
+
+  useEffect(() => {
+    if (!sessionRestored) return
+    try {
+      // Filtrar mensajes de configuración completada antes de guardar
+      const filteredMessages = messages.filter(m => 
+        !m.text.includes('CONFIGURACIÓN COMPLETADA EXITOSAMENTE')
+      )
+      localStorage.setItem('chatSession', JSON.stringify({ planningConfig, messages: filteredMessages, isConfigured }))
+    } catch {}
+  }, [planningConfig, messages, isConfigured, sessionRestored])
+
   // Función para buscar documentos relevantes
   const searchRelevantDocuments = async (query: string): Promise<PDFContent[]> => {
     try {
@@ -435,7 +456,15 @@ Ejemplos:
         return false
       })
       
-      return relevantDocs
+      // Re-ranking básico: ponderar coincidencias en título sobre contenido, y doc_type específico
+      const scored = relevantDocs.map(doc => {
+        const titleScore = doc.title.toLowerCase().includes(query.toLowerCase()) ? 2 : 0
+        const typeScore = doc.doc_type.toLowerCase().includes('curricular') ? 1 : 0
+        const contentScore = doc.content.toLowerCase().includes(query.toLowerCase()) ? 1 : 0
+        return { doc, score: titleScore + typeScore + contentScore }
+      })
+      scored.sort((a, b) => b.score - a.score)
+      return scored.map(s => s.doc)
       
     } catch (error) {
       console.error('❌ Error buscando documentos:', error)
@@ -452,9 +481,15 @@ Ejemplos:
       // CONSULTA AUTOMÁTICA DE DOCUMENTOS INSTITUCIONALES
       const documentosInstitucionales = await consultarDocumentosInstitucionales()
       
+      // Actualizar estado de documentos consultados
+      setConsultedDocuments({
+        pei: documentosInstitucionales.pei,
+        modeloPedagogico: documentosInstitucionales.modeloPedagogico,
+        orientacionesCurriculares: documentosInstitucionales.orientacionesCurriculares,
+        relevantDocs: relevantDocs
+      })
+      
       // Combinar documentos relevantes de la consulta con documentos institucionales
-      // y priorizar por asignatura para evitar mezclar áreas
-      const subject = (planningConfig.asignatura || '').toLowerCase()
       let relevantFiles = [...relevantDocs]
       
       // Agregar PEI si está habilitado
@@ -471,17 +506,6 @@ Ejemplos:
       if (documentosInstitucionales.orientacionesCurriculares.length > 0) {
         relevantFiles.push(...documentosInstitucionales.orientacionesCurriculares)
       }
-
-      // Filtro por asignatura cuando sea posible
-      if (subject) {
-        const subjectKeywords = [subject]
-        relevantFiles = relevantFiles.filter(doc => {
-          const t = (doc.title || '').toLowerCase()
-          const c = (doc.content || '').toLowerCase()
-          const d = (doc.doc_type || '').toLowerCase()
-          return subjectKeywords.some(k => t.includes(k) || c.includes(k) || d.includes(k))
-        })
-      }
       
       // Buscar documentos adicionales si no hay suficientes
       if (relevantFiles.length === 0) {
@@ -489,8 +513,25 @@ Ejemplos:
         relevantFiles.push(...docsAdicionales)
       }
       
+      // Filtrar por asignatura (evitar mezclar áreas ajenas)
+      const asignaturaLc = (planningConfig.asignatura || '').toLowerCase()
+      const temaLc = (planningConfig.tema || '').toLowerCase()
+      const filteredBySubject = relevantFiles.filter(doc => {
+        const t = (doc.title || '').toLowerCase()
+        const c = (doc.content || '').toLowerCase()
+        const dt = (doc.doc_type || '').toLowerCase()
+        const matchesAsignatura = asignaturaLc
+          ? t.includes(asignaturaLc) || c.includes(asignaturaLc) || dt.includes(asignaturaLc)
+          : true
+        const matchesTema = temaLc ? t.includes(temaLc) || c.includes(temaLc) : true
+        const isTech = t.includes('tecnolog') || c.includes('tecnolog') || dt.includes('tecnolog') || dt.includes('informát') || dt.includes('informat')
+        const asignaturaEsTec = asignaturaLc.includes('tecnolog') || asignaturaLc.includes('informát') || asignaturaLc.includes('informat')
+        if (isTech && !asignaturaEsTec) return false
+        return matchesAsignatura && matchesTema
+      })
+      
       // Eliminar duplicados basados en ID
-      const uniqueDocs = relevantFiles.filter((doc, index, self) => 
+      const uniqueDocs = filteredBySubject.filter((doc, index, self) => 
         index === self.findIndex(d => d.id === doc.id)
       )
       
@@ -529,9 +570,9 @@ Ejemplos:
         `3) Distribuye el tiempo en ${sesionesNum} sesiones; la suma total debe ser ${horasNum} horas.\n` +
         `4) Trabaja únicamente en minutos en toda la respuesta. No uses horas ni decimales.\n` +
         `5) No agregues sesiones extra; si necesitas más tiempo, prioriza y sintetiza.\n` +
-        `6) No incluyas "Institución" ni "Área" en la salida. No generes tu propia sección IDENTIFICACIÓN.\n` +
-        `7) Incluye una sección de "Distribución temporal (minutos)" con ${sesionesNum} líneas que sumen ${totalMinutes} min.\n` +
-        `8) Añade una línea de verificación: "Verificación: suma de sesiones = ${totalMinutes} min".\n` +
+        `6) Incluye una sección de "Distribución temporal (minutos)" con ${sesionesNum} líneas que sumen ${totalMinutes} min.\n` +
+        `7) Añade una línea de verificación: "Verificación: suma de sesiones = ${totalMinutes} min".\n` +
+        `8) No incluyas "Institución" ni "Área". Mantente en la asignatura: ${planningConfig.asignatura}.\n` +
         `9) Mantén la sección de duración total (min) y sesiones al inicio exactamente con estos valores.\n\n` +
         `Historial reciente del chat (usar como guía contextual, no repetir literalmente):\n${conversationTranscript}`
 
@@ -581,35 +622,27 @@ Ejemplos:
             text = text.replace(/(\*\*Informaci[óo]n de la Planeaci[óo]n:\*\*[\s\S]*?\n)/, `$1${bloque}\n`)
           }
 
-          // Estandarizar sección IDENTIFICACIÓN: eliminar variantes previas y crear una única sección clara
-          const identificacion = [
-            '**IDENTIFICACIÓN**',
-            `• Grado: ${planningConfig.grado || 'No especificado'}`,
-            `• Asignatura: ${planningConfig.asignatura || 'No especificada'}`,
-            `• Tema: ${planningConfig.tema || 'No especificado'}`,
-            `• Duración: ${horasNum} horas`,
-            `• Sesiones: ${sesionesNum}`,
-            `• Docente: ${planningConfig.nombreDocente || 'No especificado'}`,
-            `• Recursos disponibles: ${planningConfig.recursos || 'No especificados'}`,
-          ].join('\n')
-
-          // Eliminar cualquier bloque IDENTIFICACIÓN anterior (incluyendo variantes entre paréntesis)
+          // Eliminar cualquier bloque IDENTIFICACIÓN (incluyendo variantes entre paréntesis)
           text = text
             .replace(/^\s*IDENTIFICACI[ÓO]N\s*$(?:[\s\S]*?)(?=\n\n|\n\*\*|$)/gim, '')
             .replace(/\(\s*•\s*(Instituci[óo]n|Área|Duraci[óo]n)[\s\S]*?\)/gim, '')
             .replace(/^•\s*Instituci[óo]n:[^\n]*\n?/gim, '')
             .replace(/^•\s*Área:[^\n]*\n?/gim, '')
             .replace(/^•\s*Duraci[óo]n:\s*Configuraci[óo]n inicial proporcionada por el docente:?\s*\n?/gim, '')
+            .replace(/^•\s*Grado:[^\n]*\n?/gim, '')
+            .replace(/^•\s*Asignatura:[^\n]*\n?/gim, '')
+            .replace(/^•\s*Tema:[^\n]*\n?/gim, '')
+            .replace(/^•\s*Sesiones:[^\n]*\n?/gim, '')
+            .replace(/^•\s*Docente:[^\n]*\n?/gim, '')
+            .replace(/^•\s*Recursos disponibles:[^\n]*\n?/gim, '')
 
-          // Insertar IDENTIFICACIÓN al inicio del documento (antes de la primera sección fuerte si existe)
-          if (/^\*\*/m.test(text)) {
-            text = identificacion + '\n\n' + text
-          } else {
-            text = identificacion + '\n\n' + text
-          }
+          // Eliminar sección COMPONENTE CURRICULAR
+          text = text
+            .replace(/📚\s*COMPONENTE\s*CURRICULAR\s*(?:[\s\S]*?)(?=\n\n|\n\*\*|\n[🎯🔍📝✅📂🕒]|$)/gim, '')
+            .replace(/^\s*COMPONENTE\s*CURRICULAR\s*(?:[\s\S]*?)(?=\n\n|\n\*\*|\n[🎯🔍📝✅📂🕒]|$)/gim, '')
+            .replace(/^📚\s*COMPONENTE\s*CURRICULAR\s*$/gim, '')
+            .replace(/^COMPONENTE\s*CURRICULAR\s*$/gim, '')
 
-          // Eliminar cualquier IDENTIFICACIÓN remanente adicional después de la primera
-          text = text.replace(/^(?:(?!\A)[\s\S])*^IDENTIFICACI[ÓO]N\s*(?:\n[\s\S]*?)(?=\n\n|\n\*\*|\n[📚🎯🔍📝✅📂🕒]|$)/gim, '')
           // Limpieza de saltos repetidos
           text = text.replace(/\n{3,}/g, '\n\n')
         } catch {}
@@ -662,6 +695,14 @@ Ejemplos:
       
       // Consultar documentos institucionales
       const documentosInstitucionales = await consultarDocumentosInstitucionales()
+      
+      // Actualizar estado de documentos consultados
+      setConsultedDocuments({
+        pei: documentosInstitucionales.pei,
+        modeloPedagogico: documentosInstitucionales.modeloPedagogico,
+        orientacionesCurriculares: documentosInstitucionales.orientacionesCurriculares,
+        relevantDocs: relevantDocs
+      })
       
       // Combinar todos los documentos relevantes
       let allDocs = [...relevantDocs]
@@ -749,20 +790,23 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         .replace(/^•\s*Duraci[óo]n:\s*\n?/gim, '')
         .replace(/\n{3,}/g, '\n\n')
 
-      // Insertar sección IDENTIFICACIÓN estandarizada al inicio del fallback
-      const identificacion = [
-        '**IDENTIFICACIÓN**',
-        `• Grado: ${planningConfig.grado || 'No especificado'}`,
-        `• Asignatura: ${planningConfig.asignatura || 'No especificada'}`,
-        `• Tema: ${planningConfig.tema || 'No especificado'}`,
-        `• Duración: ${horasNum} horas`,
-        `• Sesiones: ${sesionesNum}`,
-        `• Docente: ${planningConfig.nombreDocente || 'No especificado'}`,
-        `• Recursos disponibles: ${planningConfig.recursos || 'No especificados'}`,
-      ].join('\n')
-      response = identificacion + '\n\n' + response
-      // Remover posibles duplicados de IDENTIFICACIÓN tras inserción
-      response = response.replace(/^(?:(?!\A)[\s\S])*^IDENTIFICACI[ÓO]N\s*(?:\n[\s\S]*?)(?=\n\n|\n\*\*|\n[📚🎯🔍📝✅📂🕒]|$)/gim, '')
+      // Eliminar cualquier bloque IDENTIFICACIÓN del fallback
+      response = response
+        .replace(/^\s*IDENTIFICACI[ÓO]N\s*$(?:[\s\S]*?)(?=\n\n|\n\*\*|$)/gim, '')
+        .replace(/^•\s*Grado:[^\n]*\n?/gim, '')
+        .replace(/^•\s*Asignatura:[^\n]*\n?/gim, '')
+        .replace(/^•\s*Tema:[^\n]*\n?/gim, '')
+        .replace(/^•\s*Duraci[óo]n:[^\n]*\n?/gim, '')
+        .replace(/^•\s*Sesiones:[^\n]*\n?/gim, '')
+        .replace(/^•\s*Docente:[^\n]*\n?/gim, '')
+        .replace(/^•\s*Recursos disponibles:[^\n]*\n?/gim, '')
+
+      // Eliminar sección COMPONENTE CURRICULAR del fallback
+      response = response
+        .replace(/📚\s*COMPONENTE\s*CURRICULAR\s*(?:[\s\S]*?)(?=\n\n|\n\*\*|\n[🎯🔍📝✅📂🕒]|$)/gim, '')
+        .replace(/^\s*COMPONENTE\s*CURRICULAR\s*(?:[\s\S]*?)(?=\n\n|\n\*\*|\n[🎯🔍📝✅📂🕒]|$)/gim, '')
+        .replace(/^📚\s*COMPONENTE\s*CURRICULAR\s*$/gim, '')
+        .replace(/^COMPONENTE\s*CURRICULAR\s*$/gim, '')
         .replace(/\n{3,}/g, '\n\n')
 
       return response
@@ -862,7 +906,13 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!inputText.trim() || isLoading) return
+    if (!inputText.trim()) return
+    if (isLoading) {
+      // Encolar si hay generación en curso
+      setPendingInputs(prev => [...prev, inputText])
+      setInputText('')
+      return
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -874,13 +924,22 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
     setMessages(prev => [...prev, userMessage])
     setInputText('')
     setIsLoading(true)
+    // Cancel controller
+    if (abortControllerRef.current) {
+      try { abortControllerRef.current.abort() } catch {}
+    }
+    abortControllerRef.current = new AbortController()
 
     try {
       // Buscar documentos relevantes usando el sistema vectorial
+      console.time('docs:search')
       const relevantDocs = await searchRelevantDocuments(inputText)
+      console.timeEnd('docs:search')
       
       // Generar respuesta pedagógica
+      console.time('ai:generate')
       const aiResponse = await generatePedagogicalResponse(inputText, relevantDocs)
+      console.timeEnd('ai:generate')
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -911,6 +970,17 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
+      // Procesar cola
+      if (pendingInputs.length > 0) {
+        const next = pendingInputs[0]
+        setPendingInputs(prev => prev.slice(1))
+        setInputText(next)
+        // Auto-disparar envío del siguiente
+        setTimeout(() => {
+          const form = document.querySelector('form') as HTMLFormElement | null
+          form?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
+        }, 0)
+      }
     }
   }
 
@@ -1260,7 +1330,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
     }
 
     if (confirm('¿Estás seguro de que quieres limpiar toda la conversación? Esta acción no se puede deshacer.')) {
-      setMessages([messages[0]]) // Mantener solo el mensaje inicial
+      setMessages([]) // Limpiar todos los mensajes
       setIsConfigured(false) // Reiniciar configuración
       setPlanningConfig({ // Limpiar configuración
         grado: '',
@@ -1329,13 +1399,15 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
       {/* Contenido Principal */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Formulario de Configuración Inicial */}
-        {!isConfigured && (
+        {!isConfigured && sessionRestored && (
           <ConfigurationForm 
             planningConfig={planningConfig} 
             setPlanningConfig={setPlanningConfig} 
             onSubmit={() => {
               setIsConfigured(true)
-              if (!hasShownConfigMessage) {
+              if (configShownRef.current) {
+                return
+              }
               const configMessage: Message = {
                 id: Date.now().toString(),
                 text: `✅ **CONFIGURACIÓN COMPLETADA EXITOSAMENTE**
@@ -1360,14 +1432,99 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
                 isFormatted: true,
               }
               setMessages(prev => [...prev, configMessage])
-                setHasShownConfigMessage(true)
-              }
+              configShownRef.current = true
             }}
           />
         )}
         
+        {/* Documentos consultados en tiempo real */}
+        {isConfigured && (consultedDocuments.pei.length > 0 || consultedDocuments.modeloPedagogico.length > 0 || consultedDocuments.orientacionesCurriculares.length > 0 || consultedDocuments.relevantDocs.length > 0) && (
+          <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-6 shadow-lg shadow-blue-200/30">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-bold">📚</span>
+              </div>
+              <h3 className="text-lg font-semibold text-blue-900">Documentos Consultados en Tiempo Real</h3>
+            </div>
+            
+            <div className="space-y-4">
+              {/* PEI */}
+              {consultedDocuments.pei.length > 0 && (
+                <div className="bg-white/60 rounded-xl p-4 border border-blue-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-green-600 font-bold">✅</span>
+                    <span className="font-medium text-gray-800">PEI (Proyecto Educativo Institucional)</span>
+                    <span className="text-sm text-gray-500">({consultedDocuments.pei.length} documento{consultedDocuments.pei.length !== 1 ? 's' : ''})</span>
+                  </div>
+                  <div className="space-y-1">
+                    {consultedDocuments.pei.map((doc, index) => (
+                      <div key={index} className="text-sm text-gray-600 bg-white/40 rounded-lg p-2">
+                        📄 {doc.title}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Modelo Pedagógico */}
+              {consultedDocuments.modeloPedagogico.length > 0 && (
+                <div className="bg-white/60 rounded-xl p-4 border border-blue-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-green-600 font-bold">✅</span>
+                    <span className="font-medium text-gray-800">Modelo Pedagógico</span>
+                    <span className="text-sm text-gray-500">({consultedDocuments.modeloPedagogico.length} documento{consultedDocuments.modeloPedagogico.length !== 1 ? 's' : ''})</span>
+                  </div>
+                  <div className="space-y-1">
+                    {consultedDocuments.modeloPedagogico.map((doc, index) => (
+                      <div key={index} className="text-sm text-gray-600 bg-white/40 rounded-lg p-2">
+                        📄 {doc.title}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Orientaciones Curriculares */}
+              {consultedDocuments.orientacionesCurriculares.length > 0 && (
+                <div className="bg-white/60 rounded-xl p-4 border border-blue-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-green-600 font-bold">✅</span>
+                    <span className="font-medium text-gray-800">Orientaciones Curriculares</span>
+                    <span className="text-sm text-gray-500">({consultedDocuments.orientacionesCurriculares.length} documento{consultedDocuments.orientacionesCurriculares.length !== 1 ? 's' : ''})</span>
+                  </div>
+                  <div className="space-y-1">
+                    {consultedDocuments.orientacionesCurriculares.map((doc, index) => (
+                      <div key={index} className="text-sm text-gray-600 bg-white/40 rounded-lg p-2">
+                        📄 {doc.title}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Documentos Relevantes por Consulta */}
+              {consultedDocuments.relevantDocs.length > 0 && (
+                <div className="bg-white/60 rounded-xl p-4 border border-blue-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-blue-600 font-bold">🔍</span>
+                    <span className="font-medium text-gray-800">Documentos Relevantes por Consulta</span>
+                    <span className="text-sm text-gray-500">({consultedDocuments.relevantDocs.length} documento{consultedDocuments.relevantDocs.length !== 1 ? 's' : ''})</span>
+                  </div>
+                  <div className="space-y-1">
+                    {consultedDocuments.relevantDocs.map((doc, index) => (
+                      <div key={index} className="text-sm text-gray-600 bg-white/40 rounded-lg p-2">
+                        📄 {doc.title} <span className="text-xs text-gray-500">({doc.doc_type})</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
         {/* Mensaje inicial del asistente */}
-        {!isConfigured && (
+        {!isConfigured && sessionRestored && (
         <div className="space-y-4">
           <div className="flex justify-start">
             <div className="max-w-3xl px-4 py-3 rounded-lg backdrop-blur-sm bg-white/80 border border-white/50 shadow-lg shadow-gray-200/60">
@@ -1375,8 +1532,8 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
                 <div 
                   className="prose prose-sm max-w-none"
                   style={{
-                    lineHeight: '1.6',
-                    fontSize: '14px'
+                    lineHeight: '1.7',
+                    fontSize: '16px'
                   }}
                   dangerouslySetInnerHTML={{ 
                     __html: `
@@ -1413,7 +1570,12 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
         
         {/* Mensajes del Chat - Siempre visible */}
         <div className="space-y-4">
-        {messages.map((message) => (
+        {messages.map((message) => {
+          // Debug: verificar si hay mensajes con contenido del mensaje inicial
+          if (message.text.includes('ASISTENTE PEDAGÓGICO INTELIGENTE')) {
+            console.log('🚨 Mensaje inicial encontrado en array messages:', message)
+          }
+          return (
             <div
               key={message.id}
               className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
@@ -1470,7 +1632,8 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
                 </div>
             </div>
           </div>
-        ))}
+          )
+        })}
           
           {isLoading && (
             <div className="flex justify-start">
@@ -1509,6 +1672,15 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
             className="px-10 py-5 bg-gray-900/90 backdrop-blur-sm text-white rounded-2xl hover:bg-gray-800/90 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all duración-300 font-medium text-lg shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 transform hover:-translate-y-0.5 disabled:transform-none"
                  >
                    {isLoading ? '🔄' : '📤'} Enviar
+        </button>
+        <button
+          type="button"
+          onClick={() => { try { abortControllerRef.current?.abort(); } catch {} finally { setIsLoading(false) } }}
+          disabled={!isLoading}
+          className="px-8 py-5 bg-gray-100 text-gray-700 rounded-2xl hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-200 disabled:opacity-50 transition-all duración-300 font-medium text-lg"
+          title="Cancelar generación"
+        >
+          ✖️ Cancelar
         </button>
                </form>
       </div>
