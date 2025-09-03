@@ -1,4 +1,4 @@
-# Planeación Didáctica - Sistema de Asistente Pedagógico IA
+# Planeación Didáctica - Sistema de Planeador Inteligente
 
 ## Descripción General
 

@@ -279,6 +279,7 @@ export default function PlanningForm({ currentPlanningData, setCurrentPlanningDa
       .replace(/`/g, '')    // Remover `code`
       .replace(/#{1,6}\s/g, '') // Remover headers markdown
       .replace(/^\s*[-*+]\s/gm, '• ') // Normalizar listas
+      .replace(/•\s*•/g, '•') // Corregir dobles puntos sin eliminar espacios
       .replace(/\n{3,}/g, '\n\n') // Limpiar saltos múltiples
     
     return agentContent

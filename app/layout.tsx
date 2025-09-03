@@ -6,7 +6,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Planeador AgenteIA',
-  description: 'Sistema de Asistente Pedagógico IA para la generación automática de planes de clase didácticos',
+  description: 'Sistema de Planeador Inteligente para la generación automática de planes de clase didácticos',
   generator: 'Next.js',
 }
 

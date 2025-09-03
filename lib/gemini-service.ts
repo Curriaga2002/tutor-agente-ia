@@ -207,14 +207,21 @@ El docente proporcionará:
 Debes generar un **plan de clase completo en lenguaje natural**, estructurado en los siguientes apartados y siempre en este orden:
 
 ## IDENTIFICACIÓN
-- Institución: IE Camilo Torres
-- Área: Tecnología e Informática
-- Grado: ${grado}
-- Tema: ${tema}
-- Duración: ${context.includes('horas') ? context : '2 horas'}
-- Sesiones: ${context.includes('sesiones') ? context : '2'}
-- Recursos Tecnológicos Disponibles: ${recursos || 'Computadores, internet, software educativo'}
-- Docente: ${nombreDocente || '[A definir por el docente]'}
+• Institución: IE Camilo Torres
+• Grado: ${grado}
+• Asignatura: Tecnología e Informática
+• Tema: ${tema}
+• Recursos: ${recursos || 'Computadores, internet, software educativo'}
+• ${context.includes('horas') ? context.replace(/\(/g, '').replace(/\)/g, '') : '2 horas'}
+• Sesiones: ${context.includes('sesiones') ? context : '2'}
+• Docente: ${nombreDocente || '[A definir por el docente]'}
+• Duración total (min): ${context.includes('horas') ? (parseInt(context.match(/\d+/)?.[0] || '2') * 60) : 120}
+• Distribución sugerida (min): ${(() => {
+  const horas = parseInt(context.match(/\d+/)?.[0] || '2');
+  const sesiones = parseInt(context.includes('sesiones') ? context.match(/\d+/)?.[0] || '2' : '2');
+  const minutosPorSesion = (horas * 60) / sesiones;
+  return Array.from({length: sesiones}, (_, i) => `Sesión ${i + 1}: ${minutosPorSesion} min`).join(' | ');
+})()}
 
 ## 📚 COMPONENTE CURRICULAR
 Selecciona uno o varios de los siguientes: Naturaleza y Evolución de la Tecnología, Uso y Apropiación de la Tecnología, Solución de Problemas con Tecnología, Tecnología, Informática y Sociedad.

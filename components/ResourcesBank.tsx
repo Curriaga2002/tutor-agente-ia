@@ -376,7 +376,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
         new Paragraph({
           children: [
             new TextRun({
-              text: `🤖 Generado por: Asistente Pedagógico IA`,
+              text: `🤖 Generado por: Planeador Inteligente`,
               size: 22,
               color: "7f8c8d"
             })
@@ -570,7 +570,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
         new Paragraph({
           children: [
             new TextRun({
-              text: `🤖 Generado automáticamente por el Asistente Pedagógico IA`,
+              text: `🤖 Generado automáticamente por el Planeador Inteligente`,
               size: 18,
               color: "7f8c8d"
             })

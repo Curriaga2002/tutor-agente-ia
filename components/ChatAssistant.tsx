@@ -67,20 +67,77 @@ const ConfigurationForm = ({
     const sesionesNum = Number(planningConfig.sesiones)
     const horasValid = Number.isFinite(horasNum) && horasNum >= 1 && horasNum <= 2
     const sesionesValid = Number.isFinite(sesionesNum) && sesionesNum >= 1 && sesionesNum <= 2
+    
+    // Debug: mostrar valores de validación
+    console.log('Validación del formulario:', {
+      grado: planningConfig.grado,
+      asignatura: planningConfig.asignatura,
+      tema: planningConfig.tema,
+      horas: planningConfig.horas,
+      horasValid,
+      sesiones: planningConfig.sesiones,
+      sesionesValid,
+      recursos: planningConfig.recursos,
+      nombreDocente: planningConfig.nombreDocente
+    })
+    
+    // Validación más detallada
+    const validaciones = {
+      grado: !!planningConfig.grado,
+      asignatura: !!planningConfig.asignatura,
+      tema: !!planningConfig.tema,
+      horas: horasValid,
+      sesiones: sesionesValid,
+      recursos: !!planningConfig.recursos,
+      nombreDocente: !!planningConfig.nombreDocente
+    }
+    
+    console.log('Validaciones individuales:', validaciones)
+    
+    // Forzar asignatura a "Tecnología e informática" antes de validar
+    const configConAsignatura = {
+      ...planningConfig,
+      asignatura: 'Tecnología e informática'
+    }
+    
     if (
-      planningConfig.grado &&
-      planningConfig.asignatura &&
-      planningConfig.tema &&
+      configConAsignatura.grado &&
+      configConAsignatura.asignatura &&
+      configConAsignatura.tema &&
       horasValid &&
       sesionesValid &&
-      planningConfig.recursos &&
-      planningConfig.nombreDocente
+      configConAsignatura.recursos &&
+      configConAsignatura.nombreDocente
     ) {
+      console.log('✅ Formulario válido, enviando...')
+      // Actualizar el estado con la asignatura forzada
+      setPlanningConfig(configConAsignatura)
       onSubmit()
+    } else {
+      console.log('❌ Formulario inválido')
+      // Mostrar qué campos están fallando
+      const validacionesCorregidas = {
+        grado: !!configConAsignatura.grado,
+        asignatura: !!configConAsignatura.asignatura,
+        tema: !!configConAsignatura.tema,
+        horas: horasValid,
+        sesiones: sesionesValid,
+        recursos: !!configConAsignatura.recursos,
+        nombreDocente: !!configConAsignatura.nombreDocente
+      }
+      const camposFaltantes = Object.entries(validacionesCorregidas)
+        .filter(([_, valido]) => !valido)
+        .map(([campo, _]) => campo)
+      console.log('Campos que fallan:', camposFaltantes)
     }
   }
 
   const handleInputChange = (field: string, value: string) => {
+    // No permitir cambios en asignatura - siempre mantener "Tecnología e informática"
+    if (field === 'asignatura') {
+      setPlanningConfig((prev: PlanningConfig) => ({ ...prev, asignatura: 'Tecnología e informática' }))
+      return
+    }
     if (field === 'horas' || field === 'sesiones') {
       // Mantener solo dígitos pero NO forzar rangos aquí para evitar saltos/duplicaciones visuales
       const digitsOnly = value.replace(/[^0-9]/g, '')
@@ -145,10 +202,9 @@ const ConfigurationForm = ({
                    </label>
                    <input
                      type="text"
-                     value={planningConfig.asignatura}
-                     onChange={(e) => handleInputChange('asignatura', e.target.value)}
-                     placeholder="Ej: Matemáticas, Ciencias, Español..."
-                     className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
+                     value="Tecnología e informática"
+                     readOnly
+                     className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl bg-gray-100 text-gray-700 text-sm sm:text-base cursor-not-allowed"
                      required
                    />
                  </div>
@@ -161,7 +217,7 @@ const ConfigurationForm = ({
                      type="text"
                      value={planningConfig.tema}
                      onChange={(e) => handleInputChange('tema', e.target.value)}
-                     placeholder="Ej: Suma y resta, Ecosistemas, Poesía..."
+                     placeholder="Ej: El computador, Internet, Programación básica..."
                      className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
                      required
                    />
@@ -207,7 +263,7 @@ const ConfigurationForm = ({
                      type="text"
                      value={planningConfig.recursos}
                      onChange={(e) => handleInputChange('recursos', e.target.value)}
-                     placeholder="Ej: Computadores, internet, software educativo..."
+                     placeholder="Ej: Computadores, internet, sala de cómputo, software..."
                      className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
                      required
                    />
@@ -256,7 +312,7 @@ export default function ChatAssistant({
   const [isConfigured, setIsConfigured] = useState(false)
   const [planningConfig, setPlanningConfig] = useState<PlanningConfig>({
     grado: '',
-    asignatura: '',
+    asignatura: 'Tecnología e informática',
     tema: '',
     horas: '',
     sesiones: '',
@@ -267,6 +323,14 @@ export default function ChatAssistant({
     consultarModeloPedagogico: true,
     filtrosInstitucionales: ['Orientaciones Curriculares', 'Estructuras de Planes de Clase', 'Proyectos Educativos', 'Modelos Pedagógicos']
   })
+
+  // Asegurar que la asignatura siempre esté configurada
+  useEffect(() => {
+    setPlanningConfig(prev => ({
+      ...prev,
+      asignatura: 'Tecnología e informática'
+    }))
+  }, [])
   
   const [messages, setMessages] = useState<Message[]>([])
   const [initialMessage, setInitialMessage] = useState<Message>({
@@ -283,9 +347,9 @@ export default function ChatAssistant({
 
 **¿Qué plan de clase necesitas generar?** 
 Ejemplos: 
-• "Plan de clase para 5° sobre ecosistemas"
-• "Plan de clase para 9° sobre ecuaciones cuadráticas"
-• "Plan de clase para 11° sobre literatura latinoamericana"
+• "Plan de clase para 5° sobre el computador y sus partes"
+• "Plan de clase para 9° sobre programación básica con Scratch"
+• "Plan de clase para 11° sobre desarrollo web con HTML y CSS"
 
 `,
       isUser: false,
@@ -331,9 +395,9 @@ Ejemplos:
 
 **¿Qué plan de clase necesitas generar?** 
 Ejemplos: 
-• "Plan de clase para 5° sobre ecosistemas"
-• "Plan de clase para 9° sobre ecuaciones cuadráticas"
-• "Plan de clase para 11° sobre literatura latinoamericana"
+• "Plan de clase para 5° sobre el computador y sus partes"
+• "Plan de clase para 9° sobre programación básica con Scratch"
+• "Plan de clase para 11° sobre desarrollo web con HTML y CSS"
 
 `
       }))
@@ -354,9 +418,9 @@ Ejemplos:
 
 **¿Qué plan de clase necesitas generar?** 
 Ejemplos: 
-• "Plan de clase para 5° sobre ecosistemas"
-• "Plan de clase para 9° sobre ecuaciones cuadráticas"
-• "Plan de clase para 11° sobre literatura latinoamericana"
+• "Plan de clase para 5° sobre el computador y sus partes"
+• "Plan de clase para 9° sobre programación básica con Scratch"
+• "Plan de clase para 11° sobre desarrollo web con HTML y CSS"
 
 `
       }))
@@ -377,9 +441,9 @@ Ejemplos:
 
 **¿Qué plan de clase necesitas generar?** 
 Ejemplos: 
-• "Plan de clase para 5° sobre ecosistemas"
-• "Plan de clase para 9° sobre ecuaciones cuadráticas"
-• "Plan de clase para 11° sobre literatura latinoamericana"
+• "Plan de clase para 5° sobre el computador y sus partes"
+• "Plan de clase para 9° sobre programación básica con Scratch"
+• "Plan de clase para 11° sobre desarrollo web con HTML y CSS"
 
 `
       }))
@@ -549,16 +613,8 @@ Ejemplos:
         return `Sesión ${i + 1}: ${minutesPerSessionBase + extra} min`
       }).join(' | ')
 
-      const configContext = `Configuración inicial proporcionada por el docente:\n` +
-        `• Grado: ${planningConfig.grado || 'No especificado'}\n` +
-        `• Asignatura: ${planningConfig.asignatura || 'No especificada'}\n` +
-        `• Tema: ${planningConfig.tema || 'No especificado'}\n` +
-        `• Duración: ${horasNum} horas\n` +
-        `• Sesiones: ${sesionesNum}\n` +
-        `• Docente: ${planningConfig.nombreDocente || 'No especificado'}\n` +
-        `• Recursos disponibles: ${planningConfig.recursos || 'No especificados'}\n` +
-        `• Duración total (min): ${totalMinutes}\n` +
-        `• Distribución sugerida (min): ${distributionPreview}`
+      // Eliminado configContext para evitar duplicación con la sección IDENTIFICACIÓN
+      const configContext = ''
 
       const recentMessages = messages.slice(-10)
       const conversationTranscript = recentMessages
@@ -627,22 +683,24 @@ Ejemplos:
           text = text
             .replace(/^\s*IDENTIFICACI[ÓO]N\s*$(?:[\s\S]*?)(?=\n\n|\n\*\*|$)/gim, '')
             .replace(/\(\s*•\s*(Instituci[óo]n|Área|Duraci[óo]n)[\s\S]*?\)/gim, '')
-            .replace(/^•\s*Instituci[óo]n:[^\n]*\n?/gim, '')
-            .replace(/^•\s*Área:[^\n]*\n?/gim, '')
-            .replace(/^•\s*Duraci[óo]n:\s*Configuraci[óo]n inicial proporcionada por el docente:?\s*\n?/gim, '')
-            .replace(/^•\s*Grado:[^\n]*\n?/gim, '')
-            .replace(/^•\s*Asignatura:[^\n]*\n?/gim, '')
-            .replace(/^•\s*Tema:[^\n]*\n?/gim, '')
-            .replace(/^•\s*Sesiones:[^\n]*\n?/gim, '')
-            .replace(/^•\s*Docente:[^\n]*\n?/gim, '')
-            .replace(/^•\s*Recursos disponibles:[^\n]*\n?/gim, '')
+            // Comentado para mantener información esencial de IDENTIFICACIÓN
+            // .replace(/^•\s*Instituci[óo]n:[^\n]*\n?/gim, '')
+            // .replace(/^•\s*Área:[^\n]*\n?/gim, '')
+            // .replace(/^•\s*Duraci[óo]n:\s*Configuraci[óo]n inicial proporcionada por el docente:?\s*\n?/gim, '')
+            // .replace(/^•\s*Grado:[^\n]*\n?/gim, '')
+            // .replace(/^•\s*Asignatura:[^\n]*\n?/gim, '')
+            // .replace(/^•\s*Tema:[^\n]*\n?/gim, '')
+            // .replace(/^•\s*Sesiones:[^\n]*\n?/gim, '')
+            // .replace(/^•\s*Docente:[^\n]*\n?/gim, '')
+            // .replace(/^•\s*Recursos disponibles:[^\n]*\n?/gim, '')
 
-          // Eliminar sección COMPONENTE CURRICULAR
-          text = text
-            .replace(/📚\s*COMPONENTE\s*CURRICULAR\s*(?:[\s\S]*?)(?=\n\n|\n\*\*|\n[🎯🔍📝✅📂🕒]|$)/gim, '')
-            .replace(/^\s*COMPONENTE\s*CURRICULAR\s*(?:[\s\S]*?)(?=\n\n|\n\*\*|\n[🎯🔍📝✅📂🕒]|$)/gim, '')
-            .replace(/^📚\s*COMPONENTE\s*CURRICULAR\s*$/gim, '')
-            .replace(/^COMPONENTE\s*CURRICULAR\s*$/gim, '')
+          // Mantener sección COMPONENTE CURRICULAR
+          // Las siguientes líneas estaban eliminando el componente curricular, ahora están comentadas para mantenerlo
+          // text = text
+          //   .replace(/📚\s*COMPONENTE\s*CURRICULAR\s*(?:[\s\S]*?)(?=\n\n|\n\*\*|\n[🎯🔍📝✅📂🕒]|$)/gim, '')
+          //   .replace(/^\s*COMPONENTE\s*CURRICULAR\s*(?:[\s\S]*?)(?=\n\n|\n\*\*|\n[🎯🔍📝✅📂🕒]|$)/gim, '')
+          //   .replace(/^📚\s*COMPONENTE\s*CURRICULAR\s*$/gim, '')
+          //   .replace(/^COMPONENTE\s*CURRICULAR\s*$/gim, '')
 
           // Limpieza de saltos repetidos
           text = text.replace(/\n{3,}/g, '\n\n')
@@ -794,20 +852,22 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
       // Eliminar cualquier bloque IDENTIFICACIÓN del fallback
       response = response
         .replace(/^\s*IDENTIFICACI[ÓO]N\s*$(?:[\s\S]*?)(?=\n\n|\n\*\*|$)/gim, '')
-        .replace(/^•\s*Grado:[^\n]*\n?/gim, '')
-        .replace(/^•\s*Asignatura:[^\n]*\n?/gim, '')
-        .replace(/^•\s*Tema:[^\n]*\n?/gim, '')
-        .replace(/^•\s*Duraci[óo]n:[^\n]*\n?/gim, '')
-        .replace(/^•\s*Sesiones:[^\n]*\n?/gim, '')
-        .replace(/^•\s*Docente:[^\n]*\n?/gim, '')
-        .replace(/^•\s*Recursos disponibles:[^\n]*\n?/gim, '')
+        // Comentado para mantener información esencial de IDENTIFICACIÓN en fallback
+        // .replace(/^•\s*Grado:[^\n]*\n?/gim, '')
+        // .replace(/^•\s*Asignatura:[^\n]*\n?/gim, '')
+        // .replace(/^•\s*Tema:[^\n]*\n?/gim, '')
+        // .replace(/^•\s*Duraci[óo]n:[^\n]*\n?/gim, '')
+        // .replace(/^•\s*Sesiones:[^\n]*\n?/gim, '')
+        // .replace(/^•\s*Docente:[^\n]*\n?/gim, '')
+        // .replace(/^•\s*Recursos disponibles:[^\n]*\n?/gim, '')
 
-      // Eliminar sección COMPONENTE CURRICULAR del fallback
-      response = response
-        .replace(/📚\s*COMPONENTE\s*CURRICULAR\s*(?:[\s\S]*?)(?=\n\n|\n\*\*|\n[🎯🔍📝✅📂🕒]|$)/gim, '')
-        .replace(/^\s*COMPONENTE\s*CURRICULAR\s*(?:[\s\S]*?)(?=\n\n|\n\*\*|\n[🎯🔍📝✅📂🕒]|$)/gim, '')
-        .replace(/^📚\s*COMPONENTE\s*CURRICULAR\s*$/gim, '')
-        .replace(/^COMPONENTE\s*CURRICULAR\s*$/gim, '')
+      // Mantener sección COMPONENTE CURRICULAR del fallback
+      // Las siguientes líneas estaban eliminando el componente curricular, ahora están comentadas para mantenerlo
+      // response = response
+      //   .replace(/📚\s*COMPONENTE\s*CURRICULAR\s*(?:[\s\S]*?)(?=\n\n|\n\*\*|\n[🎯🔍📝✅📂🕒]|$)/gim, '')
+      //   .replace(/^\s*COMPONENTE\s*CURRICULAR\s*(?:[\s\S]*?)(?=\n\n|\n\*\*|\n[🎯🔍📝✅📂🕒]|$)/gim, '')
+      //   .replace(/^📚\s*COMPONENTE\s*CURRICULAR\s*$/gim, '')
+      //   .replace(/^COMPONENTE\s*CURRICULAR\s*$/gim, '')
         .replace(/\n{3,}/g, '\n\n')
 
       return response
@@ -1072,13 +1132,18 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         
         // Limpiar el contenido del agente
         let agentContent = lastAgentMessage.text
+        console.log('🔍 Contenido original del agente:', agentContent.substring(0, 200) + '...')
+        
         agentContent = agentContent
           .replace(/\*\*/g, '') // Remover **bold**
           .replace(/\*/g, '')   // Remover *italic*
           .replace(/`/g, '')    // Remover `code`
           .replace(/#{1,6}\s/g, '') // Remover headers markdown
           .replace(/^\s*[-*+]\s/gm, '• ') // Normalizar listas
+          .replace(/•\s*•/g, '•') // Corregir dobles puntos sin eliminar espacios
           .replace(/\n{3,}/g, '\n\n') // Limpiar saltos múltiples
+        
+        console.log('🔍 Contenido procesado del agente:', agentContent.substring(0, 200) + '...')
 
         // Dividir el contenido en párrafos
         const contentLines = agentContent.split('\n').filter(line => line.trim())
@@ -1137,7 +1202,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         new Paragraph({
           children: [
             new TextRun({
-              text: `🤖 Generado por: Asistente Pedagógico IA`,
+              text: `🤖 Generado por: Planeador Inteligente`,
               size: 22,
               color: "7f8c8d"
             })
@@ -1320,7 +1385,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         new Paragraph({
           children: [
             new TextRun({
-              text: `🤖 Generado automáticamente por el Asistente Pedagógico IA`,
+              text: `🤖 Generado automáticamente por el Planeador Inteligente`,
               size: 18,
               color: "7f8c8d"
             })
@@ -1411,7 +1476,11 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
       <div className="bg-white border-b border-gray-100 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div className="flex-1 min-w-0">
-            <h2 className="text-3xl sm:text-4xl font-light mb-2 sm:mb-3 tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 via-pink-500 to-orange-500 bg-clip-text text-transparent">Asistente Pedagógico IA</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-2 sm:mb-3 tracking-tight leading-tight">
+              <span className="bg-gradient-to-r from-blue-500 via-purple-500 via-pink-500 to-orange-500 bg-clip-text text-transparent" style={{WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}>
+                Planeador Inteligente
+              </span>
+            </h2>
             <p className="text-sm sm:text-base lg:text-lg text-gray-500 font-light">
               Sistema de planeación inteligente con inteligencia artificial
             </p>
@@ -1580,7 +1649,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
         {!isConfigured && sessionRestored && (
         <div className="space-y-3 sm:space-y-4">
           <div className="flex justify-start">
-            <div className="max-w-full sm:max-w-3xl px-3 sm:px-4 py-3 rounded-lg backdrop-blur-sm bg-white/80 border border-white/50 shadow-lg shadow-gray-200/60">
+            <div className="max-w-full sm:max-w-3xl px-4 sm:px-6 lg:px-8 py-3 rounded-lg backdrop-blur-sm bg-white/80 border border-white/50 shadow-lg shadow-gray-200/60">
               {initialMessage.isFormatted ? (
                 <div 
                   className="prose prose-sm max-w-none"
@@ -1634,7 +1703,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
               className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-full sm:max-w-3xl px-3 sm:px-4 py-3 rounded-lg backdrop-blur-sm ${
+                className={`max-w-full sm:max-w-3xl px-4 sm:px-6 lg:px-8 py-3 rounded-lg backdrop-blur-sm ${
                   message.isUser
                     ? 'bg-blue-600/90 text-white shadow-xl shadow-blue-600/35'
                     : 'bg-white/80 border border-white/50 shadow-xl shadow-blue-200/40'
