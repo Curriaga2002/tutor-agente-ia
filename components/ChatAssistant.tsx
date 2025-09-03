@@ -341,80 +341,6 @@ Ejemplos:
   const [isSaving, setIsSaving] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Formateo amigable para mensajes del asistente: emojis por secciones, tablas y saneo básico
-  const formatAssistantHtml = (raw: string): string => {
-    // Saneo básico: eliminar caracteres de control no imprimibles
-    let text = raw.replace(/[\u0000-\u001F\u007F]/g, '')
-
-    // Emojis para secciones comunes (no forzamos si ya existen)
-    const sectionReplacements: Array<[RegExp, string]> = [
-      [/^\s*\*\*?\s*información de la planeación\s*:?\s*\*\*/gim, '**📋 Información de la planeación:**'],
-      [/^\s*\*\*?\s*objetivos( de aprendizaje)?\s*:?\s*\*\*/gim, '**🎯 Objetivos de aprendizaje:**'],
-      [/^\s*\*\*?\s*metodolog[ií]a\s*:?\s*\*\*/gim, '**🧠 Metodología:**'],
-      [/^\s*\*\*?\s*actividades( principales)?\s*:?\s*\*\*/gim, '**📝 Actividades:**'],
-      [/^\s*\*\*?\s*recursos( disponibles)?\s*:?\s*\*\*/gim, '**📚 Recursos:**'],
-      [/^\s*\*\*?\s*evaluaci[óo]n\s*:?\s*\*\*/gim, '**✅ Evaluación:**'],
-      [/^\s*\*\*?\s*distribuci[óo]n temporal( \(minutos\))?\s*:?\s*\*\*/gim, '**🕒 Distribución temporal (minutos):**'],
-      [/^\s*\*\*?\s*contexto( institucional)?\s*:?\s*\*\*/gim, '**🏫 Contexto institucional:**'],
-    ]
-    sectionReplacements.forEach(([re, rep]) => {
-      text = text.replace(re, rep)
-    })
-
-    // Conversión simple de tablas markdown (| col | col |) a HTML table
-    const toHtmlTable = (block: string): string => {
-      const lines = block.trim().split(/\n/).filter(l => l.trim().length > 0)
-      if (lines.length < 2) return block
-      // Detect header divider (---|---)
-      let headerLineIdx = -1
-      for (let i = 0; i < lines.length; i++) {
-        if (/^\s*\|?\s*:?-{2,}\s*(\|\s*:?-{2,}\s*)+\|?\s*$/.test(lines[i])) {
-          headerLineIdx = i
-          break
-        }
-      }
-      const hasHeader = headerLineIdx !== -1
-      const rows = lines.filter((_, i) => i !== headerLineIdx)
-      const cellsByRow = rows.map(r => r.replace(/^\||\|$/g, '').split(/\s*\|\s*/))
-      const header = hasHeader ? cellsByRow[0] : []
-      const body = hasHeader ? cellsByRow.slice(1) : cellsByRow
-      const thead = hasHeader ? `<thead><tr>${header.map(c => `<th>${c}</th>`).join('')}</tr></thead>` : ''
-      const tbody = `<tbody>${body.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`
-      return `<div class="overflow-x-auto"><table class="ai-table">${thead}${tbody}</table></div>`
-    }
-
-    // Detectar bloques de tabla por presencia de pipes en múltiples líneas consecutivas
-    text = text.replace(/(?:^|\n)(\|[^\n]+\|(?:\n\|[^\n]+\|)+)/g, (m, p1) => `\n${toHtmlTable(p1)}`)
-
-    // Reglas markdown básicas existentes
-    const html = `
-      <style>
-        .prose li { margin-bottom: 8px; }
-        .prose h1, .prose h2, .prose h3 { color: #1f2937; }
-        .prose strong { color: #1f2937; font-weight: 600; }
-        .prose code { background-color: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
-        .prose pre { background-color: #f3f4f6; padding: 12px; border-radius: 6px; border: 1px solid #d1d5db; }
-        .ai-table { width: 100%; border-collapse: collapse; }
-        .ai-table th, .ai-table td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; }
-        .ai-table thead th { background: #f9fafb; font-weight: 600; }
-      </style>
-      ${text
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-        .replace(/`(.*?)`/g, '<code>$1</code>')
-        .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-        .replace(/^\- (.*$)/gm, '<li>• $1</li>')
-        .replace(/^\d+\. (.*$)/gm, '<li>$&</li>')
-        .replace(/\n\n/g, '<br><br>')
-        .replace(/\n/g, '<br>')
-      }`
-
-    return html
-  }
-
   // Actualizar mensaje inicial cuando cambie el estado de los documentos
   useEffect(() => {
     if (documentsLoading) {
@@ -619,8 +545,17 @@ Ejemplos:
             .replace(/•\s*Duración:\s*\d+\s*horas/gi, `• Duración: ${horasNum} horas`)
             .replace(/Sesiones:\s*\d+/gi, `Sesiones: ${sesionesNum}`)
             .replace(/•\s*Sesiones:\s*\d+/gi, `• Sesiones: ${sesionesNum}`)
+            .replace(/•\s*Área:\s*[^\n]+/gi, `• Área: ${planningConfig.asignatura || 'No especificada'}`)
+            .replace(/•\s*Asignatura:\s*[^\n]+/gi, `• Asignatura: ${planningConfig.asignatura || 'No especificada'}`)
             .replace(/Duración total \(min\):\s*\d+/gi, `Duración total (min): ${totalMinutes}`)
             .replace(/•\s*Duración total \(min\):\s*\d+/gi, `• Duración total (min): ${totalMinutes}`)
+          // Eliminar bloque/lineas de identificación redundante o errónea
+          text = text
+            .replace(/^\s*IDENTIFICACI[ÓO]N\s*$/gim, '')
+            .replace(/^•\s*Instituci[óo]n:[^\n]*\n?/gim, '')
+            .replace(/^•\s*Área:[^\n]*\n?/gim, '')
+            .replace(/^•\s*Duraci[óo]n:\s*\n?/gim, '')
+            .replace(/\n{3,}/g, '\n\n')
           // Inyectar bloque de distribución temporal al inicio si no existe
           if (!/Distribuci[óo]n temporal/gi.test(text)) {
             const bloque = `\n\n**🕒 Distribución temporal (minutos):**\n` +
@@ -761,6 +696,11 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         .replace(/•\s*Sesiones:\s*\d+/gi, `• Sesiones: ${sesionesNum}`)
         .replace(/Duración total \(min\):\s*\d+/gi, `Duración total (min): ${horasNum * 60}`)
         .replace(/•\s*Duración total \(min\):\s*\d+/gi, `• Duración total (min): ${horasNum * 60}`)
+        .replace(/^\s*IDENTIFICACI[ÓO]N\s*$/gim, '')
+        .replace(/^•\s*Instituci[óo]n:[^\n]*\n?/gim, '')
+        .replace(/^•\s*Área:[^\n]*\n?/gim, '')
+        .replace(/^•\s*Duraci[óo]n:\s*\n?/gim, '')
+        .replace(/\n{3,}/g, '\n\n')
 
       return response
       
@@ -1361,6 +1301,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
         )}
         
         {/* Mensaje inicial del asistente */}
+        {!isConfigured && (
         <div className="space-y-4">
           <div className="flex justify-start">
             <div className="max-w-3xl px-4 py-3 rounded-lg backdrop-blur-sm bg-white/80 border border-white/50 shadow-lg shadow-gray-200/60">
@@ -1402,6 +1343,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
             </div>
           </div>
         </div>
+        )}
 
         {/* Mensajes del Chat - Siempre visible */}
         <div className="space-y-4">
@@ -1425,7 +1367,28 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
                       fontSize: '14px'
                     }}
                     dangerouslySetInnerHTML={{ 
-                      __html: message.isUser ? message.text : formatAssistantHtml(message.text)
+                      __html: `
+                        <style>
+                          .prose li { margin-bottom: 8px; }
+                          .prose h1, .prose h2, .prose h3 { color: #1f2937; }
+                          .prose strong { color: #1f2937; font-weight: 600; }
+                          .prose code { background-color: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+                          .prose pre { background-color: #f3f4f6; padding: 12px; border-radius: 6px; border: 1px solid #d1d5db; }
+                        </style>
+                        ${message.text
+                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                          .replace(/```(.*?)```/g, '<pre><code>$1</code></pre>')
+                          .replace(/`(.*?)`/g, '<code>$1</code>')
+                          .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                          .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                          .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                          .replace(/^- (.*$)/gm, '<li>• $1</li>')
+                          .replace(/^\d+\. (.*$)/gm, '<li>$&</li>')
+                          .replace(/\n\n/g, '<br><br>')
+                          .replace(/\n/g, '<br>')
+                        }
+                      `
                     }} 
                   />
                 ) : (
@@ -1463,7 +1426,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
         </div>
       </div>
 
-                 {/* Input del Chat - Siempre visible; deshabilitado si no está configurado */}
+                 {/* Input del Chat - Siempre visible */}
       <div className="bg-white border-t border-gray-100 p-8">
         <form onSubmit={handleSubmit} className="flex gap-6">
           <input
@@ -1471,13 +1434,13 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder={isConfigured ? "Escribe tu consulta específica para el plan de clase..." : "Completa la configuración inicial para habilitar el chat"}
-            className="flex-1 px-8 py-5 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 text-gray-900 placeholder-gray-500 text-lg bg-white"
+            className="flex-1 px-8 py-5 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duración-300 text-gray-900 placeholder-gray-500 text-lg bg-white"
             disabled={!isConfigured || isLoading || isSaving}
           />
           <button
             type="submit"
             disabled={!isConfigured || !inputText.trim() || isLoading || isSaving}
-            className="px-10 py-5 bg-gray-900/90 backdrop-blur-sm text-white rounded-2xl hover:bg-gray-800/90 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all duration-300 font-medium text-lg shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 transform hover:-translate-y-0.5 disabled:transform-none"
+            className="px-10 py-5 bg-gray-900/90 backdrop-blur-sm text-white rounded-2xl hover:bg-gray-800/90 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all duración-300 font-medium text-lg shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 transform hover:-translate-y-0.5 disabled:transform-none"
           >
             {isLoading ? '🔄' : '📤'} Enviar
           </button>
