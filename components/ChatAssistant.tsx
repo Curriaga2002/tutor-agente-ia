@@ -1406,12 +1406,12 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
   }, [messages])
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="flex flex-col h-full bg-gray-50 rounded-3xl shadow-[0_10px_30px_rgba(59,130,246,0.08)] ring-1 ring-blue-200/40 border border-gray-100 overflow-hidden">
       {/* Header del Chat - Estilo Apple */}
       <div className="bg-white border-b border-gray-100 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div className="flex-1 min-w-0">
-            <h2 className="text-2xl sm:text-3xl font-light mb-2 sm:mb-3 tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 via-pink-500 to-orange-500 bg-clip-text text-transparent">Asistente Pedagógico IA</h2>
+            <h2 className="text-3xl sm:text-4xl font-light mb-2 sm:mb-3 tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 via-pink-500 to-orange-500 bg-clip-text text-transparent">Asistente Pedagógico IA</h2>
             <p className="text-sm sm:text-base lg:text-lg text-gray-500 font-light">
               Sistema de planeación inteligente con inteligencia artificial
             </p>
@@ -1492,7 +1492,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
         
         {/* Documentos consultados en tiempo real */}
         {isConfigured && (consultedDocuments.pei.length > 0 || consultedDocuments.modeloPedagogico.length > 0 || consultedDocuments.orientacionesCurriculares.length > 0 || consultedDocuments.relevantDocs.length > 0) && (
-          <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-6 shadow-lg shadow-blue-200/30">
+          <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-6 shadow-xl shadow-blue-200/40 ring-1 ring-blue-200/40">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-bold">📚</span>
@@ -1503,7 +1503,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
             <div className="space-y-3 sm:space-y-4">
               {/* PEI */}
               {consultedDocuments.pei.length > 0 && (
-                <div className="bg-white/60 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                <div className="bg-white/60 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100 shadow-md shadow-blue-100/50">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
                     <span className="text-green-600 font-bold">✅</span>
                     <span className="font-medium text-gray-800 text-sm sm:text-base">PEI (Proyecto Educativo Institucional)</span>
@@ -1521,7 +1521,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
               
               {/* Modelo Pedagógico */}
               {consultedDocuments.modeloPedagogico.length > 0 && (
-                <div className="bg-white/60 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                <div className="bg-white/60 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100 shadow-md shadow-blue-100/50">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
                     <span className="text-green-600 font-bold">✅</span>
                     <span className="font-medium text-gray-800 text-sm sm:text-base">Modelo Pedagógico</span>
@@ -1539,7 +1539,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
               
               {/* Orientaciones Curriculares */}
               {consultedDocuments.orientacionesCurriculares.length > 0 && (
-                <div className="bg-white/60 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                <div className="bg-white/60 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100 shadow-md shadow-blue-100/50">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
                     <span className="text-green-600 font-bold">✅</span>
                     <span className="font-medium text-gray-800 text-sm sm:text-base">Orientaciones Curriculares</span>
@@ -1557,7 +1557,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
               
               {/* Documentos Relevantes por Consulta */}
               {consultedDocuments.relevantDocs.length > 0 && (
-                <div className="bg-white/60 rounded-xl p-4 border border-blue-100">
+                <div className="bg-white/60 rounded-xl p-4 border border-blue-100 shadow-md shadow-blue-100/50">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-blue-600 font-bold">🔍</span>
                     <span className="font-medium text-gray-800">Documentos Relevantes por Consulta</span>
@@ -1636,8 +1636,8 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
               <div
                 className={`max-w-full sm:max-w-3xl px-3 sm:px-4 py-3 rounded-lg backdrop-blur-sm ${
                   message.isUser
-                    ? 'bg-blue-600/90 text-white shadow-lg shadow-blue-600/25'
-                    : 'bg-white/80 border border-white/50 shadow-lg shadow-gray-200/60'
+                    ? 'bg-blue-600/90 text-white shadow-xl shadow-blue-600/35'
+                    : 'bg-white/80 border border-white/50 shadow-xl shadow-blue-200/40'
                 }`}
               >
                 {message.isFormatted ? (

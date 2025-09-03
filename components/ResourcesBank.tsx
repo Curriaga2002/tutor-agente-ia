@@ -839,11 +839,11 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
       {/* Modal para mostrar historial del chat */}
       {showChatHistory && selectedPlan && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4" onClick={closeChatHistory}>
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl shadow-black/20 w-full max-w-7xl h-[95vh] sm:h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl shadow-blue-200/40 ring-1 ring-blue-200/40 w-full max-w-7xl h-[95vh] sm:h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
             {/* Header responsive */}
             <div className="relative p-4 sm:p-6 lg:p-8 border-b border-gray-200 bg-white">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-800 pr-4">
+                <h3 className="text-xl sm:text-2xl lg:text-3xl font-semibold pr-4 bg-gradient-to-r from-blue-500 via-purple-500 via-pink-500 to-orange-500 bg-clip-text text-transparent">
                   💬 Historial Completo del Chat - {selectedPlan.tema}
                 </h3>
                 <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
@@ -859,6 +859,13 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                   >
                     📄 Word
                   </button>
+                  <button
+                    onClick={closeChatHistory}
+                    className="bg-red-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl hover:bg-red-700 transition duration-300 text-xs sm:text-sm font-medium shadow-lg shadow-red-600/25 hover:shadow-xl hover:shadow-red-600/30 flex-1 sm:flex-none"
+                    title="Cerrar"
+                  >
+                    ✖️ Cerrar
+                  </button>
                 </div>
               </div>
             </div>
@@ -866,7 +873,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
             {/* Contenido responsive */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-white">
               {/* Información de la planeación */}
-                             <div className="bg-blue-50 border border-blue-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8 shadow-lg shadow-blue-100/50">
+                             <div className="bg-blue-50 border border-blue-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8 shadow-xl shadow-blue-300/60">
                 <h4 className="font-semibold text-blue-800 mb-2 sm:mb-3 lg:mb-4 text-sm sm:text-base lg:text-lg">📚 Información de la Planeación</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 lg:gap-6 text-xs sm:text-sm lg:text-base">
                   <div>
@@ -898,8 +905,8 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                       <div
                                                  className={`inline-block max-w-[95%] sm:max-w-[90%] p-3 sm:p-4 lg:p-6 rounded-xl sm:rounded-2xl ${
                            message.isUser
-                             ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
-                             : "bg-gray-50 text-gray-800 border-l-4 border-blue-400 shadow-lg shadow-gray-200/60"
+                             ? "bg-blue-600 text-white shadow-lg shadow-blue-600/35"
+                             : "bg-gray-50 text-gray-800 border-l-4 border-blue-400 shadow-lg shadow-blue-200/40"
                          }`}
                       >
                         <div className="text-xs sm:text-sm lg:text-base leading-relaxed whitespace-pre-wrap break-words">
