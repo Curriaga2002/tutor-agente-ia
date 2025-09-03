@@ -1410,7 +1410,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
       <div className="bg-white border-b border-gray-100 p-8">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-light text-gray-900 mb-3 tracking-tight">💬 Asistente Pedagógico IA</h2>
+            <h2 className="text-3xl font-light mb-3 tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 via-pink-500 to-orange-500 bg-clip-text text-transparent">Asistente Pedagógico IA</h2>
             <p className="text-lg text-gray-500 font-light">
               Sistema de planeación inteligente con inteligencia artificial
             </p>
