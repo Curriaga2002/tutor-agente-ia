@@ -63,13 +63,44 @@ const ConfigurationForm = ({
 }) => {
   const handleConfigSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (planningConfig.grado && planningConfig.asignatura && planningConfig.tema && planningConfig.horas && planningConfig.sesiones && planningConfig.recursos && planningConfig.nombreDocente) {
+    const horasNum = Number(planningConfig.horas)
+    const sesionesNum = Number(planningConfig.sesiones)
+    const horasValid = Number.isFinite(horasNum) && horasNum >= 1 && horasNum <= 20
+    const sesionesValid = Number.isFinite(sesionesNum) && sesionesNum >= 1 && sesionesNum <= 10
+    if (
+      planningConfig.grado &&
+      planningConfig.asignatura &&
+      planningConfig.tema &&
+      horasValid &&
+      sesionesValid &&
+      planningConfig.recursos &&
+      planningConfig.nombreDocente
+    ) {
       onSubmit()
     }
   }
 
   const handleInputChange = (field: string, value: string) => {
+    if (field === 'horas' || field === 'sesiones') {
+      // Mantener solo dígitos pero NO forzar rangos aquí para evitar saltos/duplicaciones visuales
+      const digitsOnly = value.replace(/[^0-9]/g, '')
+      setPlanningConfig((prev: PlanningConfig) => ({ ...prev, [field]: digitsOnly }))
+      return
+    }
     setPlanningConfig((prev: PlanningConfig) => ({ ...prev, [field]: value }))
+  }
+
+  const normalizeNumericField = (field: 'horas' | 'sesiones') => {
+    let num = Number(planningConfig[field])
+    if (!Number.isFinite(num) || num === 0) num = 1
+    if (field === 'horas') {
+      if (num < 1) num = 1
+      if (num > 20) num = 20
+    } else {
+      if (num < 1) num = 1
+      if (num > 10) num = 10
+    }
+    setPlanningConfig((prev: PlanningConfig) => ({ ...prev, [field]: String(num) }))
   }
 
            return (
@@ -146,6 +177,7 @@ const ConfigurationForm = ({
                      max="20"
                      value={planningConfig.horas}
                      onChange={(e) => handleInputChange('horas', e.target.value)}
+                     onBlur={() => normalizeNumericField('horas')}
                      placeholder="Ej: 2, 4, 6..."
                      className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
                      required
@@ -162,6 +194,7 @@ const ConfigurationForm = ({
                      max="10"
                      value={planningConfig.sesiones}
                      onChange={(e) => handleInputChange('sesiones', e.target.value)}
+                     onBlur={() => normalizeNumericField('sesiones')}
                      placeholder="Ej: 2, 3, 4..."
                      className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
                      required
@@ -450,12 +483,16 @@ Ejemplos:
       )
       
       // Construir contexto enriquecido con configuración inicial + historial reciente del chat
+      // Normalizar horas y sesiones como números válidos dentro de rango
+      const horasNum = Math.min(20, Math.max(1, Number(planningConfig.horas || '1') || 1))
+      const sesionesNum = Math.min(10, Math.max(1, Number(planningConfig.sesiones || '1') || 1))
+
       const configContext = `Configuración inicial proporcionada por el docente:\n` +
         `• Grado: ${planningConfig.grado || 'No especificado'}\n` +
         `• Asignatura: ${planningConfig.asignatura || 'No especificada'}\n` +
         `• Tema: ${planningConfig.tema || 'No especificado'}\n` +
-        `• Duración: ${planningConfig.horas || 'No especificada'} horas\n` +
-        `• Sesiones: ${planningConfig.sesiones || 'No especificado'}\n` +
+        `• Duración: ${horasNum} horas\n` +
+        `• Sesiones: ${sesionesNum}\n` +
         `• Docente: ${planningConfig.nombreDocente || 'No especificado'}\n` +
         `• Recursos disponibles: ${planningConfig.recursos || 'No especificados'}`
 
@@ -464,7 +501,12 @@ Ejemplos:
         .map(m => `${m.isUser ? 'Docente' : 'Asistente'}: ${m.text}`)
         .join('\n\n')
 
-      const combinedContext = `${configContext}\n\nHistorial reciente del chat (usar como guía contextual, no repetir literalmente):\n${conversationTranscript}`
+      const combinedContext = `${configContext}\n\nREGLAS ESTRICTAS PARA LA RESPUESTA (OBLIGATORIAS):\n` +
+        `1) Usa EXACTAMENTE la duración total: ${horasNum} horas. No la modifiques ni la derives.\n` +
+        `2) Usa EXACTAMENTE el número de sesiones: ${sesionesNum}. No lo modifiques.\n` +
+        `3) Si decides distribuir horas por sesión, asegúrate de que la suma total sea ${horasNum} horas y que el número de sesiones sea ${sesionesNum}.\n` +
+        `4) No agregues ni cambies valores de configuración si ya fueron proporcionados.\n\n` +
+        `Historial reciente del chat (usar como guía contextual, no repetir literalmente):\n${conversationTranscript}`
 
       // Usar Gemini para generar el plan de clase con el contexto combinado
       const geminiResponse = await geminiService.generateClassPlan(
@@ -477,7 +519,19 @@ Ejemplos:
       )
       
       if (geminiResponse.success) {
-        return geminiResponse.text
+        // Post-procesar para asegurar consistencia de horas y sesiones si el modelo se desvió
+        let text = geminiResponse.text
+        try {
+          const horasNum = Math.min(20, Math.max(1, Number(planningConfig.horas || '1') || 1))
+          const sesionesNum = Math.min(10, Math.max(1, Number(planningConfig.sesiones || '1') || 1))
+          // Reemplazos suaves en secciones comunes
+          text = text
+            .replace(/Duración:\s*\d+\s*horas/gi, `Duración: ${horasNum} horas`)
+            .replace(/•\s*Duración:\s*\d+\s*horas/gi, `• Duración: ${horasNum} horas`)
+            .replace(/Sesiones:\s*\d+/gi, `Sesiones: ${sesionesNum}`)
+            .replace(/•\s*Sesiones:\s*\d+/gi, `• Sesiones: ${sesionesNum}`)
+        } catch {}
+        return text
         } else {
         // Verificar si es error de cuota excedida
         if (geminiResponse.error && (geminiResponse.error.includes('quota') || geminiResponse.error.includes('429'))) {
@@ -545,14 +599,18 @@ Ejemplos:
       )
       
       // Generar respuesta estructurada basada en los documentos disponibles e integrando la configuración inicial
+      // Normalizar horas/sesiones también en fallback
+      const horasNum = Math.min(20, Math.max(1, Number(planningConfig.horas) || Number(analysis.horas) || 1))
+      const sesionesNum = Math.min(10, Math.max(1, Number(planningConfig.sesiones) || Number(analysis.sesiones) || 1))
+
       let response = `🎓 **PLAN DE CLASE GENERADO (Sistema de Fallback)**
 
 **Información de la Planeación:**
 • **Grado:** ${planningConfig.grado || analysis.grado}
 • **Asignatura:** ${planningConfig.asignatura || analysis.asignatura}
 • **Tema:** ${planningConfig.tema || analysis.tema}
-• **Duración:** ${planningConfig.horas || analysis.horas} horas
-• **Sesiones:** ${planningConfig.sesiones || analysis.sesiones}
+• **Duración:** ${horasNum} horas
+• **Sesiones:** ${sesionesNum}
 • **Docente:** ${planningConfig.nombreDocente || 'No especificado'}
 • **Recursos disponibles:** ${planningConfig.recursos || 'No especificados'}
 
@@ -589,6 +647,13 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
    • Estándares curriculares oficiales
 
 **💡 Recomendación:** Revisa los documentos específicos listados arriba para obtener detalles más precisos sobre la implementación de este plan de clase.`
+
+      // Asegurar consistencia en fallback también
+      response = response
+        .replace(/Duración:\s*\d+\s*horas/gi, `Duración: ${horasNum} horas`)
+        .replace(/•\s*Duración:\s*\d+\s*horas/gi, `• Duración: ${horasNum} horas`)
+        .replace(/Sesiones:\s*\d+/gi, `Sesiones: ${sesionesNum}`)
+        .replace(/•\s*Sesiones:\s*\d+/gi, `• Sesiones: ${sesionesNum}`)
 
       return response
       
