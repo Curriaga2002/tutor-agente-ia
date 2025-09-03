@@ -65,8 +65,8 @@ const ConfigurationForm = ({
     e.preventDefault()
     const horasNum = Number(planningConfig.horas)
     const sesionesNum = Number(planningConfig.sesiones)
-    const horasValid = Number.isFinite(horasNum) && horasNum >= 1 && horasNum <= 20
-    const sesionesValid = Number.isFinite(sesionesNum) && sesionesNum >= 1 && sesionesNum <= 10
+    const horasValid = Number.isFinite(horasNum) && horasNum >= 1 && horasNum <= 2
+    const sesionesValid = Number.isFinite(sesionesNum) && sesionesNum >= 1 && sesionesNum <= 2
     if (
       planningConfig.grado &&
       planningConfig.asignatura &&
@@ -95,10 +95,10 @@ const ConfigurationForm = ({
     if (!Number.isFinite(num) || num === 0) num = 1
     if (field === 'horas') {
       if (num < 1) num = 1
-      if (num > 20) num = 20
+      if (num > 2) num = 2
     } else {
       if (num < 1) num = 1
-      if (num > 10) num = 10
+      if (num > 2) num = 2
     }
     setPlanningConfig((prev: PlanningConfig) => ({ ...prev, [field]: String(num) }))
   }
@@ -171,34 +171,32 @@ const ConfigurationForm = ({
                    <label className="block text-lg font-medium text-gray-900 mb-3">
                      Duración Total (horas) *
                    </label>
-                   <input
-                     type="number"
-                     min="1"
-                     max="20"
-                     value={planningConfig.horas}
-                     onChange={(e) => handleInputChange('horas', e.target.value)}
-                     onBlur={() => normalizeNumericField('horas')}
-                     placeholder="Ej: 2, 4, 6..."
-                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
-                     required
-                   />
+                   <select
+                    value={planningConfig.horas}
+                    onChange={(e) => handleInputChange('horas', e.target.value)}
+                    className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
+                    required
+                  >
+                    <option value="">Selecciona horas</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                  </select>
                  </div>
                  
                  <div className="space-y-3">
                    <label className="block text-lg font-medium text-gray-900 mb-3">
                      Número de Sesiones *
                    </label>
-                   <input
-                     type="number"
-                     min="1"
-                     max="10"
-                     value={planningConfig.sesiones}
-                     onChange={(e) => handleInputChange('sesiones', e.target.value)}
-                     onBlur={() => normalizeNumericField('sesiones')}
-                     placeholder="Ej: 2, 3, 4..."
-                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
-                     required
-                   />
+                   <select
+                    value={planningConfig.sesiones}
+                    onChange={(e) => handleInputChange('sesiones', e.target.value)}
+                    className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
+                    required
+                  >
+                    <option value="">Selecciona sesiones</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                  </select>
                  </div>
                  
                  <div className="space-y-3">
@@ -484,8 +482,16 @@ Ejemplos:
       
       // Construir contexto enriquecido con configuración inicial + historial reciente del chat
       // Normalizar horas y sesiones como números válidos dentro de rango
-      const horasNum = Math.min(20, Math.max(1, Number(planningConfig.horas || '1') || 1))
-      const sesionesNum = Math.min(10, Math.max(1, Number(planningConfig.sesiones || '1') || 1))
+      const horasNum = Math.min(2, Math.max(1, Number(planningConfig.horas || '1') || 1))
+      const sesionesNum = Math.min(2, Math.max(1, Number(planningConfig.sesiones || '1') || 1))
+
+      const totalMinutes = horasNum * 60
+      const minutesPerSessionBase = Math.floor(totalMinutes / sesionesNum)
+      const minutesRemainder = totalMinutes - (minutesPerSessionBase * sesionesNum)
+      const distributionPreview = Array.from({ length: sesionesNum }, (_, i) => {
+        const extra = i === (sesionesNum - 1) ? minutesRemainder : 0
+        return `Sesión ${i + 1}: ${minutesPerSessionBase + extra} min`
+      }).join(' | ')
 
       const configContext = `Configuración inicial proporcionada por el docente:\n` +
         `• Grado: ${planningConfig.grado || 'No especificado'}\n` +
@@ -494,7 +500,9 @@ Ejemplos:
         `• Duración: ${horasNum} horas\n` +
         `• Sesiones: ${sesionesNum}\n` +
         `• Docente: ${planningConfig.nombreDocente || 'No especificado'}\n` +
-        `• Recursos disponibles: ${planningConfig.recursos || 'No especificados'}`
+        `• Recursos disponibles: ${planningConfig.recursos || 'No especificados'}\n` +
+        `• Duración total (min): ${totalMinutes}\n` +
+        `• Distribución sugerida (min): ${distributionPreview}`
 
       const recentMessages = messages.slice(-10)
       const conversationTranscript = recentMessages
@@ -504,8 +512,12 @@ Ejemplos:
       const combinedContext = `${configContext}\n\nREGLAS ESTRICTAS PARA LA RESPUESTA (OBLIGATORIAS):\n` +
         `1) Usa EXACTAMENTE la duración total: ${horasNum} horas. No la modifiques ni la derives.\n` +
         `2) Usa EXACTAMENTE el número de sesiones: ${sesionesNum}. No lo modifiques.\n` +
-        `3) Si decides distribuir horas por sesión, asegúrate de que la suma total sea ${horasNum} horas y que el número de sesiones sea ${sesionesNum}.\n` +
-        `4) No agregues ni cambies valores de configuración si ya fueron proporcionados.\n\n` +
+        `3) Distribuye el tiempo en ${sesionesNum} sesiones; la suma total debe ser ${horasNum} horas.\n` +
+        `4) Trabaja únicamente en minutos en toda la respuesta. No uses horas ni decimales.\n` +
+        `5) No agregues sesiones extra; si necesitas más tiempo, prioriza y sintetiza.\n` +
+        `6) Incluye una sección de "Distribución temporal (minutos)" con ${sesionesNum} líneas que sumen ${totalMinutes} min.\n` +
+        `7) Añade una línea de verificación: "Verificación: suma de sesiones = ${totalMinutes} min".\n` +
+        `8) Mantén la sección de duración total (min) y sesiones al inicio exactamente con estos valores.\n\n` +
         `Historial reciente del chat (usar como guía contextual, no repetir literalmente):\n${conversationTranscript}`
 
       // Usar Gemini para generar el plan de clase con el contexto combinado
@@ -519,17 +531,31 @@ Ejemplos:
       )
       
       if (geminiResponse.success) {
-        // Post-procesar para asegurar consistencia de horas y sesiones si el modelo se desvió
+        // Post-procesar para asegurar consistencia de horas y sesiones y añadir distribución temporal
         let text = geminiResponse.text
         try {
-          const horasNum = Math.min(20, Math.max(1, Number(planningConfig.horas || '1') || 1))
-          const sesionesNum = Math.min(10, Math.max(1, Number(planningConfig.sesiones || '1') || 1))
-          // Reemplazos suaves en secciones comunes
+          const horasNum = Math.min(2, Math.max(1, Number(planningConfig.horas || '1') || 1))
+          const sesionesNum = Math.min(2, Math.max(1, Number(planningConfig.sesiones || '1') || 1))
+          const totalMinutes = horasNum * 60
+          const base = Math.floor(totalMinutes / sesionesNum)
+          const remainder = totalMinutes - (base * sesionesNum)
+          // Normalizar encabezados
           text = text
             .replace(/Duración:\s*\d+\s*horas/gi, `Duración: ${horasNum} horas`)
             .replace(/•\s*Duración:\s*\d+\s*horas/gi, `• Duración: ${horasNum} horas`)
             .replace(/Sesiones:\s*\d+/gi, `Sesiones: ${sesionesNum}`)
             .replace(/•\s*Sesiones:\s*\d+/gi, `• Sesiones: ${sesionesNum}`)
+            .replace(/Duración total \(min\):\s*\d+/gi, `Duración total (min): ${totalMinutes}`)
+            .replace(/•\s*Duración total \(min\):\s*\d+/gi, `• Duración total (min): ${totalMinutes}`)
+          // Inyectar bloque de distribución temporal al inicio si no existe
+          if (!/Distribuci[óo]n temporal/gi.test(text)) {
+            const bloque = `\n\n**🕒 Distribución temporal (minutos):**\n` +
+              Array.from({ length: sesionesNum }, (_, i) => {
+                const extra = i === (sesionesNum - 1) ? remainder : 0
+                return `• Sesión ${i + 1}: ${base + extra} min`
+              }).join('\n') + `\n• Verificación: suma de sesiones = ${totalMinutes} min`
+            text = text.replace(/(\*\*Informaci[óo]n de la Planeaci[óo]n:\*\*[\s\S]*?\n)/, `$1${bloque}\n`)
+          }
         } catch {}
         return text
         } else {
@@ -600,8 +626,8 @@ Ejemplos:
       
       // Generar respuesta estructurada basada en los documentos disponibles e integrando la configuración inicial
       // Normalizar horas/sesiones también en fallback
-      const horasNum = Math.min(20, Math.max(1, Number(planningConfig.horas) || Number(analysis.horas) || 1))
-      const sesionesNum = Math.min(10, Math.max(1, Number(planningConfig.sesiones) || Number(analysis.sesiones) || 1))
+      const horasNum = Math.min(2, Math.max(1, Number(planningConfig.horas) || Number(analysis.horas) || 1))
+      const sesionesNum = Math.min(2, Math.max(1, Number(planningConfig.sesiones) || Number(analysis.sesiones) || 1))
 
       let response = `🎓 **PLAN DE CLASE GENERADO (Sistema de Fallback)**
 
@@ -611,6 +637,7 @@ Ejemplos:
 • **Tema:** ${planningConfig.tema || analysis.tema}
 • **Duración:** ${horasNum} horas
 • **Sesiones:** ${sesionesNum}
+• **Duración total (min):** ${horasNum * 60}
 • **Docente:** ${planningConfig.nombreDocente || 'No especificado'}
 • **Recursos disponibles:** ${planningConfig.recursos || 'No especificados'}
 
@@ -646,6 +673,10 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
    • Instrumentos del modelo pedagógico
    • Estándares curriculares oficiales
 
+**🕒 Distribución temporal (minutos):**
+${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === sesionesNum - 1 ? Math.floor((horasNum * 60) / sesionesNum) + ((horasNum * 60) - (Math.floor((horasNum * 60) / sesionesNum) * sesionesNum)) : Math.floor((horasNum * 60) / sesionesNum)} min`).join('\n')}
+• Verificación: suma de sesiones = ${horasNum * 60} min
+
 **💡 Recomendación:** Revisa los documentos específicos listados arriba para obtener detalles más precisos sobre la implementación de este plan de clase.`
 
       // Asegurar consistencia en fallback también
@@ -654,6 +685,8 @@ ${uniqueDocs.length > 0 ? uniqueDocs.map((doc, index) => `• **${index + 1}.** 
         .replace(/•\s*Duración:\s*\d+\s*horas/gi, `• Duración: ${horasNum} horas`)
         .replace(/Sesiones:\s*\d+/gi, `Sesiones: ${sesionesNum}`)
         .replace(/•\s*Sesiones:\s*\d+/gi, `• Sesiones: ${sesionesNum}`)
+        .replace(/Duración total \(min\):\s*\d+/gi, `Duración total (min): ${horasNum * 60}`)
+        .replace(/•\s*Duración total \(min\):\s*\d+/gi, `• Duración total (min): ${horasNum * 60}`)
 
       return response
       
@@ -1359,14 +1392,19 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
           
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-white border border-gray-200 px-4 py-3 rounded-lg">
-              <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b border-blue-600"></div>
-                  <span className="text-gray-600">Generando respuesta...</span>
+              <div className="max-w-3xl px-4 py-3 rounded-lg backdrop-blur-sm bg-white/80 border border-white/50 shadow-lg shadow-gray-200/60">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="w-2 h-2 bg-blue-600/80 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-2 h-2 bg-blue-600/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  </div>
+                  <span className="text-gray-600 text-sm">El asistente está pensando...</span>
+                  <span className="sr-only">Generando respuesta</span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
           
         <div ref={messagesEndRef} />
         </div>
