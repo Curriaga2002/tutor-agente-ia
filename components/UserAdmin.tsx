@@ -73,7 +73,7 @@ export default function UserAdmin() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          email: newUser.email,
+        email: newUser.email,
           password: randomPassword
         })
       })
@@ -83,14 +83,14 @@ export default function UserAdmin() {
         throw new Error(errorData.error || 'Error al crear usuario')
       }
 
-      // Guardar la contraseña generada y email para mostrar
-      setGeneratedPassword(randomPassword)
-      setCreatedUserEmail(newUser.email)
-      setNewUser({ email: '', password: '' })
-      setShowCreateForm(false)
-      
-      // Actualizar la lista inmediatamente
-      await fetchUsers()
+        // Guardar la contraseña generada y email para mostrar
+        setGeneratedPassword(randomPassword)
+        setCreatedUserEmail(newUser.email)
+        setNewUser({ email: '', password: '' })
+        setShowCreateForm(false)
+        
+        // Actualizar la lista inmediatamente
+        await fetchUsers()
       
     } catch (err: any) {
       setError(err.message)
