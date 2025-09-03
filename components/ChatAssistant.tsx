@@ -104,24 +104,24 @@ const ConfigurationForm = ({
   }
 
            return (
-           <div className="bg-white/85 backdrop-blur-xl border border-white/40 rounded-3xl p-12 mb-8 shadow-xl shadow-black/10">
-             <div className="text-center mb-12">
-               <h3 className="text-3xl font-light text-gray-900 mb-4 tracking-tight">Configuración Inicial</h3>
-               <p className="text-xl text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
+           <div className="bg-white/85 backdrop-blur-xl border border-white/40 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 xl:p-12 mb-6 sm:mb-8 shadow-xl shadow-black/10">
+             <div className="text-center mb-6 sm:mb-8 lg:mb-12">
+               <h3 className="text-2xl sm:text-3xl font-light text-gray-900 mb-3 sm:mb-4 tracking-tight">Configuración Inicial</h3>
+               <p className="text-base sm:text-lg lg:text-xl text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
                  Configura los parámetros básicos de tu planeación para personalizar la experiencia
                </p>
              </div>
       
-                   <form onSubmit={handleConfigSubmit} className="space-y-8">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                 <div className="space-y-3">
-                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                   <form onSubmit={handleConfigSubmit} className="space-y-4 sm:space-y-6 lg:space-y-8">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+                 <div className="space-y-2 sm:space-y-3">
+                   <label className="block text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                      Grado *
                    </label>
                    <select
                      value={planningConfig.grado}
                      onChange={(e) => handleInputChange('grado', e.target.value)}
-                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
+                     className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
                      required
                    >
                      <option value="">Selecciona el grado</option>
@@ -139,8 +139,8 @@ const ConfigurationForm = ({
                    </select>
                  </div>
                  
-                 <div className="space-y-3">
-                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                 <div className="space-y-2 sm:space-y-3">
+                   <label className="block text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                      Asignatura *
                    </label>
                    <input
@@ -148,13 +148,13 @@ const ConfigurationForm = ({
                      value={planningConfig.asignatura}
                      onChange={(e) => handleInputChange('asignatura', e.target.value)}
                      placeholder="Ej: Matemáticas, Ciencias, Español..."
-                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
+                     className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
                      required
                    />
                  </div>
                  
-                 <div className="space-y-3">
-                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                 <div className="space-y-2 sm:space-y-3">
+                   <label className="block text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                      Tema Específico *
                    </label>
                    <input
@@ -162,19 +162,19 @@ const ConfigurationForm = ({
                      value={planningConfig.tema}
                      onChange={(e) => handleInputChange('tema', e.target.value)}
                      placeholder="Ej: Suma y resta, Ecosistemas, Poesía..."
-                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
+                     className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
                      required
                    />
                  </div>
                  
-                 <div className="space-y-3">
-                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                 <div className="space-y-2 sm:space-y-3">
+                   <label className="block text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                      Duración Total (horas) *
                    </label>
                    <select
                      value={planningConfig.horas}
                      onChange={(e) => handleInputChange('horas', e.target.value)}
-                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
+                     className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
                      required
                   >
                     <option value="">Selecciona horas</option>
@@ -183,14 +183,14 @@ const ConfigurationForm = ({
                   </select>
                  </div>
                  
-                 <div className="space-y-3">
-                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                 <div className="space-y-2 sm:space-y-3">
+                   <label className="block text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                      Número de Sesiones *
                    </label>
                    <select
                      value={planningConfig.sesiones}
                      onChange={(e) => handleInputChange('sesiones', e.target.value)}
-                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
+                     className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
                      required
                   >
                     <option value="">Selecciona sesiones</option>
@@ -199,8 +199,8 @@ const ConfigurationForm = ({
                   </select>
                  </div>
                  
-                 <div className="space-y-3">
-                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                 <div className="space-y-2 sm:space-y-3">
+                   <label className="block text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                      Recursos Disponibles *
                    </label>
                    <input
@@ -208,13 +208,13 @@ const ConfigurationForm = ({
                      value={planningConfig.recursos}
                      onChange={(e) => handleInputChange('recursos', e.target.value)}
                      placeholder="Ej: Computadores, internet, software educativo..."
-                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
+                     className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
                      required
                    />
                  </div>
                  
-                 <div className="md:col-span-2 space-y-3">
-                   <label className="block text-lg font-medium text-gray-900 mb-3">
+                 <div className="sm:col-span-2 space-y-2 sm:space-y-3">
+                   <label className="block text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                      Nombre del Docente *
                    </label>
                    <input
@@ -222,20 +222,21 @@ const ConfigurationForm = ({
                      value={planningConfig.nombreDocente}
                      onChange={(e) => handleInputChange('nombreDocente', e.target.value)}
                      placeholder="Ej: María González, Juan Pérez..."
-                     className="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
+                     className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
                      required
                    />
                  </div>
           
-               </div>
-               
-               <div className="text-center pt-8">
+                       </div>
+                       
+               <div className="text-center pt-4 sm:pt-6 lg:pt-8">
                  <button
                    type="submit"
-                   className="inline-flex items-center px-12 py-5 bg-gray-900/90 backdrop-blur-sm text-white rounded-2xl hover:bg-gray-800/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium text-xl shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 transform hover:-translate-y-0.5"
+                   className="inline-flex items-center px-6 sm:px-8 lg:px-12 py-3 sm:py-4 lg:py-5 bg-gray-900/90 backdrop-blur-sm text-white rounded-xl sm:rounded-2xl hover:bg-gray-800/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium text-base sm:text-lg lg:text-xl shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 transform hover:-translate-y-0.5"
                  >
-                   <span className="mr-3">✅</span>
-                   Aceptar y Continuar
+                   <span className="mr-2 sm:mr-3">✅</span>
+                   <span className="hidden sm:inline">Aceptar y Continuar</span>
+                   <span className="sm:hidden">Continuar</span>
                  </button>
                </div>
       </form>
@@ -1193,13 +1194,13 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         )
       })
 
-              // Espacio antes de la conversación
-        paragraphs.push(
-          new Paragraph({
-            children: [new TextRun({ text: "" })],
-            spacing: { after: 600 }
-          })
-        )
+      // Espacio antes de la conversación
+      paragraphs.push(
+        new Paragraph({
+          children: [new TextRun({ text: "" })],
+          spacing: { after: 600 }
+        })
+      )
 
       // Título de la conversación
       paragraphs.push(
@@ -1407,46 +1408,49 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
   return (
     <div className="flex flex-col h-full bg-gray-50 rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
       {/* Header del Chat - Estilo Apple */}
-      <div className="bg-white border-b border-gray-100 p-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-light mb-3 tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 via-pink-500 to-orange-500 bg-clip-text text-transparent">Asistente Pedagógico IA</h2>
-            <p className="text-lg text-gray-500 font-light">
+      <div className="bg-white border-b border-gray-100 p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-2xl sm:text-3xl font-light mb-2 sm:mb-3 tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 via-pink-500 to-orange-500 bg-clip-text text-transparent">Asistente Pedagógico IA</h2>
+            <p className="text-sm sm:text-base lg:text-lg text-gray-500 font-light">
               Sistema de planeación inteligente con inteligencia artificial
             </p>
           </div>
           
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4">
             <button
               onClick={clearChat}
               disabled={isLoading || isSaving}
-              className="px-6 py-3 text-sm bg-gray-100/80 backdrop-blur-sm text-gray-700 rounded-2xl hover:bg-gray-200/80 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-gray-200/50 hover:shadow-lg hover:shadow-gray-200/60"
+              className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-gray-100/80 backdrop-blur-sm text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-200/80 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-gray-200/50 hover:shadow-lg hover:shadow-gray-200/60"
               title="Limpiar conversación"
             >
-              🗑️ Limpiar
+              <span className="hidden sm:inline">🗑️ Limpiar</span>
+              <span className="sm:hidden">🗑️</span>
             </button>
             <button
               onClick={() => exportToWord('agent-only')}
               disabled={isLoading || isSaving || !isConfigured}
-              className="px-6 py-3 text-sm bg-blue-100/80 backdrop-blur-sm text-blue-700 rounded-2xl hover:bg-blue-200/80 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-blue-200/50 hover:shadow-lg hover:shadow-blue-200/60"
+              className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-blue-100/80 backdrop-blur-sm text-blue-700 rounded-xl sm:rounded-2xl hover:bg-blue-200/80 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-blue-200/50 hover:shadow-lg hover:shadow-blue-200/60"
               title="Exportar plan de clase como Word"
             >
-              📄 Exportar Word
+              <span className="hidden sm:inline">📄 Exportar Word</span>
+              <span className="sm:hidden">📄 Word</span>
             </button>
                 <button
               onClick={saveChatToDatabase}
               disabled={isLoading || isSaving || !isConfigured}
-              className="px-6 py-3 text-sm bg-green-100/80 backdrop-blur-sm text-green-700 rounded-2xl hover:bg-green-200/80 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-green-200/50 hover:shadow-lg hover:shadow-green-200/60"
+              className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-green-100/80 backdrop-blur-sm text-green-700 rounded-xl sm:rounded-2xl hover:bg-green-200/80 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-green-200/50 hover:shadow-lg hover:shadow-green-200/60"
               title="Guardar planeación"
             >
-              💾 Guardar
+              <span className="hidden sm:inline">💾 Guardar</span>
+              <span className="sm:hidden">💾</span>
                 </button>
           </div>
         </div>
       </div>
 
       {/* Contenido Principal */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6">
         {/* Formulario de Configuración Inicial */}
         {!isConfigured && sessionRestored && (
           <ConfigurationForm 
@@ -1493,21 +1497,21 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-bold">📚</span>
               </div>
-              <h3 className="text-lg font-semibold text-blue-900">Documentos Consultados en Tiempo Real</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-blue-900">Documentos Consultados en Tiempo Real</h3>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* PEI */}
               {consultedDocuments.pei.length > 0 && (
-                <div className="bg-white/60 rounded-xl p-4 border border-blue-100">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="bg-white/60 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
                     <span className="text-green-600 font-bold">✅</span>
-                    <span className="font-medium text-gray-800">PEI (Proyecto Educativo Institucional)</span>
-                    <span className="text-sm text-gray-500">({consultedDocuments.pei.length} documento{consultedDocuments.pei.length !== 1 ? 's' : ''})</span>
+                    <span className="font-medium text-gray-800 text-sm sm:text-base">PEI (Proyecto Educativo Institucional)</span>
+                    <span className="text-xs sm:text-sm text-gray-500">({consultedDocuments.pei.length} documento{consultedDocuments.pei.length !== 1 ? 's' : ''})</span>
                   </div>
                   <div className="space-y-1">
                     {consultedDocuments.pei.map((doc, index) => (
-                      <div key={index} className="text-sm text-gray-600 bg-white/40 rounded-lg p-2">
+                      <div key={index} className="text-xs sm:text-sm text-gray-600 bg-white/40 rounded-md sm:rounded-lg p-2">
                         📄 {doc.title}
                       </div>
                     ))}
@@ -1517,15 +1521,15 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
               
               {/* Modelo Pedagógico */}
               {consultedDocuments.modeloPedagogico.length > 0 && (
-                <div className="bg-white/60 rounded-xl p-4 border border-blue-100">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="bg-white/60 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
                     <span className="text-green-600 font-bold">✅</span>
-                    <span className="font-medium text-gray-800">Modelo Pedagógico</span>
-                    <span className="text-sm text-gray-500">({consultedDocuments.modeloPedagogico.length} documento{consultedDocuments.modeloPedagogico.length !== 1 ? 's' : ''})</span>
+                    <span className="font-medium text-gray-800 text-sm sm:text-base">Modelo Pedagógico</span>
+                    <span className="text-xs sm:text-sm text-gray-500">({consultedDocuments.modeloPedagogico.length} documento{consultedDocuments.modeloPedagogico.length !== 1 ? 's' : ''})</span>
                   </div>
                   <div className="space-y-1">
                     {consultedDocuments.modeloPedagogico.map((doc, index) => (
-                      <div key={index} className="text-sm text-gray-600 bg-white/40 rounded-lg p-2">
+                      <div key={index} className="text-xs sm:text-sm text-gray-600 bg-white/40 rounded-md sm:rounded-lg p-2">
                         📄 {doc.title}
                       </div>
                     ))}
@@ -1535,15 +1539,15 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
               
               {/* Orientaciones Curriculares */}
               {consultedDocuments.orientacionesCurriculares.length > 0 && (
-                <div className="bg-white/60 rounded-xl p-4 border border-blue-100">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="bg-white/60 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
                     <span className="text-green-600 font-bold">✅</span>
-                    <span className="font-medium text-gray-800">Orientaciones Curriculares</span>
-                    <span className="text-sm text-gray-500">({consultedDocuments.orientacionesCurriculares.length} documento{consultedDocuments.orientacionesCurriculares.length !== 1 ? 's' : ''})</span>
+                    <span className="font-medium text-gray-800 text-sm sm:text-base">Orientaciones Curriculares</span>
+                    <span className="text-xs sm:text-sm text-gray-500">({consultedDocuments.orientacionesCurriculares.length} documento{consultedDocuments.orientacionesCurriculares.length !== 1 ? 's' : ''})</span>
                   </div>
                   <div className="space-y-1">
                     {consultedDocuments.orientacionesCurriculares.map((doc, index) => (
-                      <div key={index} className="text-sm text-gray-600 bg-white/40 rounded-lg p-2">
+                      <div key={index} className="text-xs sm:text-sm text-gray-600 bg-white/40 rounded-md sm:rounded-lg p-2">
                         📄 {doc.title}
                       </div>
                     ))}
@@ -1574,9 +1578,9 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
         
         {/* Mensaje inicial del asistente */}
         {!isConfigured && sessionRestored && (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex justify-start">
-            <div className="max-w-3xl px-4 py-3 rounded-lg backdrop-blur-sm bg-white/80 border border-white/50 shadow-lg shadow-gray-200/60">
+            <div className="max-w-full sm:max-w-3xl px-3 sm:px-4 py-3 rounded-lg backdrop-blur-sm bg-white/80 border border-white/50 shadow-lg shadow-gray-200/60">
               {initialMessage.isFormatted ? (
                 <div 
                   className="prose prose-sm max-w-none"
@@ -1618,7 +1622,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
         )}
         
         {/* Mensajes del Chat - Siempre visible */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
         {messages.map((message) => {
           // Debug: verificar si hay mensajes con contenido del mensaje inicial
           if (message.text.includes('ASISTENTE PEDAGÓGICO INTELIGENTE')) {
@@ -1630,7 +1634,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
               className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-3xl px-4 py-3 rounded-lg backdrop-blur-sm ${
+                className={`max-w-full sm:max-w-3xl px-3 sm:px-4 py-3 rounded-lg backdrop-blur-sm ${
                   message.isUser
                     ? 'bg-blue-600/90 text-white shadow-lg shadow-blue-600/25'
                     : 'bg-white/80 border border-white/50 shadow-lg shadow-gray-200/60'
@@ -1705,32 +1709,36 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
       </div>
 
                  {/* Input del Chat - Siempre visible */}
-           <div className="bg-white border-t border-gray-100 p-8">
-               <form onSubmit={handleSubmit} className="flex gap-6">
+           <div className="bg-white border-t border-gray-100 p-4 sm:p-6 lg:p-8">
+               <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-6">
       <input
                    type="text"
                    value={inputText}
                    onChange={(e) => setInputText(e.target.value)}
             placeholder={isConfigured ? "Escribe tu consulta específica para el plan de clase..." : "Completa la configuración inicial para habilitar el chat"}
-            className="flex-1 px-8 py-5 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duración-300 text-gray-900 placeholder-gray-500 text-lg bg-white"
+            className="flex-1 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duración-300 text-gray-900 placeholder-gray-500 text-sm sm:text-base lg:text-lg bg-white"
             disabled={!isConfigured || isLoading || isSaving}
         />
+        <div className="flex gap-2 sm:gap-3 lg:gap-4">
         <button
                    type="submit"
             disabled={!isConfigured || !inputText.trim() || isLoading || isSaving}
-            className="px-10 py-5 bg-gray-900/90 backdrop-blur-sm text-white rounded-2xl hover:bg-gray-800/90 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all duración-300 font-medium text-lg shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 transform hover:-translate-y-0.5 disabled:transform-none"
+            className="flex-1 sm:flex-none px-4 sm:px-6 lg:px-10 py-3 sm:py-4 lg:py-5 bg-gray-900/90 backdrop-blur-sm text-white rounded-xl sm:rounded-2xl hover:bg-gray-800/90 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all duración-300 font-medium text-sm sm:text-base lg:text-lg shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 transform hover:-translate-y-0.5 disabled:transform-none"
                  >
-                   {isLoading ? '🔄' : '📤'} Enviar
+                   <span className="hidden sm:inline">{isLoading ? '🔄' : '📤'} Enviar</span>
+                   <span className="sm:hidden">{isLoading ? '🔄' : '📤'}</span>
         </button>
         <button
           type="button"
           onClick={() => { try { abortControllerRef.current?.abort(); } catch {} finally { setIsLoading(false) } }}
           disabled={!isLoading}
-          className="px-8 py-5 bg-gray-100 text-gray-700 rounded-2xl hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-200 disabled:opacity-50 transition-all duración-300 font-medium text-lg"
+          className="flex-1 sm:flex-none px-3 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 bg-gray-100 text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-200 disabled:opacity-50 transition-all duración-300 font-medium text-sm sm:text-base lg:text-lg"
           title="Cancelar generación"
         >
-          ✖️ Cancelar
+          <span className="hidden sm:inline">✖️ Cancelar</span>
+          <span className="sm:hidden">✖️</span>
         </button>
+        </div>
                </form>
       </div>
     </div>

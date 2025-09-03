@@ -182,35 +182,36 @@ export default function UserAdmin() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="bg-white/85 backdrop-blur-xl border border-white/40 rounded-3xl p-8 shadow-xl shadow-black/10 mb-8">
-          <div className="flex justify-between items-center">
+        <div className="bg-white/85 backdrop-blur-xl border border-white/40 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xl shadow-black/10 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                 👑 Administración de Usuarios
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 Gestiona usuarios del sistema
               </p>
             </div>
             <button
               onClick={() => setShowCreateForm(!showCreateForm)}
-              className="px-6 py-3 bg-blue-600/90 backdrop-blur-sm text-white rounded-2xl hover:bg-blue-700/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/30"
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600/90 backdrop-blur-sm text-white rounded-xl sm:rounded-2xl hover:bg-blue-700/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/30 text-sm sm:text-base"
             >
-              ➕ Crear Usuario
+              <span className="hidden sm:inline">➕ Crear Usuario</span>
+              <span className="sm:hidden">➕ Crear</span>
             </button>
           </div>
         </div>
 
         {/* Formulario de creación */}
         {showCreateForm && (
-          <div className="bg-white/85 backdrop-blur-xl border border-white/40 rounded-3xl p-8 shadow-xl shadow-black/10 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+          <div className="bg-white/85 backdrop-blur-xl border border-white/40 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xl shadow-black/10 mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6">
               Crear Nuevo Usuario
             </h2>
-            <form onSubmit={createUser} className="space-y-6">
+            <form onSubmit={createUser} className="space-y-4 sm:space-y-6">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                   Email
@@ -221,27 +222,27 @@ export default function UserAdmin() {
                   value={newUser.email}
                   onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
                   placeholder="usuario@ejemplo.com"
                 />
               </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
-                <p className="text-blue-800 text-sm">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl sm:rounded-2xl p-3 sm:p-4">
+                <p className="text-blue-800 text-xs sm:text-sm">
                   🔐 La contraseña se generará automáticamente y se mostrará después de crear el usuario.
                 </p>
               </div>
-              <div className="flex space-x-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-3 bg-green-600/90 backdrop-blur-sm text-white rounded-2xl hover:bg-green-700/90 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all duration-300 font-medium shadow-lg shadow-green-600/25 hover:shadow-xl hover:shadow-green-600/30"
+                  className="px-4 sm:px-6 py-2 sm:py-3 bg-green-600/90 backdrop-blur-sm text-white rounded-xl sm:rounded-2xl hover:bg-green-700/90 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all duration-300 font-medium shadow-lg shadow-green-600/25 hover:shadow-xl hover:shadow-green-600/30 text-sm sm:text-base"
                 >
                   {loading ? '⏳ Creando...' : '✅ Crear Usuario'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowCreateForm(false)}
-                  className="px-6 py-3 bg-gray-500/90 backdrop-blur-sm text-white rounded-2xl hover:bg-gray-600/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium shadow-lg shadow-gray-500/25 hover:shadow-xl hover:shadow-gray-500/30"
+                  className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-500/90 backdrop-blur-sm text-white rounded-xl sm:rounded-2xl hover:bg-gray-600/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium shadow-lg shadow-gray-500/25 hover:shadow-xl hover:shadow-gray-500/30 text-sm sm:text-base"
                 >
                   ❌ Cancelar
                 </button>
@@ -296,49 +297,51 @@ export default function UserAdmin() {
               {users.map((user) => (
                 <div
                   key={user.id}
-                  className="bg-white/80 backdrop-blur-sm border border-white/50 rounded-2xl p-6 shadow-lg shadow-black/10 hover:shadow-xl hover:shadow-black/15 transition-all duration-300"
+                  className="bg-white/80 backdrop-blur-sm border border-white/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg shadow-black/10 hover:shadow-xl hover:shadow-black/15 transition-all duration-300"
                 >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-xl">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <div className="flex items-center space-x-3 sm:space-x-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-lg sm:text-xl">
                           {user.email === 'admin@admin.com' ? '👑' : '👤'}
                         </span>
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 flex items-center">
-                          {user.email}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-gray-900 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                          <span className="truncate">{user.email}</span>
                           {user.email === 'admin@admin.com' && (
-                            <span className="ml-2 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                            <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium self-start sm:self-auto">
                               Admin
                             </span>
                           )}
                         </h3>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs sm:text-sm text-gray-500">
                           Creado: {new Date(user.created_at).toLocaleDateString('es-ES')}
                         </p>
                         {user.last_sign_in_at && (
-                          <p className="text-sm text-gray-500">
+                          <p className="text-xs sm:text-sm text-gray-500">
                             Último acceso: {new Date(user.last_sign_in_at).toLocaleDateString('es-ES')}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2">
                       <button
                         onClick={() => resetUserPassword(user.id, user.email || '')}
-                        className="px-4 py-2 bg-yellow-500/90 backdrop-blur-sm text-white rounded-xl hover:bg-yellow-600/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium shadow-lg shadow-yellow-500/25 hover:shadow-xl hover:shadow-yellow-500/30"
+                        className="px-3 sm:px-4 py-2 bg-yellow-500/90 backdrop-blur-sm text-white rounded-lg sm:rounded-xl hover:bg-yellow-600/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium shadow-lg shadow-yellow-500/25 hover:shadow-xl hover:shadow-yellow-500/30 text-xs sm:text-sm"
                         title="Resetear contraseña"
                       >
-                        🔑 Reset
+                        <span className="hidden sm:inline">🔑 Reset</span>
+                        <span className="sm:hidden">🔑</span>
                       </button>
                       {user.email !== 'admin@admin.com' && (
                         <button
                           onClick={() => deleteUser(user.id, user.email || '')}
-                          className="px-4 py-2 bg-red-500/90 backdrop-blur-sm text-white rounded-xl hover:bg-red-600/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/30"
+                          className="px-3 sm:px-4 py-2 bg-red-500/90 backdrop-blur-sm text-white rounded-lg sm:rounded-xl hover:bg-red-600/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/30 text-xs sm:text-sm"
                           title="Eliminar usuario"
                         >
-                          🗑️ Eliminar
+                          <span className="hidden sm:inline">🗑️ Eliminar</span>
+                          <span className="sm:hidden">🗑️</span>
                         </button>
                       )}
                     </div>

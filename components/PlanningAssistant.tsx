@@ -26,9 +26,9 @@ export default function PlanningAssistant() {
       <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
         
-        <div className="max-w-6xl mx-auto px-8 py-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
           {activeTab === 'generar' && (
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-6 lg:space-y-8">
               <ChatAssistant 
                 onChatUpdate={handleChatUpdate}
                 currentPlanningData={currentPlanningData}
@@ -38,13 +38,13 @@ export default function PlanningAssistant() {
           )}
           
           {activeTab === 'estado' && isAdmin && (
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-6 lg:space-y-8">
               <AppStatus />
             </div>
           )}
           
           {activeTab === 'historial' && (
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-6 lg:space-y-8">
               <ResourcesBank 
                 setActiveTab={setActiveTab}
                 setCurrentPlanningData={setCurrentPlanningData}
@@ -53,7 +53,9 @@ export default function PlanningAssistant() {
           )}
           
           {activeTab === 'usuarios' && isAdmin && (
-            <UserAdmin />
+            <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+              <UserAdmin />
+            </div>
           )}
         </div>
       </div>

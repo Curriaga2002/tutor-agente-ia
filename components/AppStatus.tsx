@@ -26,140 +26,140 @@ export default function AppStatus() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       {/* Header Principal - Estilo Apple */}
-      <div className="text-center mb-16">
-        <h1 className="text-4xl font-light text-gray-900 mb-4 tracking-tight">
+      <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-900 mb-3 sm:mb-4 tracking-tight">
           Estado del Sistema
         </h1>
-        <p className="text-xl text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
+        <p className="text-base sm:text-lg lg:text-xl text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
           Monitoreo en tiempo real del estado de la aplicación y recursos disponibles
         </p>
       </div>
 
       {/* Tarjeta Principal de Estado - Estilo Apple Card */}
-      <div className="bg-white/85 backdrop-blur-xl rounded-3xl shadow-xl shadow-black/10 border border-white/40 p-12 mb-12">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-light text-gray-900">Estado General</h2>
+      <div className="bg-white/85 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl shadow-black/10 border border-white/40 p-6 sm:p-8 lg:p-12 mb-8 sm:mb-12">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-light text-gray-900">Estado General</h2>
           <div className={`flex items-center space-x-2 ${getStatusColor()}`}>
-            <span className="text-2xl">{getStatusIcon()}</span>
-            <span className="text-lg font-medium">{getStatusText()}</span>
+            <span className="text-xl sm:text-2xl">{getStatusIcon()}</span>
+            <span className="text-base sm:text-lg font-medium">{getStatusText()}</span>
           </div>
         </div>
 
         {/* Grid de Métricas - Estilo Apple */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           <div className="text-center">
-            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-blue-50 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
               <span className="text-2xl">📚</span>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Documentos</h3>
-            <p className="text-3xl font-light text-gray-900 mb-1">
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">Documentos</h3>
+            <p className="text-2xl sm:text-3xl font-light text-gray-900 mb-1">
               {documentsLoading ? '...' : documentCount}
             </p>
-            <p className="text-sm text-gray-500">Total disponibles</p>
+            <p className="text-xs sm:text-sm text-gray-500">Total disponibles</p>
           </div>
 
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">🤖</span>
+            <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-green-50 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <span className="text-xl sm:text-2xl">🤖</span>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Inteligencia Artificial</h3>
-            <p className="text-3xl font-light text-gray-900 mb-1">Activa</p>
-            <p className="text-sm text-gray-500">Gemini API</p>
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">Inteligencia Artificial</h3>
+            <p className="text-2xl sm:text-3xl font-light text-gray-900 mb-1">Activa</p>
+            <p className="text-xs sm:text-sm text-gray-500">Gemini API</p>
           </div>
 
           <div className="text-center">
-            <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">🔄</span>
+            <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-purple-50 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <span className="text-xl sm:text-2xl">🔄</span>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Monitoreo</h3>
-            <p className="text-3xl font-light text-gray-900 mb-1">Tiempo Real</p>
-            <p className="text-sm text-gray-500">Activo</p>
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">Monitoreo</h3>
+            <p className="text-2xl sm:text-3xl font-light text-gray-900 mb-1">Tiempo Real</p>
+            <p className="text-xs sm:text-sm text-gray-500">Activo</p>
           </div>
         </div>
       </div>
 
       {/* Detalles del Sistema - Estilo Apple */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         {/* Sistema de Documentos */}
-        <div className="bg-white/85 backdrop-blur-xl rounded-3xl shadow-xl shadow-black/10 border border-white/40 p-8">
-          <div className="flex items-center mb-6">
-            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mr-4">
-              <span className="text-xl">📚</span>
+        <div className="bg-white/85 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl shadow-black/10 border border-white/40 p-4 sm:p-6 lg:p-8">
+          <div className="flex items-center mb-4 sm:mb-6">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 rounded-xl sm:rounded-2xl flex items-center justify-center mr-3 sm:mr-4">
+              <span className="text-lg sm:text-xl">📚</span>
             </div>
-            <h3 className="text-xl font-light text-gray-900">Sistema de Documentos</h3>
+            <h3 className="text-lg sm:text-xl font-light text-gray-900">Sistema de Documentos</h3>
           </div>
           
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-gray-50">
-              <span className="text-gray-600 font-medium">Estado de conexión</span>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 py-2 sm:py-3 border-b border-gray-50">
+              <span className="text-sm sm:text-base text-gray-600 font-medium">Estado de conexión</span>
               <span className={`flex items-center space-x-2 ${getStatusColor()}`}>
                 <span>{getStatusIcon()}</span>
-                <span className="font-medium">{getStatusText()}</span>
+                <span className="text-sm sm:text-base font-medium">{getStatusText()}</span>
               </span>
             </div>
             
-            <div className="flex items-center justify-between py-3 border-b border-gray-50">
-              <span className="text-gray-600 font-medium">Documentos cargados</span>
-              <span className="font-medium text-gray-900">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 py-2 sm:py-3 border-b border-gray-50">
+              <span className="text-sm sm:text-base text-gray-600 font-medium">Documentos cargados</span>
+              <span className="text-sm sm:text-base font-medium text-gray-900">
                 {documentsLoading ? '...' : documentCount}
               </span>
             </div>
             
-            <div className="flex items-center justify-between py-3 border-b border-gray-50">
-              <span className="text-gray-600 font-medium">Última actualización</span>
-              <span className="font-medium text-gray-900">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 py-2 sm:py-3 border-b border-gray-50">
+              <span className="text-sm sm:text-base text-gray-600 font-medium">Última actualización</span>
+              <span className="text-sm sm:text-base font-medium text-gray-900">
                 {lastUpdated ? new Date(lastUpdated).toLocaleTimeString('es-ES') : 'N/A'}
               </span>
             </div>
             
-            <div className="flex items-center justify-between py-3">
-              <span className="text-gray-600 font-medium">Bucket Supabase</span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 py-2 sm:py-3">
+              <span className="text-sm sm:text-base text-gray-600 font-medium">Bucket Supabase</span>
               <span className="flex items-center space-x-2 text-green-500">
                 <span>✅</span>
-                <span className="font-medium">Conectado</span>
+                <span className="text-sm sm:text-base font-medium">Conectado</span>
               </span>
             </div>
           </div>
         </div>
 
         {/* Sistema de IA */}
-        <div className="bg-white/85 backdrop-blur-xl rounded-3xl shadow-xl shadow-black/10 border border-white/40 p-8">
-          <div className="flex items-center mb-6">
-            <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center mr-4">
-              <span className="text-xl">🤖</span>
+        <div className="bg-white/85 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl shadow-black/10 border border-white/40 p-4 sm:p-6 lg:p-8">
+          <div className="flex items-center mb-4 sm:mb-6">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-50 rounded-xl sm:rounded-2xl flex items-center justify-center mr-3 sm:mr-4">
+              <span className="text-lg sm:text-xl">🤖</span>
             </div>
-            <h3 className="text-xl font-light text-gray-900">Inteligencia Artificial</h3>
+            <h3 className="text-lg sm:text-xl font-light text-gray-900">Inteligencia Artificial</h3>
           </div>
           
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-gray-50">
-              <span className="text-gray-600 font-medium">Gemini API</span>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 py-2 sm:py-3 border-b border-gray-50">
+              <span className="text-sm sm:text-base text-gray-600 font-medium">Gemini API</span>
               <span className="flex items-center space-x-2 text-green-500">
                 <span>✅</span>
-                <span className="font-medium">Activa</span>
+                <span className="text-sm sm:text-base font-medium">Activa</span>
               </span>
             </div>
             
-            <div className="flex items-center justify-between py-3 border-b border-gray-50">
-              <span className="text-gray-600 font-medium">Modelo</span>
-              <span className="font-medium text-gray-900">gemini-1.5-flash</span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 py-2 sm:py-3 border-b border-gray-50">
+              <span className="text-sm sm:text-base text-gray-600 font-medium">Modelo</span>
+              <span className="text-sm sm:text-base font-medium text-gray-900">gemini-1.5-flash</span>
             </div>
             
-            <div className="flex items-center justify-between py-3 border-b border-gray-50">
-              <span className="text-gray-600 font-medium">Sistema de fallback</span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 py-2 sm:py-3 border-b border-gray-50">
+              <span className="text-sm sm:text-base text-gray-600 font-medium">Sistema de fallback</span>
               <span className="flex items-center space-x-2 text-blue-500">
                 <span>🔄</span>
-                <span className="font-medium">Disponible</span>
+                <span className="text-sm sm:text-base font-medium">Disponible</span>
               </span>
             </div>
             
-            <div className="flex items-center justify-between py-3">
-              <span className="text-gray-600 font-medium">Generación de planes</span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 py-2 sm:py-3">
+              <span className="text-sm sm:text-base text-gray-600 font-medium">Generación de planes</span>
               <span className="flex items-center space-x-2 text-green-500">
                 <span>✅</span>
-                <span className="font-medium">Funcionando</span>
+                <span className="text-sm sm:text-base font-medium">Funcionando</span>
               </span>
             </div>
           </div>
@@ -168,19 +168,19 @@ export default function AppStatus() {
 
       {/* Documentos Disponibles - Estilo Apple */}
       {bucketDocuments.length > 0 && (
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mt-8">
-          <div className="flex items-center mb-6">
-            <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mr-4">
-              <span className="text-xl">📖</span>
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:p-8 mt-6 sm:mt-8">
+          <div className="flex items-center mb-4 sm:mb-6">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-50 rounded-xl sm:rounded-2xl flex items-center justify-center mr-3 sm:mr-4">
+              <span className="text-lg sm:text-xl">📖</span>
             </div>
-            <h3 className="text-xl font-light text-gray-900">Documentos Disponibles</h3>
+            <h3 className="text-lg sm:text-xl font-light text-gray-900">Documentos Disponibles</h3>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-64 overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 max-h-48 sm:max-h-64 overflow-y-auto">
             {bucketDocuments.slice(0, 12).map((doc, index) => (
-              <div key={doc.id} className="bg-gray-50 rounded-2xl p-4 border border-gray-100 hover:border-gray-200 transition-colors">
-                <div className="flex items-start justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-800 line-clamp-2 leading-relaxed">{doc.title}</h4>
+              <div key={doc.id} className="bg-gray-50 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-gray-100 hover:border-gray-200 transition-colors">
+                <div className="flex items-start justify-between mb-2 sm:mb-3">
+                  <h4 className="text-xs sm:text-sm font-medium text-gray-800 line-clamp-2 leading-relaxed">{doc.title}</h4>
                   <span className="text-xs text-gray-400 ml-2 flex-shrink-0">#{index + 1}</span>
                 </div>
                 <p className="text-xs text-gray-500 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full inline-block">

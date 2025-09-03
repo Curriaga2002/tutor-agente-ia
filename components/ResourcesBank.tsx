@@ -723,27 +723,27 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
   }, [])
 
   return (
-            <div className="bg-white rounded-lg shadow-xl shadow-black/10 p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">Banco de Recursos - Planeaciones Guardadas</h2>
+            <div className="bg-white rounded-lg shadow-xl shadow-black/10 p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Banco de Recursos - Planeaciones Guardadas</h2>
         <button
           onClick={loadHistorial}
-          className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200 text-sm"
+          className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200 text-sm self-start sm:self-auto"
         >
           🔄 Actualizar
         </button>
       </div>
 
       {/* Filtros de búsqueda */}
-      <div className="mb-6 space-y-4">
-        <div className="flex gap-4">
+      <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
+        <div className="flex gap-3 sm:gap-4">
           <div className="flex-1">
             <input
               type="text"
               placeholder="🔍 Buscar por tema o grado..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
             />
           </div>
         </div>
@@ -777,30 +777,30 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
       )}
 
       {!isLoading && filteredPlaneaciones.length > 0 && (
-        <div className="space-y-6">
-          <div className="text-sm text-gray-600 mb-4">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
             Mostrando {filteredPlaneaciones.length} de {planeaciones.length} planeaciones
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredPlaneaciones.map((plan) => (
               <div 
                 key={plan.id} 
-                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-2xl hover:shadow-gray-200/60 hover:border-gray-300 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group"
+                className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:shadow-2xl hover:shadow-gray-200/60 hover:border-gray-300 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group"
               >
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-3 sm:mb-4">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-lg mb-2 group-hover:text-gray-700 transition-colors">
+                    <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-2 group-hover:text-gray-700 transition-colors">
                       {plan.tema}
                     </h3>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <div className="flex flex-wrap gap-1 sm:gap-2 mb-2 sm:mb-3">
+                      <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                         📚 {plan.grado}
                       </span>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         ⏱️ {plan.duracion}
                       </span>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                         📅 {plan.sesiones} sesión(es)
                       </span>
                     </div>
@@ -810,21 +810,23 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                   </div>
                 </div>
                 
-                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 pt-3 sm:pt-4 border-t border-gray-100">
                   <button
                     onClick={() => viewChatHistory(plan)}
-                    className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors duration-200 text-sm font-medium group-hover:bg-blue-50 group-hover:text-blue-700"
+                    className="flex items-center justify-center px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-200 transition-colors duration-200 text-xs sm:text-sm font-medium group-hover:bg-blue-50 group-hover:text-blue-700"
                     title="Ver historial completo del chat"
                   >
-                    💬 Ver Chat
+                    <span className="hidden sm:inline">💬 Ver Chat</span>
+                    <span className="sm:hidden">💬 Chat</span>
                   </button>
                   {isAdmin && (
                   <button
                       onClick={() => deletePlaneacion(plan.id)}
-                      className="flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors duration-200 text-sm font-medium"
+                      className="flex items-center justify-center px-3 sm:px-4 py-2 bg-red-50 text-red-600 rounded-lg sm:rounded-xl hover:bg-red-100 transition-colors duration-200 text-xs sm:text-sm font-medium"
                       title="Eliminar planeación (solo administradores)"
                   >
-                    🗑️ Eliminar
+                    <span className="hidden sm:inline">🗑️ Eliminar</span>
+                    <span className="sm:hidden">🗑️</span>
                   </button>
                   )}
                 </div>
@@ -836,41 +838,37 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
 
       {/* Modal para mostrar historial del chat */}
       {showChatHistory && selectedPlan && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
-          <div className="bg-white rounded-2xl shadow-2xl shadow-black/20 w-full max-w-7xl h-[95vh] sm:h-[90vh] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4" onClick={closeChatHistory}>
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl shadow-black/20 w-full max-w-7xl h-[95vh] sm:h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
             {/* Header responsive */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-6 lg:p-8 border-b border-gray-200 bg-white">
-              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-800 mb-4 sm:mb-0 pr-4">
-                💬 Historial Completo del Chat - {selectedPlan.tema}
-              </h3>
-              <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
-                <button
-                  onClick={() => copyToClipboard(formatChatForCopy(selectedPlan), "Chat completo")}
-                  className="bg-green-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl hover:bg-green-700 transition duration-300 text-xs sm:text-sm font-medium shadow-lg shadow-green-600/25 hover:shadow-xl hover:shadow-green-600/30 flex-1 sm:flex-none"
-                >
-                  📋 Copiar
-                </button>
-                <button
-                  onClick={() => exportChatToWord(selectedPlan)}
-                  className="bg-blue-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl hover:bg-blue-700 transition duration-300 text-xs sm:text-sm font-medium shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/30 flex-1 sm:flex-none"
-                >
-                  📄 Word
-                </button>
-                <button
-                  onClick={closeChatHistory}
-                  className="bg-gray-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl hover:bg-gray-700 transition duration-300 text-xs sm:text-sm font-medium shadow-lg shadow-gray-600/25 hover:shadow-xl hover:shadow-gray-600/30 flex-1 sm:flex-none"
-                >
-                  ✕ Cerrar
-                </button>
+            <div className="relative p-4 sm:p-6 lg:p-8 border-b border-gray-200 bg-white">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-800 pr-4">
+                  💬 Historial Completo del Chat - {selectedPlan.tema}
+                </h3>
+                <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
+                  <button
+                    onClick={() => copyToClipboard(formatChatForCopy(selectedPlan), "Chat completo")}
+                    className="bg-green-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl hover:bg-green-700 transition duration-300 text-xs sm:text-sm font-medium shadow-lg shadow-green-600/25 hover:shadow-xl hover:shadow-green-600/30 flex-1 sm:flex-none"
+                  >
+                    📋 Copiar
+                  </button>
+                  <button
+                    onClick={() => exportChatToWord(selectedPlan)}
+                    className="bg-blue-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl hover:bg-blue-700 transition duration-300 text-xs sm:text-sm font-medium shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/30 flex-1 sm:flex-none"
+                  >
+                    📄 Word
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Contenido responsive */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-white">
               {/* Información de la planeación */}
-                             <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-lg shadow-blue-100/50">
-                <h4 className="font-semibold text-blue-800 mb-3 sm:mb-4 text-base sm:text-lg">📚 Información de la Planeación</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 text-sm sm:text-base">
+                             <div className="bg-blue-50 border border-blue-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8 shadow-lg shadow-blue-100/50">
+                <h4 className="font-semibold text-blue-800 mb-2 sm:mb-3 lg:mb-4 text-sm sm:text-base lg:text-lg">📚 Información de la Planeación</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 lg:gap-6 text-xs sm:text-sm lg:text-base">
                   <div>
                     <span className="font-medium text-blue-900">Grado:</span> 
                     <span className="ml-2 text-blue-700">{selectedPlan.grado}</span>
@@ -891,26 +889,26 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
               </div>
 
               {/* Historial del chat */}
-              <div className="space-y-4 sm:space-y-6">
-                <h4 className="font-semibold text-gray-800 mb-4 sm:mb-6 text-lg sm:text-xl">💬 Conversación Completa</h4>
+              <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+                <h4 className="font-semibold text-gray-800 mb-3 sm:mb-4 lg:mb-6 text-base sm:text-lg lg:text-xl">💬 Conversación Completa</h4>
                 
                 {selectedPlan.chat_history && selectedPlan.chat_history.length > 0 ? (
                   selectedPlan.chat_history.map((message) => (
                     <div key={message.id} className={`${message.isUser ? "text-right" : "text-left"}`}>
                       <div
-                                                 className={`inline-block max-w-[95%] sm:max-w-[90%] p-4 sm:p-6 rounded-2xl ${
+                                                 className={`inline-block max-w-[95%] sm:max-w-[90%] p-3 sm:p-4 lg:p-6 rounded-xl sm:rounded-2xl ${
                            message.isUser
                              ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
                              : "bg-gray-50 text-gray-800 border-l-4 border-blue-400 shadow-lg shadow-gray-200/60"
                          }`}
                       >
-                        <div className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap break-words">
+                        <div className="text-xs sm:text-sm lg:text-base leading-relaxed whitespace-pre-wrap break-words">
                           {message.isFormatted ? 
                             message.text.replace(/\*\*/g, '').replace(/\*/g, '') : 
                             message.text
                           }
                         </div>
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 sm:mt-4 gap-1 sm:gap-0">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 sm:mt-3 lg:mt-4 gap-1 sm:gap-0">
                           <span className="text-xs sm:text-sm opacity-70">
                             {new Date(message.timestamp).toLocaleTimeString("es-CO")}
                           </span>
