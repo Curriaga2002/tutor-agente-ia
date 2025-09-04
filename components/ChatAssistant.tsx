@@ -152,7 +152,7 @@ const ConfigurationForm = ({
     let num = Number(planningConfig[field])
     if (!Number.isFinite(num) || num === 0) num = 1
     // Rango: 1-3 sesiones
-    if (num < 1) num = 1
+      if (num < 1) num = 1
     if (num > 3) num = 3
     setPlanningConfig((prev: PlanningConfig) => ({ 
       ...prev, 
