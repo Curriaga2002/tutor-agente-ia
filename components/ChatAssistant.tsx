@@ -581,11 +581,10 @@ export default function ChatAssistant({
         // Post-procesar para asegurar consistencia de horas y sesiones y añadir distribución temporal
         let text = geminiResponse.text
         try {
-          const horasNum = Math.min(2, Math.max(1, Number(planningConfig.horas || '1') || 1))
           const sesionesNum = Math.min(2, Math.max(1, Number(planningConfig.sesiones || '1') || 1))
+          const horasNum = sesionesNum * 2 // Cada sesión = 2 horas
           const totalMinutes = horasNum * 60
-          const base = Math.floor(totalMinutes / sesionesNum)
-          const remainder = totalMinutes - (base * sesionesNum)
+          const horasPorSesion = 2 // Cada sesión siempre es de 2 horas
           // Normalizar encabezados
           text = text
             .replace(/Duración:\s*\d+\s*horas/gi, `Duración: ${horasNum} horas`)
@@ -605,11 +604,10 @@ export default function ChatAssistant({
             .replace(/\n{3,}/g, '\n\n')
           // Inyectar bloque de distribución temporal al inicio si no existe
           if (!/Distribuci[óo]n temporal/gi.test(text)) {
-            const bloque = `\n\n**🕒 Distribución temporal (minutos):**\n` +
+            const bloque = `\n\n**🕒 Distribución temporal:**\n` +
               Array.from({ length: sesionesNum }, (_, i) => {
-                const extra = i === (sesionesNum - 1) ? remainder : 0
-                return `• Sesión ${i + 1}: ${base + extra} min`
-              }).join('\n') + `\n• Verificación: suma de sesiones = ${totalMinutes} min`
+                return `• Sesión ${i + 1}: ${horasPorSesion} horas`
+              }).join('\n') + `\n• Verificación: suma de sesiones = ${horasNum} horas`
             text = text.replace(/(\*\*Informaci[óo]n de la Planeaci[óo]n:\*\*[\s\S]*?\n)/, `$1${bloque}\n`)
           }
 
