@@ -1499,11 +1499,15 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
 • **Duración:** ${planningConfig.horas} horas
 • **Sesiones:** ${planningConfig.sesiones}
 
-**💡 Ejemplos de solicitudes para Tecnología e Informática:**
+**💡 Ejemplo de solicitud para Tecnología e Informática:**
 
-• "Genera un plan de clase para ${planningConfig.grado} sobre el computador y sus partes"
-• "Crea un plan de clase para ${planningConfig.grado} sobre programación básica con Scratch"
-• "Diseña un plan de clase para ${planningConfig.grado} sobre desarrollo web con HTML y CSS"`,
+"Genera un plan de clase para grado 8° sobre programación básica con Scratch.
+Cantidad de estudiantes: 30.
+Recursos disponibles: 15 computadores.
+Estrategia de trabajo: Grupos de 2 estudiantes por computador.
+Metodología: Aprendizaje basado en proyectos con enfoque colaborativo, alineado al modelo crítico-social.
+Duración: 2 sesiones (4 horas).
+Evaluación: Formativa mediante observación, lista de cotejo y producto final del proyecto en Scratch."`,
                 isUser: false,
                 timestamp: new Date(),
                 isFormatted: true,
@@ -1612,22 +1616,6 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
               {/* Contenedor principal con gradiente */}
               <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50/30 backdrop-blur-xl border border-blue-200/50 rounded-2xl p-6 sm:p-8 shadow-xl shadow-blue-500/10 ring-1 ring-blue-200/20">
                 
-                {/* Header del asistente */}
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg shadow-blue-500/25 flex items-center justify-center">
-                      <span className="text-2xl">🤖</span>
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
-                      <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        Asistente Pedagógico IA
-                      </span>
-                    </h3>
-                    <p className="text-sm text-gray-600 font-medium">Listo para ayudarte</p>
-                  </div>
-                </div>
 
                 {/* Contenido del mensaje */}
                 <div className="space-y-4">
@@ -1830,7 +1818,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
                    type="text"
                    value={inputText}
                    onChange={(e) => setInputText(e.target.value)}
-            placeholder={isConfigured ? "Escribe tu consulta específica para el plan de clase..." : "Completa la configuración inicial para habilitar el chat"}
+            placeholder="Pide aquí tu plan de clases"
             className="flex-1 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duración-300 text-gray-900 placeholder-gray-500 text-sm sm:text-base lg:text-lg bg-white"
             disabled={!isConfigured || isLoading || isSaving}
         />
