@@ -212,15 +212,15 @@ Debes generar un **plan de clase completo en lenguaje natural**, estructurado en
 • Asignatura: Tecnología e Informática
 • Tema: ${tema}
 • Recursos: ${recursos || 'Computadores, internet, software educativo'}
-• ${context.includes('horas') ? context.replace(/\(/g, '').replace(/\)/g, '') : '2 horas'}
-• Sesiones: ${context.includes('sesiones') ? context : '2'}
+• Sesiones: ${context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1' : '1'} sesión(es)
+• Duración total: ${(() => {
+  const sesiones = parseInt(context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1' : '1');
+  return `${sesiones * 2} horas`;
+})()}
 • Docente: ${nombreDocente || '[A definir por el docente]'}
-• Duración total (min): ${context.includes('horas') ? (parseInt(context.match(/\d+/)?.[0] || '2') * 60) : 120}
-• Distribución sugerida (min): ${(() => {
-  const horas = parseInt(context.match(/\d+/)?.[0] || '2');
-  const sesiones = parseInt(context.includes('sesiones') ? context.match(/\d+/)?.[0] || '2' : '2');
-  const minutosPorSesion = (horas * 60) / sesiones;
-  return Array.from({length: sesiones}, (_, i) => `Sesión ${i + 1}: ${minutosPorSesion} min`).join(' | ');
+• Distribución de sesiones: ${(() => {
+  const sesiones = parseInt(context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1' : '1');
+  return Array.from({length: sesiones}, (_, i) => `Sesión ${i + 1}: 2 horas`).join(' | ');
 })()}
 
 ## 📚 COMPONENTE CURRICULAR

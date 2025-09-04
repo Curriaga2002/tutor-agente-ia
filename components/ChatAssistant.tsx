@@ -63,10 +63,10 @@ const ConfigurationForm = ({
 }) => {
   const handleConfigSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const horasNum = Number(planningConfig.horas)
     const sesionesNum = Number(planningConfig.sesiones)
-    const horasValid = Number.isFinite(horasNum) && horasNum >= 1 && horasNum <= 2
-    const sesionesValid = Number.isFinite(sesionesNum) && sesionesNum >= 1 && sesionesNum <= 2
+    const sesionesValid = Number.isFinite(sesionesNum) && sesionesNum >= 1 && sesionesNum <= 3
+    // Las horas se calculan automáticamente: 1 sesión = 2 horas
+    const horasCalculadas = sesionesNum * 2
     
     // Debug: mostrar valores de validación
     console.log('Validación del formulario:', {
@@ -74,7 +74,6 @@ const ConfigurationForm = ({
       asignatura: planningConfig.asignatura,
       tema: planningConfig.tema,
       horas: planningConfig.horas,
-      horasValid,
       sesiones: planningConfig.sesiones,
       sesionesValid,
       recursos: planningConfig.recursos,
@@ -86,7 +85,6 @@ const ConfigurationForm = ({
       grado: !!planningConfig.grado,
       asignatura: !!planningConfig.asignatura,
       tema: !!planningConfig.tema,
-      horas: horasValid,
       sesiones: sesionesValid,
       recursos: !!planningConfig.recursos,
       nombreDocente: !!planningConfig.nombreDocente
@@ -104,7 +102,6 @@ const ConfigurationForm = ({
       configConAsignatura.grado &&
       configConAsignatura.asignatura &&
       configConAsignatura.tema &&
-      horasValid &&
       sesionesValid &&
       configConAsignatura.recursos &&
       configConAsignatura.nombreDocente
@@ -120,7 +117,6 @@ const ConfigurationForm = ({
         grado: !!configConAsignatura.grado,
         asignatura: !!configConAsignatura.asignatura,
         tema: !!configConAsignatura.tema,
-        horas: horasValid,
         sesiones: sesionesValid,
         recursos: !!configConAsignatura.recursos,
         nombreDocente: !!configConAsignatura.nombreDocente
@@ -138,26 +134,31 @@ const ConfigurationForm = ({
       setPlanningConfig((prev: PlanningConfig) => ({ ...prev, asignatura: 'Tecnología e informática' }))
       return
     }
-    if (field === 'horas' || field === 'sesiones') {
+    if (field === 'sesiones') {
       // Mantener solo dígitos pero NO forzar rangos aquí para evitar saltos/duplicaciones visuales
       const digitsOnly = value.replace(/[^0-9]/g, '')
-      setPlanningConfig((prev: PlanningConfig) => ({ ...prev, [field]: digitsOnly }))
+      setPlanningConfig((prev: PlanningConfig) => {
+        const newConfig = { ...prev, [field]: digitsOnly }
+        // Calcular horas automáticamente: 1 sesión = 2 horas
+        newConfig.horas = String((parseInt(digitsOnly) || 0) * 2)
+        return newConfig
+      })
       return
     }
     setPlanningConfig((prev: PlanningConfig) => ({ ...prev, [field]: value }))
   }
 
-  const normalizeNumericField = (field: 'horas' | 'sesiones') => {
+  const normalizeNumericField = (field: 'sesiones') => {
     let num = Number(planningConfig[field])
     if (!Number.isFinite(num) || num === 0) num = 1
-    if (field === 'horas') {
-      if (num < 1) num = 1
-      if (num > 2) num = 2
-    } else {
-      if (num < 1) num = 1
-      if (num > 2) num = 2
-    }
-    setPlanningConfig((prev: PlanningConfig) => ({ ...prev, [field]: String(num) }))
+    // Rango: 1-3 sesiones
+    if (num < 1) num = 1
+    if (num > 3) num = 3
+    setPlanningConfig((prev: PlanningConfig) => ({ 
+      ...prev, 
+      [field]: String(num),
+      horas: String(num * 2) // Calcular horas automáticamente
+    }))
   }
 
            return (
@@ -243,22 +244,6 @@ const ConfigurationForm = ({
                  
                  <div className="space-y-2 sm:space-y-3">
                    <label className="block text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
-                     Duración Total (horas) *
-                   </label>
-                   <select
-                     value={planningConfig.horas}
-                     onChange={(e) => handleInputChange('horas', e.target.value)}
-                     className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
-                     required
-                  >
-                    <option value="">Selecciona horas</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                  </select>
-                 </div>
-                 
-                 <div className="space-y-2 sm:space-y-3">
-                   <label className="block text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                      Número de Sesiones *
                    </label>
                    <select
@@ -267,13 +252,17 @@ const ConfigurationForm = ({
                      className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
                      required
                   >
-                    <option value="">Selecciona sesiones</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
+                    <option value="">Selecciona número de sesiones</option>
+                    <option value="1">1 sesión (2 horas)</option>
+                    <option value="2">2 sesiones (4 horas)</option>
+                    <option value="3">3 sesiones (6 horas)</option>
                   </select>
+                   <p className="text-sm text-gray-600 mt-1">
+                     💡 Cada sesión equivale a 2 horas exactas
+                   </p>
                  </div>
                  
-                 <div className="space-y-2 sm:space-y-3">
+                 <div className="sm:col-span-2 space-y-2 sm:space-y-3">
                    <label className="block text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">
                      Recursos Disponibles *
                    </label>
@@ -353,25 +342,7 @@ export default function ChatAssistant({
   const [messages, setMessages] = useState<Message[]>([])
   const [initialMessage, setInitialMessage] = useState<Message>({
     id: "initial",
-      text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
-
-¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
-
-**Mi misión es ayudarte a planificar clases completas** usando documentos oficiales del sistema educativo:
-• Orientaciones curriculares oficiales
-• Estructuras de planes de clase
-• Proyectos educativos institucionales
-• Modelos pedagógicos validados
-
-**¿Qué plan de clase necesitas generar?** 
-
-Ejemplos: 
-
-• "Plan de clase para 5° sobre el computador y sus partes"
-• "Plan de clase para 9° sobre programación básica con Scratch"
-• "Plan de clase para 11° sobre desarrollo web con HTML y CSS"
-
-`,
+      text: ``,
       isUser: false,
       timestamp: new Date(),
       isFormatted: true,
@@ -401,71 +372,17 @@ Ejemplos:
       if (documentsLoading) {
       setInitialMessage(prev => ({
         ...prev,
-        text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
-
-¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
-
-**Mi misión es ayudarte a planificar clases completas** usando documentos oficiales del sistema educativo:
-• Orientaciones curriculares oficiales
-• Estructuras de planes de clase
-• Proyectos educativos institucionales
-• Modelos pedagógicos validados
-
-**Estado del sistema:** 🔄 Inicializando...
-
-**¿Qué plan de clase necesitas generar?** 
-Ejemplos: 
-• "Plan de clase para 5° sobre el computador y sus partes"
-• "Plan de clase para 9° sobre programación básica con Scratch"
-• "Plan de clase para 11° sobre desarrollo web con HTML y CSS"
-
-`
+        text: ``
       }))
       } else if (documentsError) {
       setInitialMessage(prev => ({
         ...prev,
-        text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
-
-¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
-
-**Mi misión es ayudarte a planificar clases completas** usando documentos oficiales del sistema educativo:
-• Orientaciones curriculares oficiales
-• Estructuras de planes de clase
-• Proyectos educativos institucionales
-• Modelos pedagógicos validados
-
-**Estado del sistema:** ⚠️ Verificando conexión...
-
-**¿Qué plan de clase necesitas generar?** 
-Ejemplos: 
-• "Plan de clase para 5° sobre el computador y sus partes"
-• "Plan de clase para 9° sobre programación básica con Scratch"
-• "Plan de clase para 11° sobre desarrollo web con HTML y CSS"
-
-`
+        text: ``
       }))
       } else if (bucketDocuments.length > 0) {
       setInitialMessage(prev => ({
         ...prev,
-        text: `🎓 **ASISTENTE PEDAGÓGICO INTELIGENTE**
-
-¡Hola! Soy tu asistente pedagógico especializado en la creación de planes de clase personalizados.
-
-**Mi misión es ayudarte a planificar clases completas** usando documentos oficiales del sistema educativo:
-• Orientaciones curriculares oficiales
-• Estructuras de planes de clase
-• Proyectos educativos institucionales
-• Modelos pedagógicos validados
-
-**Estado del sistema:** ✅ Sistema listo
-
-**¿Qué plan de clase necesitas generar?** 
-Ejemplos: 
-• "Plan de clase para 5° sobre el computador y sus partes"
-• "Plan de clase para 9° sobre programación básica con Scratch"
-• "Plan de clase para 11° sobre desarrollo web con HTML y CSS"
-
-`
+        text: ``
       }))
     }
   }, [documentsLoading, documentsError, bucketDocuments, documentCount])
@@ -500,11 +417,9 @@ Ejemplos:
           setMessages(filteredMessages)
         }
         if (typeof parsed.isConfigured === 'boolean') {
-          setIsConfigured(parsed.isConfigured)
-          // Si ya está configurado, marcar que el mensaje de configuración ya se mostró
-          if (parsed.isConfigured) {
-            configShownRef.current = true
-          }
+          // Siempre empezar con formulario no configurado para permitir nueva configuración
+          setIsConfigured(false)
+          configShownRef.current = false
         }
       }
     } catch {}
@@ -1559,15 +1474,16 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
       {/* Contenido Principal */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6">
         {/* Formulario de Configuración Inicial */}
-        {!isConfigured && sessionRestored && (
+        {(() => {
+          console.log('🔍 Debug - Estado del formulario:', { isConfigured, sessionRestored });
+          return !isConfigured && sessionRestored;
+        })() && (
           <ConfigurationForm 
             planningConfig={planningConfig} 
             setPlanningConfig={setPlanningConfig} 
             onSubmit={() => {
               setIsConfigured(true)
-              if (configShownRef.current) {
-                return
-              }
+              // Siempre mostrar el mensaje de confirmación
               const configMessage: Message = {
                 id: Date.now().toString(),
                 text: `✅ **CONFIGURACIÓN COMPLETADA EXITOSAMENTE**
@@ -1579,14 +1495,11 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
 • **Duración:** ${planningConfig.horas} horas
 • **Sesiones:** ${planningConfig.sesiones}
 
-**🔍 Consulta automática de documentos institucionales:**
-• **PEI:** ${planningConfig.consultarPEI ? '✅ Habilitado' : '❌ Deshabilitado'}
-• **Modelo Pedagógico:** ${planningConfig.consultarModeloPedagogico ? '✅ Habilitado' : '❌ Deshabilitado'}
+**💡 Ejemplos de solicitudes para Tecnología e Informática:**
 
-**🚀 ¡Sistema listo!** 
-El chat ya está habilitado y puedes comenzar a escribir tu consulta específica.
-
-**💡 Próximo paso:** Escribe tu consulta en el campo de texto de abajo para generar el plan de clase personalizado.`,
+• "Genera un plan de clase para ${planningConfig.grado} sobre el computador y sus partes"
+• "Crea un plan de clase para ${planningConfig.grado} sobre programación básica con Scratch"
+• "Diseña un plan de clase para ${planningConfig.grado} sobre desarrollo web con HTML y CSS"`,
                 isUser: false,
                 timestamp: new Date(),
                 isFormatted: true,
@@ -1686,8 +1599,8 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
         {/* Mensaje inicial del asistente con diseño premium */}
         {!isConfigured && sessionRestored && (
         <div className="space-y-4 sm:space-y-6">
-          <div className="flex justify-start">
-            <div className="max-w-full sm:max-w-4xl">
+          <div className="w-full">
+            <div className="w-full">
               {/* Contenedor principal con gradiente */}
               <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50/30 backdrop-blur-xl border border-blue-200/50 rounded-2xl p-6 sm:p-8 shadow-xl shadow-blue-500/10 ring-1 ring-blue-200/20">
                 
