@@ -255,7 +255,6 @@ const ConfigurationForm = ({
                     <option value="">Selecciona número de sesiones</option>
                     <option value="1">1 sesión (2 horas)</option>
                     <option value="2">2 sesiones (4 horas)</option>
-                    <option value="3">3 sesiones (6 horas)</option>
                   </select>
                    <p className="text-sm text-gray-600 mt-1">
                      💡 Cada sesión equivale a 2 horas exactas
@@ -918,6 +917,10 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
     }
 
     setMessages(prev => [...prev, userMessage])
+    // Scroll inmediato tras enviar
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }, 0)
     setInputText('')
     setIsLoading(true)
     // Cancel controller
@@ -1402,9 +1405,10 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
 
   // Scroll automático al final solo cuando se agregan nuevos mensajes
   useEffect(() => {
-    // Solo hacer scroll si hay mensajes reales del chat (no el mensaje inicial)
-    if (messages.length > 0 && messages[messages.length - 1]?.id !== 'initial') {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Desplazar solo cuando llega la respuesta del agente (no en mensajes del usuario)
+    const last = messages[messages.length - 1]
+    if (last && last.isUser === false) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
   }, [messages])
 
@@ -1506,6 +1510,10 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
               }
               setMessages(prev => [...prev, configMessage])
               configShownRef.current = true
+              // Desplazar al final tras confirmar
+              setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+              }, 0)
             }}
           />
         )}
@@ -1745,7 +1753,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
               >
                 {message.isFormatted ? (
                   <div 
-                    className="prose prose-sm max-w-none"
+                    className="prose prose-sm max-w-none break-words"
                     style={{
                       lineHeight: '1.6',
                       fontSize: '14px'
@@ -1758,8 +1766,12 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
                           .prose strong { color: #1f2937; font-weight: 600; }
                           .prose code { background-color: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
                           .prose pre { background-color: #f3f4f6; padding: 12px; border-radius: 6px; border: 1px solid #d1d5db; }
+                          .prose { overflow-wrap: anywhere; word-break: break-word; }
                         </style>
                         ${message.text
+                          // Normalizar dobles dos puntos y títulos con ':' extra
+                          .replace(/:{2,}/g, ':')
+                          .replace(/^##\s*([^:]+):\s*$/gm, '## $1')
                           .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                           .replace(/\*(.*?)\*/g, '<em>$1</em>')
                           .replace(/```(.*?)```/g, '<pre><code>$1</code></pre>')
