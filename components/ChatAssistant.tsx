@@ -161,12 +161,30 @@ const ConfigurationForm = ({
   }
 
            return (
-           <div className="bg-white/85 backdrop-blur-xl border border-white/40 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 xl:p-12 mb-6 sm:mb-8 shadow-xl shadow-black/10">
-             <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-               <h3 className="text-2xl sm:text-3xl font-light text-gray-900 mb-3 sm:mb-4 tracking-tight">Configuración Inicial</h3>
-               <p className="text-base sm:text-lg lg:text-xl text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
-                 Configura los parámetros básicos de tu planeación para personalizar la experiencia
-               </p>
+           <div className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 backdrop-blur-xl border border-white/60 rounded-3xl p-6 sm:p-8 lg:p-10 xl:p-12 mb-6 sm:mb-8 shadow-2xl shadow-blue-500/10 ring-1 ring-blue-200/30">
+             {/* Header con diseño premium */}
+             <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+               <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 tracking-tight">
+                 <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                   Configuración Inicial
+                 </span>
+               </h3>
+               
+               <div className="max-w-3xl mx-auto">
+                 <p className="text-lg sm:text-xl text-gray-600 font-medium leading-relaxed mb-2">
+                   Configura los parámetros básicos de tu planeación
+                 </p>
+                 <p className="text-sm sm:text-base text-gray-500 font-light">
+                   Personaliza la experiencia para obtener resultados óptimos
+                 </p>
+               </div>
+               
+               {/* Línea decorativa */}
+               <div className="flex items-center justify-center mt-6 sm:mt-8">
+                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
+                 <div className="mx-4 w-2 h-2 bg-blue-500 rounded-full"></div>
+                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-purple-300 to-transparent"></div>
+               </div>
              </div>
       
                    <form onSubmit={handleConfigSubmit} className="space-y-4 sm:space-y-6 lg:space-y-8">
@@ -288,7 +306,7 @@ const ConfigurationForm = ({
                <div className="text-center pt-4 sm:pt-6 lg:pt-8">
                  <button
                    type="submit"
-                   className="inline-flex items-center px-6 sm:px-8 lg:px-12 py-3 sm:py-4 lg:py-5 bg-gray-900/90 backdrop-blur-sm text-white rounded-xl sm:rounded-2xl hover:bg-gray-800/90 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-300 font-medium text-base sm:text-lg lg:text-xl shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 transform hover:-translate-y-0.5"
+                   className="inline-flex items-center px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 backdrop-blur-sm text-white rounded-md sm:rounded-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-200/20 transition-all duration-300 font-medium text-xs sm:text-sm lg:text-base shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transform hover:-translate-y-0.5"
                  >
                    <span className="mr-2 sm:mr-3">✅</span>
                    <span className="hidden sm:inline">Aceptar y Continuar</span>
@@ -346,7 +364,9 @@ export default function ChatAssistant({
 • Modelos pedagógicos validados
 
 **¿Qué plan de clase necesitas generar?** 
+
 Ejemplos: 
+
 • "Plan de clase para 5° sobre el computador y sus partes"
 • "Plan de clase para 9° sobre programación básica con Scratch"
 • "Plan de clase para 11° sobre desarrollo web con HTML y CSS"
@@ -1469,7 +1489,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
   useEffect(() => {
     // Solo hacer scroll si hay mensajes reales del chat (no el mensaje inicial)
     if (messages.length > 0 && messages[messages.length - 1]?.id !== 'initial') {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages])
 
@@ -1505,30 +1525,30 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
           </div>
           
           <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4">
-            <button
-              onClick={clearChat}
-              disabled={isLoading || isSaving}
-              className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-gray-100/80 backdrop-blur-sm text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-200/80 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-gray-200/50 hover:shadow-lg hover:shadow-gray-200/60"
-              title="Limpiar conversación"
-            >
+                         <button
+               onClick={clearChat}
+               disabled={isLoading || isSaving}
+               className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-gray-200/90 backdrop-blur-sm text-gray-800 rounded-xl sm:rounded-2xl hover:bg-gray-300/90 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-gray-300/60 hover:shadow-lg hover:shadow-gray-300/70"
+               title="Limpiar conversación"
+             >
               <span className="hidden sm:inline">🗑️ Limpiar</span>
               <span className="sm:hidden">🗑️</span>
             </button>
-            <button
-              onClick={() => exportToWord('agent-only')}
-              disabled={isLoading || isSaving || !isConfigured}
-              className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-blue-100/80 backdrop-blur-sm text-blue-700 rounded-xl sm:rounded-2xl hover:bg-blue-200/80 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-blue-200/50 hover:shadow-lg hover:shadow-blue-200/60"
-              title="Exportar plan de clase como Word"
-            >
+                         <button
+               onClick={() => exportToWord('agent-only')}
+               disabled={isLoading || isSaving || !isConfigured}
+               className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-blue-200/90 backdrop-blur-sm text-blue-800 rounded-xl sm:rounded-2xl hover:bg-blue-300/90 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-blue-300/60 hover:shadow-lg hover:shadow-blue-300/70"
+               title="Exportar plan de clase como Word"
+             >
               <span className="hidden sm:inline">📄 Exportar Word</span>
               <span className="sm:hidden">📄 Word</span>
             </button>
-                <button
-              onClick={saveChatToDatabase}
-              disabled={isLoading || isSaving || !isConfigured}
-              className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-green-100/80 backdrop-blur-sm text-green-700 rounded-xl sm:rounded-2xl hover:bg-green-200/80 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-green-200/50 hover:shadow-lg hover:shadow-green-200/60"
-              title="Guardar planeación"
-            >
+                                 <button
+               onClick={saveChatToDatabase}
+               disabled={isLoading || isSaving || !isConfigured}
+               className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-green-200/90 backdrop-blur-sm text-green-800 rounded-xl sm:rounded-2xl hover:bg-green-300/90 disabled:opacity-50 transition-all duration-300 font-medium shadow-md shadow-green-300/60 hover:shadow-lg hover:shadow-green-300/70"
+               title="Guardar planeación"
+             >
               <span className="hidden sm:inline">💾 Guardar</span>
               <span className="sm:hidden">💾</span>
                 </button>
@@ -1663,26 +1683,96 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
           </div>
         )}
         
-        {/* Mensaje inicial del asistente */}
+        {/* Mensaje inicial del asistente con diseño premium */}
         {!isConfigured && sessionRestored && (
-        <div className="space-y-3 sm:space-y-4">
+        <div className="space-y-4 sm:space-y-6">
           <div className="flex justify-start">
-            <div className="max-w-full sm:max-w-3xl px-4 sm:px-6 lg:px-8 py-3 rounded-lg backdrop-blur-sm bg-white/80 border border-white/50 shadow-lg shadow-gray-200/60">
+            <div className="max-w-full sm:max-w-4xl">
+              {/* Contenedor principal con gradiente */}
+              <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50/30 backdrop-blur-xl border border-blue-200/50 rounded-2xl p-6 sm:p-8 shadow-xl shadow-blue-500/10 ring-1 ring-blue-200/20">
+                
+                {/* Header del asistente */}
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg shadow-blue-500/25 flex items-center justify-center">
+                      <span className="text-2xl">🤖</span>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+                      <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        Asistente Pedagógico IA
+                      </span>
+                    </h3>
+                    <p className="text-sm text-gray-600 font-medium">Listo para ayudarte</p>
+                  </div>
+                </div>
+
+                {/* Contenido del mensaje */}
+                <div className="space-y-4">
               {initialMessage.isFormatted ? (
                 <div 
-                  className="prose prose-sm max-w-none"
+                      className="prose prose-lg max-w-none"
                   style={{
-                    lineHeight: '1.7',
+                        lineHeight: '1.8',
                     fontSize: '16px'
                   }}
                   dangerouslySetInnerHTML={{ 
                     __html: `
                       <style>
-                        .prose li { margin-bottom: 8px; }
-                        .prose h1, .prose h2, .prose h3 { color: #1f2937; }
-                        .prose strong { color: #1f2937; font-weight: 600; }
-                        .prose code { background-color: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
-                        .prose pre { background-color: #f3f4f6; padding: 12px; border-radius: 6px; border: 1px solid #d1d5db; }
+                            .prose { color: #374151; }
+                            .prose h1, .prose h2, .prose h3 { 
+                              color: #1f2937; 
+                              font-weight: 700;
+                              margin-bottom: 1rem;
+                            }
+                            .prose strong { 
+                              color: #1f2937; 
+                              font-weight: 700;
+                              background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                              -webkit-background-clip: text;
+                              -webkit-text-fill-color: transparent;
+                              background-clip: text;
+                            }
+                            .prose ul { margin: 1rem 0; }
+                            .prose li { 
+                              margin-bottom: 0.75rem; 
+                              padding-left: 0.5rem;
+                              position: relative;
+                            }
+                            .prose li::before {
+                              content: "✨";
+                              position: absolute;
+                              left: -1.5rem;
+                              top: 0;
+                            }
+                            .prose code { 
+                              background: linear-gradient(135deg, #f3f4f6, #e5e7eb); 
+                              padding: 0.25rem 0.5rem; 
+                              border-radius: 0.375rem; 
+                              font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+                              font-size: 0.875rem;
+                              border: 1px solid #d1d5db;
+                            }
+                            .prose pre { 
+                              background: linear-gradient(135deg, #f8fafc, #f1f5f9); 
+                              padding: 1rem; 
+                              border-radius: 0.75rem; 
+                              border: 1px solid #e2e8f0;
+                              box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+                            }
+                            .status-badge {
+                              display: inline-flex;
+                              align-items: center;
+                              padding: 0.5rem 1rem;
+                              background: linear-gradient(135deg, #10b981, #059669);
+                              color: white;
+                              border-radius: 2rem;
+                              font-size: 0.875rem;
+                              font-weight: 600;
+                              box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);
+                              margin: 0.5rem 0;
+                            }
                       </style>
                       ${initialMessage.text
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -1692,8 +1782,11 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
                         .replace(/^### (.*$)/gm, '<h3>$1</h3>')
                         .replace(/^## (.*$)/gm, '<h2>$1</h2>')
                         .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-                        .replace(/^- (.*$)/gm, '<li>• $1</li>')
+                            .replace(/^- (.*$)/gm, '<li>$1</li>')
                         .replace(/^\d+\. (.*$)/gm, '<li>$&</li>')
+                                                         .replace(/Estado del sistema: ✅ Sistema listo/g, '<div class="status-badge">✅ Sistema listo</div>')
+                             .replace(/¿Qué plan de clase necesitas generar\?/g, '<strong>¿Qué plan de clase necesitas generar?</strong>')
+                             .replace(/Ejemplos:/g, '<strong>💡 Ejemplos de solicitudes:</strong>')
                         .replace(/\n\n/g, '<br><br>')
                         .replace(/\n/g, '<br>')
                       }
@@ -1701,8 +1794,18 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
                   }} 
                 />
               ) : (
-                <p className="whitespace-pre-wrap">{initialMessage.text}</p>
-              )}
+                    <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">{initialMessage.text}</p>
+                  )}
+                </div>
+
+                {/* Footer decorativo */}
+                <div className="mt-6 pt-4 border-t border-blue-200/30">
+                  <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span>Conectado y listo para ayudarte</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1810,7 +1913,7 @@ El chat ya está habilitado y puedes comenzar a escribir tu consulta específica
         <button
                    type="submit"
             disabled={!isConfigured || !inputText.trim() || isLoading || isSaving}
-            className="flex-1 sm:flex-none px-4 sm:px-6 lg:px-10 py-3 sm:py-4 lg:py-5 bg-gray-900/90 backdrop-blur-sm text-white rounded-xl sm:rounded-2xl hover:bg-gray-800/90 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:opacity-50 transition-all duración-300 font-medium text-sm sm:text-base lg:text-lg shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 transform hover:-translate-y-0.5 disabled:transform-none"
+            className="flex-1 sm:flex-none px-4 sm:px-6 lg:px-10 py-3 sm:py-4 lg:py-5 bg-gradient-to-r from-blue-500/80 to-purple-500/80 backdrop-blur-sm text-white rounded-xl sm:rounded-2xl hover:from-blue-600/90 hover:to-purple-600/90 focus:outline-none focus:ring-4 focus:ring-blue-200/30 disabled:opacity-50 transition-all duration-300 font-medium text-sm sm:text-base lg:text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transform hover:-translate-y-0.5 disabled:transform-none"
                  >
                    <span className="hidden sm:inline">{isLoading ? '🔄' : '📤'} Enviar</span>
                    <span className="sm:hidden">{isLoading ? '🔄' : '📤'}</span>
