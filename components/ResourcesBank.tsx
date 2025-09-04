@@ -6,6 +6,32 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Bord
 import { saveAs } from 'file-saver'
 import { useAuth } from '../hooks/useAuth'
 
+// Función para procesar markdown y convertir a HTML
+const processMarkdown = (text: string): string => {
+  if (!text || typeof text !== 'string') return ''
+  
+  return text
+    // Normalizar dobles dos puntos y títulos con ':' extra
+    .replace(/:{2,}/g, ':')
+    .replace(/^##\s*([^:]+):\s*$/gm, '## $1')
+    // Formateo de texto
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // Código
+    .replace(/```(.*?)```/g, '<pre><code>$1</code></pre>')
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    // Títulos
+    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+    // Listas
+    .replace(/^- (.*$)/gm, '<li>• $1</li>')
+    .replace(/^\d+\. (.*$)/gm, '<li>$&</li>')
+    // Saltos de línea
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>')
+}
+
 interface ResourcesBankProps {
   setActiveTab: (tab: "generar" | "historial") => void
   setCurrentPlanningData: (data: any) => void
@@ -38,6 +64,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
   const [selectedPlan, setSelectedPlan] = useState<Planeacion | null>(null)
   const [showChatHistory, setShowChatHistory] = useState(false)
   const [copiedText, setCopiedText] = useState<string | null>(null)
+  const [forceRender, setForceRender] = useState(0)
 
   const { isAdmin } = useAuth()
   const supabase = createClient()
@@ -299,6 +326,11 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
   const viewChatHistory = (plan: Planeacion) => {
     setSelectedPlan(plan)
     setShowChatHistory(true)
+    // Forzar re-renderizado para aplicar formato inmediatamente
+    setForceRender(prev => prev + 1)
+    setTimeout(() => {
+      setForceRender(prev => prev + 1)
+    }, 0)
   }
 
   // Función para cerrar la visualización del chat
@@ -722,6 +754,21 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
     loadHistorial()
   }, [])
 
+  // Forzar re-renderizado cuando se muestran mensajes formateados
+  useEffect(() => {
+    if (selectedPlan && selectedPlan.chat_history) {
+      const hasFormattedMessages = selectedPlan.chat_history.some(msg => msg.isFormatted)
+      if (hasFormattedMessages) {
+        // Forzar re-renderizado inmediato para aplicar formato
+        setForceRender(prev => prev + 1)
+        // Re-renderizado adicional para asegurar que el DOM esté actualizado
+        requestAnimationFrame(() => {
+          setForceRender(prev => prev + 1)
+        })
+      }
+    }
+  }, [selectedPlan])
+
   return (
             <div className="bg-white rounded-lg shadow-xl shadow-black/10 p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4 sm:mb-6">
@@ -901,19 +948,95 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                 
                 {selectedPlan.chat_history && selectedPlan.chat_history.length > 0 ? (
                   selectedPlan.chat_history.map((message) => (
-                    <div key={message.id} className={`${message.isUser ? "text-right" : "text-left"}`}>
+                    <div key={`${message.id}-${forceRender}`} className={`${message.isUser ? "text-right" : "text-left"}`}>
                       <div
-                                                 className={`inline-block max-w-[95%] sm:max-w-[90%] p-3 sm:p-4 lg:p-6 rounded-xl sm:rounded-2xl ${
-                           message.isUser
-                             ? "bg-blue-600 text-white shadow-lg shadow-blue-600/35"
-                             : "bg-gray-50 text-gray-800 border-l-4 border-blue-400 shadow-lg shadow-blue-200/40"
-                         }`}
+                        className={`inline-block max-w-[95%] sm:max-w-[90%] p-3 sm:p-4 lg:p-6 rounded-lg backdrop-blur-sm ${
+                          message.isUser
+                            ? "bg-blue-600/90 text-white shadow-xl shadow-blue-600/35"
+                            : "bg-white/80 border border-white/50 shadow-xl shadow-blue-200/40"
+                        }`}
                       >
-                        <div className="text-xs sm:text-sm lg:text-base leading-relaxed whitespace-pre-wrap break-words">
-                          {message.isFormatted ? 
-                            message.text.replace(/\*\*/g, '').replace(/\*/g, '') : 
-                            message.text
-                          }
+                        <div className="text-xs sm:text-sm lg:text-base leading-relaxed break-words">
+                          {message.isFormatted ? (
+                            <div 
+                              className="prose prose-sm max-w-none break-words"
+                              style={{
+                                lineHeight: '1.6',
+                                fontSize: '14px'
+                              }}
+                              dangerouslySetInnerHTML={{ 
+                                __html: `
+                                  <style>
+                                    .prose { 
+                                      color: #374151 !important; 
+                                      overflow-wrap: anywhere; 
+                                      word-break: break-word; 
+                                    }
+                                    .prose li { 
+                                      margin-bottom: 8px !important; 
+                                      color: #374151 !important;
+                                    }
+                                    .prose h1, .prose h2, .prose h3 { 
+                                      color: #1f2937 !important; 
+                                      font-weight: 700 !important;
+                                      margin-bottom: 1rem !important;
+                                    }
+                                    .prose strong { 
+                                      color: #1f2937 !important; 
+                                      font-weight: 600 !important;
+                                    }
+                                    .prose code { 
+                                      background-color: #f3f4f6 !important; 
+                                      padding: 2px 6px !important; 
+                                      border-radius: 4px !important; 
+                                      font-family: monospace !important;
+                                      color: #374151 !important;
+                                    }
+                                    .prose pre { 
+                                      background-color: #f3f4f6 !important; 
+                                      padding: 12px !important; 
+                                      border-radius: 6px !important; 
+                                      border: 1px solid #d1d5db !important;
+                                      color: #374151 !important;
+                                    }
+                                    /* Estilos base para texto */
+                                    .prose {
+                                      color: #374151 !important;
+                                    }
+                                    .prose h1, .prose h2, .prose h3 {
+                                      color: #1f2937 !important;
+                                    }
+                                    .prose strong {
+                                      color: #1f2937 !important;
+                                    }
+                                    .prose code {
+                                      color: #374151 !important;
+                                    }
+                                    /* Preservar colores originales de emojis usando unset */
+                                    .prose * {
+                                      color: unset !important;
+                                    }
+                                    .prose {
+                                      color: #374151 !important;
+                                    }
+                                    .prose h1, .prose h2, .prose h3 {
+                                      color: #1f2937 !important;
+                                    }
+                                    .prose strong {
+                                      color: #1f2937 !important;
+                                    }
+                                    .prose code {
+                                      color: #374151 !important;
+                                    }
+                                  </style>
+                                  ${processMarkdown(message.text)}
+                                `
+                              }} 
+                              key={`formatted-${message.id}-${forceRender}`}
+                            />
+                          ) : (
+                            <div className="whitespace-pre-wrap" key={`plain-${message.id}-${forceRender}`}>{message.text}</div>
+                          )}
                         </div>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 sm:mt-3 lg:mt-4 gap-1 sm:gap-0">
                           <span className="text-xs sm:text-sm opacity-70">

@@ -73,6 +73,74 @@ El **Agente Planeador de Clases IE Camilo Torres** garantiza que cada plan cumpl
 
 ---
 
+## 🏗️ Arquitectura del Sistema
+
+### Diagrama de Flujo Principal
+
+```mermaid
+flowchart TD
+    A[👨‍🏫 Docente<br/>Entrada: Grado, Tema, Sesiones] --> B[🧠 Agente de Planificación<br/>Análisis de contexto]
+    
+    B --> C[📚 Consulta de Documentos<br/>PEI, MEN 2022, Tabla 7]
+    B --> D[🎯 Mapeo de Competencias<br/>Según grado y tema]
+    
+    C --> E[⚙️ Generación de Plan<br/>Estructura completa]
+    D --> E
+    
+    E --> F[🛡️ Guardrails<br/>• Filtrado de información interna<br/>• Validación de coherencia<br/>• Anti-alucinación]
+    
+    F --> G[📋 Plan de Clase Final<br/>• Identificación<br/>• Competencias<br/>• Momentos pedagógicos<br/>• Evaluación Tabla 7]
+    
+    G --> H[💾 Almacenamiento<br/>Base de datos + Historial]
+    
+    H --> I[📊 Exportación<br/>Word, PDF, etc.]
+    
+    %% Memoria y Aprendizaje
+    J[💾 Memoria del Sistema<br/>• Historial de chat<br/>• Perfil del docente<br/>• Estado de conversación] -.-> B
+    
+    %% Observabilidad
+    K[📈 Observabilidad<br/>• Métricas de rendimiento<br/>• Logs de interacción<br/>• Análisis de calidad] -.-> F
+    
+    %% Estilos
+    classDef userClass fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    classDef agentClass fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef processClass fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef outputClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef memoryClass fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class A userClass
+    class B agentClass
+    class C,D,E processClass
+    class F,G,H,I outputClass
+    class J,K memoryClass
+```
+
+### Flujo de Datos
+
+```mermaid
+sequenceDiagram
+    participant D as Docente
+    participant A as Agente
+    participant DB as Base de Datos
+    participant G as Gemini AI
+    participant E as Exportación
+    
+    D->>A: Configuración inicial
+    A->>DB: Consulta documentos
+    DB-->>A: Documentos relevantes
+    A->>G: Generación de plan
+    G-->>A: Plan estructurado
+    A->>A: Aplicar guardrails
+    A->>D: Plan de clase final
+    D->>A: Solicitar guardado
+    A->>DB: Almacenar plan
+    D->>A: Solicitar exportación
+    A->>E: Generar Word/PDF
+    E-->>D: Archivo descargado
+```
+
+---
+
 ## Descripción General
 
 Sistema web para la generación automática de planes de clase didácticos utilizando inteligencia artificial. El sistema permite a los docentes crear planeaciones personalizadas mediante un chat interactivo con un asistente IA especializado en pedagogía.
