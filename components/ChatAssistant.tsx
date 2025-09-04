@@ -308,6 +308,8 @@ const ConfigurationForm = ({
 
 // Función para procesar markdown y convertir a HTML
 const processMarkdown = (text: string): string => {
+  if (!text || typeof text !== 'string') return ''
+  
   return text
     // Normalizar dobles dos puntos y títulos con ':' extra
     .replace(/:{2,}/g, ':')
@@ -363,6 +365,17 @@ export default function ChatAssistant({
   }, [])
   
   const [messages, setMessages] = useState<Message[]>([])
+
+  // Forzar re-renderizado cuando se agregan mensajes para asegurar formateo inmediato
+  useEffect(() => {
+    if (messages.length > 0) {
+      setForceRender(prev => prev + 1)
+      // Forzar re-renderizado del DOM para aplicar formato inmediatamente
+      setTimeout(() => {
+        setForceRender(prev => prev + 1)
+      }, 0)
+    }
+  }, [messages.length])
   const [initialMessage, setInitialMessage] = useState<Message>({
     id: "initial",
       text: ``,
@@ -378,15 +391,18 @@ export default function ChatAssistant({
   const abortControllerRef = useRef<AbortController | null>(null)
   const [pendingInputs, setPendingInputs] = useState<string[]>([])
   const [sessionRestored, setSessionRestored] = useState(false)
+  const [forceRender, setForceRender] = useState(0)
   const [consultedDocuments, setConsultedDocuments] = useState<{
     pei: PDFContent[]
     modeloPedagogico: PDFContent[]
     orientacionesCurriculares: PDFContent[]
+    tabla7: PDFContent[]
     relevantDocs: PDFContent[]
   }>({
     pei: [],
     modeloPedagogico: [],
     orientacionesCurriculares: [],
+    tabla7: [],
     relevantDocs: []
   })
 
@@ -501,7 +517,7 @@ export default function ChatAssistant({
       // Analizar entrada del usuario
       const analysis = analyzeUserInput(userInput)
       
-      // CONSULTA AUTOMÁTICA DE DOCUMENTOS INSTITUCIONALES
+      // CONSULTA AUTOMÁTICA DE TODOS LOS DOCUMENTOS INSTITUCIONALES
       const documentosInstitucionales = await consultarDocumentosInstitucionales()
       
       // Actualizar estado de documentos consultados
@@ -509,26 +525,26 @@ export default function ChatAssistant({
         pei: documentosInstitucionales.pei,
         modeloPedagogico: documentosInstitucionales.modeloPedagogico,
         orientacionesCurriculares: documentosInstitucionales.orientacionesCurriculares,
+        tabla7: documentosInstitucionales.tabla7,
         relevantDocs: relevantDocs
       })
       
-      // Combinar documentos relevantes de la consulta con documentos institucionales
-      let relevantFiles = [...relevantDocs]
+      // USAR TODOS LOS DOCUMENTOS DISPONIBLES como base
+      let relevantFiles = [...documentosInstitucionales.todosLosDocumentos]
       
-      // Agregar PEI si está habilitado
-      if (planningConfig.consultarPEI && documentosInstitucionales.pei.length > 0) {
-        relevantFiles.push(...documentosInstitucionales.pei)
-      }
+      // Agregar documentos específicos de la consulta si no están ya incluidos
+      relevantDocs.forEach(doc => {
+        if (!relevantFiles.some(existing => existing.id === doc.id)) {
+          relevantFiles.push(doc)
+        }
+      })
       
-      // Agregar Modelo Pedagógico si está habilitado
-      if (planningConfig.consultarModeloPedagogico && documentosInstitucionales.modeloPedagogico.length > 0) {
-        relevantFiles.push(...documentosInstitucionales.modeloPedagogico)
-      }
-      
-      // Agregar Orientaciones Curriculares
-      if (documentosInstitucionales.orientacionesCurriculares.length > 0) {
-        relevantFiles.push(...documentosInstitucionales.orientacionesCurriculares)
-      }
+      console.log(`📚 DOCUMENTOS A USAR EN LA RESPUESTA:`)
+      console.log(`  📋 Total de documentos: ${relevantFiles.length}`)
+      console.log(`  🏫 PEI incluido: ${documentosInstitucionales.pei.length}`)
+      console.log(`  🎓 Modelo Pedagógico incluido: ${documentosInstitucionales.modeloPedagogico.length}`)
+      console.log(`  📚 Orientaciones Curriculares incluidas: ${documentosInstitucionales.orientacionesCurriculares.length}`)
+      console.log(`  🔍 Documentos específicos de consulta: ${relevantDocs.length}`)
       
       // Buscar documentos adicionales si no hay suficientes
       if (relevantFiles.length === 0) {
@@ -708,7 +724,7 @@ export default function ChatAssistant({
       // Analizar entrada del usuario
       const analysis = analyzeUserInput(userInput)
       
-      // Consultar documentos institucionales
+      // Consultar TODOS los documentos institucionales
       const documentosInstitucionales = await consultarDocumentosInstitucionales()
       
       // Actualizar estado de documentos consultados
@@ -716,20 +732,25 @@ export default function ChatAssistant({
         pei: documentosInstitucionales.pei,
         modeloPedagogico: documentosInstitucionales.modeloPedagogico,
         orientacionesCurriculares: documentosInstitucionales.orientacionesCurriculares,
+        tabla7: documentosInstitucionales.tabla7,
         relevantDocs: relevantDocs
       })
       
-      // Combinar todos los documentos relevantes
-      let allDocs = [...relevantDocs]
-      if (planningConfig.consultarPEI && documentosInstitucionales.pei.length > 0) {
-        allDocs.push(...documentosInstitucionales.pei)
-      }
-      if (planningConfig.consultarModeloPedagogico && documentosInstitucionales.modeloPedagogico.length > 0) {
-        allDocs.push(...documentosInstitucionales.modeloPedagogico)
-      }
-      if (documentosInstitucionales.orientacionesCurriculares.length > 0) {
-        allDocs.push(...documentosInstitucionales.orientacionesCurriculares)
-      }
+      // USAR TODOS LOS DOCUMENTOS DISPONIBLES como base
+      let allDocs = [...documentosInstitucionales.todosLosDocumentos]
+      
+      // Agregar documentos específicos de la consulta si no están ya incluidos
+      relevantDocs.forEach(doc => {
+        if (!allDocs.some(existing => existing.id === doc.id)) {
+          allDocs.push(doc)
+        }
+      })
+      
+      console.log(`📚 FALLBACK - DOCUMENTOS A USAR:`)
+      console.log(`  📋 Total de documentos: ${allDocs.length}`)
+      console.log(`  🏫 PEI incluido: ${documentosInstitucionales.pei.length}`)
+      console.log(`  🎓 Modelo Pedagógico incluido: ${documentosInstitucionales.modeloPedagogico.length}`)
+      console.log(`  📚 Orientaciones Curriculares incluidas: ${documentosInstitucionales.orientacionesCurriculares.length}`)
       
       // Eliminar duplicados
       const uniqueDocs = allDocs.filter((doc, index, self) => 
@@ -839,18 +860,31 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
     }
   }
 
-  // Función para consultar documentos institucionales automáticamente
+  // Función para consultar TODOS los documentos institucionales automáticamente
   const consultarDocumentosInstitucionales = async (): Promise<{
     pei: PDFContent[]
     modeloPedagogico: PDFContent[]
     orientacionesCurriculares: PDFContent[]
+    tabla7: PDFContent[] // NUEVO: Incluir Tabla 7 específicamente
+    todosLosDocumentos: PDFContent[] // NUEVO: Incluir TODOS los documentos
   }> => {
     try {
       if (bucketDocuments.length === 0) {
-        return { pei: [], modeloPedagogico: [], orientacionesCurriculares: [] }
+        return { 
+          pei: [], 
+          modeloPedagogico: [], 
+          orientacionesCurriculares: [],
+          tabla7: [],
+          todosLosDocumentos: []
+        }
       }
       
-      // Buscar PEI (Proyecto Educativo Institucional)
+      console.log(`📚 CONSULTANDO TODOS LOS DOCUMENTOS DISPONIBLES: ${bucketDocuments.length} documentos`)
+      
+      // INCLUIR TODOS LOS DOCUMENTOS DISPONIBLES
+      const todosLosDocumentos = [...bucketDocuments]
+      
+      // Buscar PEI (Proyecto Educativo Institucional) - categorización adicional
       const peiDocs = bucketDocuments.filter(doc => 
         doc.title.toLowerCase().includes('pei') ||
         doc.title.toLowerCase().includes('proyecto educativo') ||
@@ -859,7 +893,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         doc.doc_type.toLowerCase().includes('pei')
       )
       
-      // Buscar Modelo Pedagógico
+      // Buscar Modelo Pedagógico - categorización adicional
       const modeloPedagogicoDocs = bucketDocuments.filter(doc => 
         doc.title.toLowerCase().includes('modelo pedagógico') ||
         doc.title.toLowerCase().includes('enfoque pedagógico') ||
@@ -868,7 +902,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         doc.doc_type.toLowerCase().includes('pedagógico')
       )
       
-      // Buscar Orientaciones Curriculares
+      // Buscar Orientaciones Curriculares - categorización adicional
       const orientacionesCurricularesDocs = bucketDocuments.filter(doc => 
         doc.title.toLowerCase().includes('orientaciones') ||
         doc.title.toLowerCase().includes('curricular') ||
@@ -877,15 +911,52 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         doc.doc_type.toLowerCase().includes('curricular')
       )
       
+      // Buscar específicamente la Tabla 7 (incluyendo variaciones del nombre)
+      const tabla7Docs = bucketDocuments.filter(doc => 
+        doc.title.toLowerCase().includes('tabla 7') ||
+        doc.title.toLowerCase().includes('tabla7') ||
+        doc.title.toLowerCase().includes('tabla-7') ||
+        doc.title.toLowerCase().includes('tabla_7') ||
+        doc.title.toLowerCase().includes('tabla.7') ||
+        doc.title.toLowerCase().includes('evaluacion') ||
+        doc.title.toLowerCase().includes('evaluación') ||
+        doc.content.toLowerCase().includes('tabla 7') ||
+        doc.content.toLowerCase().includes('tabla-7') ||
+        doc.content.toLowerCase().includes('criterios de evaluación') ||
+        doc.content.toLowerCase().includes('criterios de evaluacion')
+      )
+      
+      console.log(`✅ DOCUMENTOS CONSULTADOS:`)
+      console.log(`  📋 Total de documentos: ${todosLosDocumentos.length}`)
+      console.log(`  🏫 PEI: ${peiDocs.length}`)
+      console.log(`  🎓 Modelo Pedagógico: ${modeloPedagogicoDocs.length}`)
+      console.log(`  📚 Orientaciones Curriculares: ${orientacionesCurricularesDocs.length}`)
+      console.log(`  📊 Tabla 7: ${tabla7Docs.length}`)
+      
+      // Debug específico para Tabla 7
+      if (tabla7Docs.length > 0) {
+        console.log(`🎯 TABLA 7 ENCONTRADA:`, tabla7Docs.map(doc => doc.title))
+      } else {
+        console.log(`⚠️ TABLA 7 NO ENCONTRADA. Documentos disponibles:`, bucketDocuments.map(doc => doc.title))
+      }
+      
       return {
         pei: peiDocs,
         modeloPedagogico: modeloPedagogicoDocs,
-        orientacionesCurriculares: orientacionesCurricularesDocs
+        orientacionesCurriculares: orientacionesCurricularesDocs,
+        tabla7: tabla7Docs, // Tabla 7 específicamente
+        todosLosDocumentos: todosLosDocumentos // TODOS los documentos incluidos
       }
       
     } catch (error) {
       console.error('❌ Error consultando documentos institucionales:', error)
-      return { pei: [], modeloPedagogico: [], orientacionesCurriculares: [] }
+      return { 
+        pei: [], 
+        modeloPedagogico: [], 
+        orientacionesCurriculares: [],
+        tabla7: [],
+        todosLosDocumentos: []
+      }
     }
   }
 
@@ -1023,7 +1094,9 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
       const grado = planningConfig.grado
       const tema = planningConfig.tema
       const asignatura = planningConfig.asignatura
-      const duracion = `${planningConfig.horas} horas`
+      // Calcular horas correctamente: sesiones × 2 horas
+      const sesionesNum = Math.min(2, Math.max(1, Number(planningConfig.sesiones) || 1))
+      const duracion = `${sesionesNum * 2} horas`
       const sesiones = planningConfig.sesiones
 
       // Preparar datos para guardar
@@ -1192,7 +1265,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
         { icon: "🎓", label: "Grado", value: planningConfig.grado },
         { icon: "📖", label: "Asignatura", value: planningConfig.asignatura },
         { icon: "📝", label: "Tema", value: planningConfig.tema },
-        { icon: "⏰", label: "Duración", value: `${planningConfig.horas} horas` },
+        { icon: "⏰", label: "Duración", value: `${Number(planningConfig.sesiones) * 2} horas` },
         { icon: "📚", label: "Sesiones", value: planningConfig.sesiones },
         { icon: "💻", label: "Recursos", value: planningConfig.recursos },
         { icon: "👤", label: "Docente", value: planningConfig.nombreDocente }
@@ -1434,6 +1507,19 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
     }
   }, [messages])
 
+  // Forzar re-renderizado cuando se agregan mensajes formateados
+  useEffect(() => {
+    const hasFormattedMessages = messages.some(msg => msg.isFormatted)
+    if (hasFormattedMessages) {
+      // Forzar re-renderizado inmediato para aplicar formato
+      setForceRender(prev => prev + 1)
+      // Re-renderizado adicional para asegurar que el DOM esté actualizado
+      requestAnimationFrame(() => {
+        setForceRender(prev => prev + 1)
+      })
+    }
+  }, [messages])
+
   return (
     <div className="flex flex-col h-full bg-gray-50 rounded-3xl shadow-[0_10px_30px_rgba(59,130,246,0.08)] ring-1 ring-blue-200/40 border border-gray-100 overflow-hidden">
       {/* Header del Chat - Estilo Apple */}
@@ -1518,7 +1604,7 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
 • **Grado:** ${planningConfig.grado}
 • **Asignatura:** ${planningConfig.asignatura}
 • **Tema:** ${planningConfig.tema}
-• **Duración:** ${planningConfig.horas} horas
+• **Duración:** ${Number(planningConfig.sesiones) * 2} horas
 • **Sesiones:** ${planningConfig.sesiones}
 
 **💡 Ejemplo de solicitud para Tecnología e Informática:**
@@ -1643,90 +1729,83 @@ Evaluación: Formativa mediante observación, lista de cotejo y producto final d
                 <div className="space-y-4">
               {initialMessage.isFormatted ? (
                 <div 
-                      className="prose prose-lg max-w-none"
+                  className="prose prose-sm max-w-none break-words"
                   style={{
-                        lineHeight: '1.8',
-                    fontSize: '16px'
+                    lineHeight: '1.6',
+                    fontSize: '14px'
                   }}
                   dangerouslySetInnerHTML={{ 
                     __html: `
                       <style>
-                            .prose { color: #374151; }
-                            .prose h1, .prose h2, .prose h3 { 
-                              color: #1f2937; 
-                              font-weight: 700;
-                              margin-bottom: 1rem;
-                            }
-                            .prose strong { 
-                              color: #1f2937; 
-                              font-weight: 700;
-                              background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-                              -webkit-background-clip: text;
-                              -webkit-text-fill-color: transparent;
-                              background-clip: text;
-                            }
-                            .prose ul { margin: 1rem 0; }
-                            .prose li { 
-                              margin-bottom: 0.75rem; 
-                              padding-left: 0.5rem;
-                              position: relative;
-                            }
-                            .prose li::before {
-                              content: "✨";
-                              position: absolute;
-                              left: -1.5rem;
-                              top: 0;
-                            }
-                            .prose code { 
-                              background: linear-gradient(135deg, #f3f4f6, #e5e7eb); 
-                              padding: 0.25rem 0.5rem; 
-                              border-radius: 0.375rem; 
-                              font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-                              font-size: 0.875rem;
-                              border: 1px solid #d1d5db;
-                            }
-                            .prose pre { 
-                              background: linear-gradient(135deg, #f8fafc, #f1f5f9); 
-                              padding: 1rem; 
-                              border-radius: 0.75rem; 
-                              border: 1px solid #e2e8f0;
-                              box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-                            }
-                            .status-badge {
-                              display: inline-flex;
-                              align-items: center;
-                              padding: 0.5rem 1rem;
-                              background: linear-gradient(135deg, #10b981, #059669);
-                              color: white;
-                              border-radius: 2rem;
-                              font-size: 0.875rem;
-                              font-weight: 600;
-                              box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);
-                              margin: 0.5rem 0;
-                            }
+                        .prose { 
+                          color: #374151 !important; 
+                          overflow-wrap: anywhere; 
+                          word-break: break-word; 
+                        }
+                        .prose li { 
+                          margin-bottom: 8px !important; 
+                          color: #374151 !important;
+                        }
+                        .prose h1, .prose h2, .prose h3 { 
+                          color: #1f2937 !important; 
+                          font-weight: 700 !important;
+                          margin-bottom: 1rem !important;
+                        }
+                        .prose strong { 
+                          color: #1f2937 !important; 
+                          font-weight: 600 !important;
+                        }
+                        .prose code { 
+                          background-color: #f3f4f6 !important; 
+                          padding: 2px 6px !important; 
+                          border-radius: 4px !important; 
+                          font-family: monospace !important;
+                          color: #374151 !important;
+                        }
+                        .prose pre { 
+                          background-color: #f3f4f6 !important; 
+                          padding: 12px !important; 
+                          border-radius: 6px !important; 
+                          border: 1px solid #d1d5db !important;
+                          color: #374151 !important;
+                        }
+                        /* Estilos base para texto */
+                        .prose {
+                          color: #374151 !important;
+                        }
+                        .prose h1, .prose h2, .prose h3 {
+                          color: #1f2937 !important;
+                        }
+                        .prose strong {
+                          color: #1f2937 !important;
+                        }
+                        .prose code {
+                          color: #374151 !important;
+                        }
+                        /* Preservar colores originales de emojis usando unset */
+                        .prose * {
+                          color: unset !important;
+                        }
+                        .prose {
+                          color: #374151 !important;
+                        }
+                        .prose h1, .prose h2, .prose h3 {
+                          color: #1f2937 !important;
+                        }
+                        .prose strong {
+                          color: #1f2937 !important;
+                        }
+                        .prose code {
+                          color: #374151 !important;
+                        }
                       </style>
-                      ${initialMessage.text
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/```(.*?)```/g, '<pre><code>$1</code></pre>')
-                        .replace(/`(.*?)`/g, '<code>$1</code>')
-                        .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-                        .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-                        .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-                            .replace(/^- (.*$)/gm, '<li>$1</li>')
-                        .replace(/^\d+\. (.*$)/gm, '<li>$&</li>')
-                                                         .replace(/Estado del sistema: ✅ Sistema listo/g, '<div class="status-badge">✅ Sistema listo</div>')
-                             .replace(/¿Qué plan de clase necesitas generar\?/g, '<strong>¿Qué plan de clase necesitas generar?</strong>')
-                             .replace(/Ejemplos:/g, '<strong>💡 Ejemplos de solicitudes:</strong>')
-                        .replace(/\n\n/g, '<br><br>')
-                        .replace(/\n/g, '<br>')
-                      }
+                      ${processMarkdown(initialMessage.text)}
                     `
                   }} 
                 />
               ) : (
-                    <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">{initialMessage.text}</p>
-                  )}
+                <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">{initialMessage.text}</p>
+              )}
                 </div>
 
                 {/* Footer decorativo */}
@@ -1744,14 +1823,14 @@ Evaluación: Formativa mediante observación, lista de cotejo y producto final d
         
         {/* Mensajes del Chat - Siempre visible */}
         <div className="space-y-3 sm:space-y-4">
-        {messages.map((message) => {
+        {messages.map((message, index) => {
           // Debug: verificar si hay mensajes con contenido del mensaje inicial
           if (message.text.includes('ASISTENTE PEDAGÓGICO INTELIGENTE')) {
             console.log('🚨 Mensaje inicial encontrado en array messages:', message)
           }
           return (
             <div
-              key={message.id}
+              key={`${message.id}-${forceRender}`}
               className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
             >
               <div
@@ -1771,19 +1850,75 @@ Evaluación: Formativa mediante observación, lista de cotejo y producto final d
                     dangerouslySetInnerHTML={{ 
                       __html: `
                         <style>
-                          .prose li { margin-bottom: 8px; }
-                          .prose h1, .prose h2, .prose h3 { color: #1f2937; }
-                          .prose strong { color: #1f2937; font-weight: 600; }
-                          .prose code { background-color: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
-                          .prose pre { background-color: #f3f4f6; padding: 12px; border-radius: 6px; border: 1px solid #d1d5db; }
-                          .prose { overflow-wrap: anywhere; word-break: break-word; }
+                          .prose { 
+                            color: #374151 !important; 
+                            overflow-wrap: anywhere; 
+                            word-break: break-word; 
+                          }
+                          .prose li { 
+                            margin-bottom: 8px !important; 
+                            color: #374151 !important;
+                          }
+                          .prose h1, .prose h2, .prose h3 { 
+                            color: #1f2937 !important; 
+                            font-weight: 700 !important;
+                            margin-bottom: 1rem !important;
+                          }
+                          .prose strong { 
+                            color: #1f2937 !important; 
+                            font-weight: 600 !important;
+                          }
+                          .prose code { 
+                            background-color: #f3f4f6 !important; 
+                            padding: 2px 6px !important; 
+                            border-radius: 4px !important; 
+                            font-family: monospace !important;
+                            color: #374151 !important;
+                          }
+                          .prose pre { 
+                            background-color: #f3f4f6 !important; 
+                            padding: 12px !important; 
+                            border-radius: 6px !important; 
+                            border: 1px solid #d1d5db !important;
+                            color: #374151 !important;
+                          }
+                          /* Estilos base para texto */
+                          .prose {
+                            color: #374151 !important;
+                          }
+                          .prose h1, .prose h2, .prose h3 {
+                            color: #1f2937 !important;
+                          }
+                          .prose strong {
+                            color: #1f2937 !important;
+                          }
+                          .prose code {
+                            color: #374151 !important;
+                          }
+                          /* Preservar colores originales de emojis usando unset */
+                          .prose * {
+                            color: unset !important;
+                          }
+                          .prose {
+                            color: #374151 !important;
+                          }
+                          .prose h1, .prose h2, .prose h3 {
+                            color: #1f2937 !important;
+                          }
+                          .prose strong {
+                            color: #1f2937 !important;
+                          }
+                          .prose code {
+                            color: #374151 !important;
+                          }
                         </style>
                         ${processMarkdown(message.text)}
                       `
                     }} 
+                    key={`formatted-${message.id}-${forceRender}`}
                   />
                 ) : (
-                  <p className="whitespace-pre-wrap">{message.text}</p>
+                  <p className="whitespace-pre-wrap" key={`plain-${message.id}-${forceRender}`}>{message.text}</p>
                 )}
                 <div className={`text-xs mt-2 ${
                   message.isUser ? 'text-blue-100' : 'text-gray-500'
