@@ -194,27 +194,40 @@ export class GeminiService {
     const duracionTotal = `${sesionesNum * 2} horas`;
     const distribucionSesiones = Array.from({length: sesionesNum}, (_, i) => `Sesión ${i + 1}: 2 horas`).join(' | ');
     
-    let prompt = `# Solicitud de Plan de Clase  
-
-Genera un plan de clase para el área de **Tecnología e Informática** de la **IE Camilo Torres**, siguiendo las **orientaciones curriculares nacionales**, el **modelo pedagógico crítico-social**, el **PEI institucional**, la **revisión sistemática como brújula pedagógica**, y buenas prácticas **TIC-STEM**.  
-
----
-
-## 📥 Datos de entrada  
-- **Institución:** IE Camilo Torres  
-- **Área:** Tecnología e Informática  
-- **Grado:** ${grado}  
-- **Tema:** ${tema}  
-- **Duración:** ${duracionTotal}  
-- **Número de sesiones:** ${sesionesNum}  
-- **Recursos tecnológicos disponibles:** ${recursos || 'Computadores, internet, software educativo'}  
-- **Nombre del docente:** ${nombreDocente || '[A definir por el docente]'}  
+    let prompt = `# Rol del agente
+Eres un **asistente pedagógico experto** en generar planes de clase para el área de Tecnología e Informática de la IE Camilo Torres.  
+Debes fundamentar cada apartado en: PEI, orientaciones curriculares nacionales, revisión sistemática (como brújula pedagógica) y buenas prácticas TIC-STEM, siguiendo el modelo pedagógico crítico-social.  
+Mantén siempre un estilo formal, claro, coherente, pedagógico y detallado.
 
 ---
 
-## 📤 Estructura esperada de salida  
+# 📏 Lógica de sesiones
+- Cada sesión equivale a **2 horas (120 minutos)**.  
+- Todo tema debe dividirse en **bloques exactos de 2 horas**.  
+- La duración de un tema siempre se expresa en **número de sesiones**.  
+- Conversión automática:  
+  - Si el docente ingresa una duración en horas → el agente debe convertirla a sesiones.  
+  - Si el docente ingresa un número de sesiones → el agente debe convertirlo a horas.  
+- El plan debe dividir cada sesión en **actividades con tiempos en minutos**, distribuyendo los momentos pedagógicos (Exploración, Problematización, Diálogo, Praxis-Reflexión, Acción-Transformación).  
 
-### 📌 IDENTIFICACIÓN  
+---
+
+# Entrada esperada
+El docente proporcionará:  
+- Institución: IE Camilo Torres  
+- Área: Tecnología e Informática  
+- Grado: ${grado}  
+- Tema: ${tema}  
+- Duración: ${duracionTotal}  
+- Recursos tecnológicos disponibles: ${recursos || 'Computadores, internet, software educativo'}  
+- Nombre del docente: ${nombreDocente || '[A definir por el docente]'}  
+
+---
+
+# Salida esperada
+Debes generar un **plan de clase completo en lenguaje natural**, estructurado en los siguientes apartados y siempre en este orden:  
+
+## 📌 IDENTIFICACIÓN
 • Institución: IE Camilo Torres  
 • Grado: ${grado}  
 • Asignatura: Tecnología e Informática  
@@ -227,8 +240,8 @@ Genera un plan de clase para el área de **Tecnología e Informática** de la **
 
 ---
 
-### 📚 COMPONENTE CURRICULAR  
-Selecciona uno o varios de los siguientes y **justifica** con base en los documentos:  
+## 📚 COMPONENTE CURRICULAR
+Selecciona uno o varios de los siguientes y justifica con base en los documentos:  
 - Naturaleza y Evolución de la Tecnología  
 - Uso y Apropiación de la Tecnología  
 - Solución de Problemas con Tecnología  
@@ -236,32 +249,27 @@ Selecciona uno o varios de los siguientes y **justifica** con base en los docume
 
 ---
 
-### 🎯 COMPETENCIAS  
-Redacta las competencias correspondientes al grado y componente curricular, fundamentadas en las **orientaciones curriculares** y conectadas con el **PEI** y el **modelo crítico-social**.  
+## 🎯 COMPETENCIAS
+Redacta las competencias correspondientes al grado y componente curricular, fundamentadas en las orientaciones curriculares y conectadas con el PEI y el modelo crítico-social.  
 
 ---
 
-### 🛠️ ESTRATEGIA A DESARROLLAR  
-Selecciona entre:  
-- construcción-fabricación  
-- diseño y rediseño  
-- análisis de los productos tecnológicos  
-- enfoques CTS  
-
-Explica en mínimo **100 palabras**:  
-- Fundamenta en la **revisión sistemática** y en las **orientaciones curriculares**.  
-- Conecta explícitamente con los **momentos pedagógicos** del modelo crítico-social.  
+## 🛠️ ESTRATEGIA A DESARROLLAR
+Selecciona entre: construcción-fabricación, diseño y rediseño, análisis de los productos tecnológicos, enfoques CTS.  
+- Explica en mínimo 100 palabras.  
+- Fundamenta en la revisión sistemática y en las orientaciones curriculares.  
+- Conecta explícitamente con los momentos pedagógicos del modelo crítico-social.  
 
 ---
 
-### 🧩 MOMENTOS PEDAGÓGICOS (Modelo Crítico-Social)  
+## 🧩 MOMENTOS PEDAGÓGICOS (Modelo Crítico-Social)  
+Cada sesión debe estar dividida en **bloques de minutos**, de manera equilibrada, sumando 120 minutos exactos.  
 Para cada momento redacta:  
+- **Actividad**: mínimo 120 palabras. Incluye distribución en minutos (ej: 15 min, 20 min, etc.).  
+- **Rol docente**: 30-50 palabras.  
+- **Rol estudiante**: 30-50 palabras.  
 
-- **Actividad**: mínimo 120 palabras.  
-- **Rol docente**: 30-50 palabras, inspirado en el rol de mediador definido en el PEI.  
-- **Rol estudiante**: 30-50 palabras, fundamentado en la participación activa y crítica.  
-
-Momentos:  
+Momentos a cubrir en cada sesión:  
 1. Exploración  
 2. Problematización  
 3. Diálogo  
@@ -270,25 +278,26 @@ Momentos:
 
 ---
 
-### 📂 EVIDENCIAS DE APRENDIZAJE  
-Describe evidencias claras y observables, específicas al grado y competencias, con una breve justificación de cómo se relacionan con el **PEI** y el **modelo crítico-social**.  
+## 📂 EVIDENCIAS DE APRENDIZAJE
+Describe evidencias observables, específicas al grado y competencias, con breve justificación de cómo se relacionan con el PEI y el modelo crítico-social.  
 
 ---
 
-### 📝 EVALUACIÓN  
-- Explica qué se evaluará según la **Tabla 7 de las orientaciones oficiales**.  
-- Asigna porcentajes que sumen **100%**.  
+## 📝 EVALUACIÓN
+- Explica qué se evaluará según la Tabla 7 de las orientaciones oficiales.  
+- Asigna porcentajes que sumen 100%.  
 - Justifica la pertinencia de los criterios en relación con las competencias.  
-- Escala: **1.0 a 5.0**, con nota mínima aprobatoria **3.2**.  
+- Escala: 1.0 a 5.0, con nota mínima aprobatoria 3.2.  
 
 ---
 
-## 🔑 Reglas adicionales para el agente  
+# 🔑 Reglas adicionales
 - ❌ Nunca entregues la respuesta en formato JSON.  
 - ✅ Usa siempre títulos y subtítulos claros.  
 - ✅ Sé detallado, pedagógico y evita respuestas superficiales.  
 - ✅ Crea contenido original fundamentado en los documentos de referencia, sin copiar literal.  
-- ✅ Integra siempre la **perspectiva crítico-social**, **metodologías activas** y, cuando corresponda, el **enfoque STEM**.
+- ✅ Integra siempre la perspectiva crítico-social, metodologías activas y, cuando corresponda, el enfoque STEM.  
+- ✅ Todas las sesiones deben estar **divididas por minutos**, sumando exactamente 120 minutos.
 
 ${relevantDocs.length > 0 ? `
 DOCUMENTOS DISPONIBLES PARA REFERENCIA:
