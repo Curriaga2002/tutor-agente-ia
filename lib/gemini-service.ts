@@ -143,7 +143,7 @@ export class GeminiService {
   }
 
   // Generar plan de clase personalizado
-  async generateClassPlan(
+    async generateClassPlan(
     grado: string, 
     tema: string, 
     context: string,
@@ -190,24 +190,40 @@ export class GeminiService {
     nombreDocente?: string
   ): string {
     // Calcular variables antes del template string
-    const sesionesNum = parseInt(context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1' : '1');
+    // Buscar específicamente el número de sesiones en el contexto
+    const sesionesMatch = context.match(/número de sesiones:\s*(\d+)/i) || context.match(/sesiones:\s*(\d+)/i);
+    const sesionesNum = sesionesMatch ? parseInt(sesionesMatch[1]) : 1; // Fallback: 1 sesión = 2 horas
     const duracionTotal = `${sesionesNum * 2} horas`;
     const distribucionSesiones = Array.from({length: sesionesNum}, (_, i) => `Sesión ${i + 1}: 2 horas`).join(' | ');
+    
+    // Debug: verificar qué se está calculando
+    console.log('🔍 DEBUG - Cálculo en gemini-service.ts:', {
+      context: context.substring(0, 200) + '...',
+      sesionesNum,
+      duracionTotal,
+      distribucionSesiones
+    });
     
     let prompt = `# Rol del agente
 Eres un **asistente pedagógico experto** en generar planes de clase para el área de Tecnología e Informática de la IE Camilo Torres.  
 Debes fundamentar cada apartado en: PEI, orientaciones curriculares nacionales, revisión sistemática (como brújula pedagógica) y buenas prácticas TIC-STEM, siguiendo el modelo pedagógico crítico-social.  
 Mantén siempre un estilo formal, claro, coherente, pedagógico y detallado.
 
+## 🚨 INSTRUCCIONES CRÍTICAS PARA ESTE PLAN:
+- **NÚMERO DE SESIONES:** ${sesionesNum} sesiones (NO CAMBIAR ESTE NÚMERO)
+- **DURACIÓN TOTAL:** ${sesionesNum * 2} horas (${sesionesNum} sesiones × 2 horas)
+- **DISTRIBUCIÓN:** Mostrar EXACTAMENTE ${sesionesNum} sesiones de 2 horas cada una
+
 ---
 
 # 📏 Lógica de sesiones
-- Cada sesión equivale a **2 horas (120 minutos)**.  
-- Todo tema debe dividirse en **bloques exactos de 2 horas**.  
-- La duración de un tema siempre se expresa en **número de sesiones**.  
-- Conversión automática:  
-  - Si el docente ingresa una duración en horas → el agente debe convertirla a sesiones.  
-  - Si el docente ingresa un número de sesiones → el agente debe convertirlo a horas.  
+- Cada sesión equivale exactamente a **2 horas (120 minutos)**.
+- La **duración total siempre debe calcularse multiplicando el número de sesiones × 2 horas**.
+- Ejemplos:
+  - 1 sesión → 2 horas totales
+  - 2 sesiones → 4 horas totales
+  - 3 sesiones → 6 horas totales
+- La **distribución de sesiones** debe mostrar todas las sesiones con su respectiva duración (ejemplo: Sesión 1: 2 horas | Sesión 2: 2 horas).
 - El plan debe dividir cada sesión en **actividades con tiempos en minutos**, distribuyendo los momentos pedagógicos (Exploración, Problematización, Diálogo, Praxis-Reflexión, Acción-Transformación).  
 
 ---
@@ -233,10 +249,10 @@ Debes generar un **plan de clase completo en lenguaje natural**, estructurado en
 • Asignatura: Tecnología e Informática  
 • Tema: ${tema}  
 • Recursos: ${recursos || 'Computadores, internet, software educativo'}  
-• Sesiones: ${sesionesNum} sesión(es)  
-• Duración total: ${duracionTotal}  
+• Sesiones: ${sesionesNum} sesión(es) (NÚMERO EXACTO: ${sesionesNum})  
+• Duración total: ${duracionTotal} (CÁLCULO OBLIGATORIO: ${sesionesNum} sesiones × 2 horas = ${sesionesNum * 2} horas - NO CAMBIAR ESTE NÚMERO)  
 • Docente: ${nombreDocente || '[A definir por el docente]'}  
-• Distribución de sesiones: ${distribucionSesiones}  
+• Distribución de sesiones: ${distribucionSesiones} (OBLIGATORIO: mostrar EXACTAMENTE ${sesionesNum} sesiones, NO MÁS, NO MENOS)  
 
 ---
 
@@ -306,7 +322,23 @@ ${relevantDocs.map((doc, index) => `${index + 1}. ${doc.title} (${doc.doc_type})
 Usa estos documentos como referencia para enriquecer el plan, pero NO copies contenido literal. Crea contenido original inspirado en las mejores prácticas.
 ` : 'DOCUMENTOS: No hay documentos específicos disponibles. Genera un plan basado en las mejores prácticas pedagógicas.'}
 
-Genera el plan de clase completo siguiendo EXACTAMENTE la estructura especificada arriba.` 
+Genera el plan de clase completo siguiendo EXACTAMENTE la estructura especificada arriba.
+
+## ⚠️ VALIDACIÓN OBLIGATORIA ANTES DE ENVIAR:
+**ATENCIÓN: El número de sesiones es EXACTAMENTE ${sesionesNum}. NO LO CAMBIES.**
+
+1. **Duración total:** Con ${sesionesNum} sesiones, la duración total DEBE ser EXACTAMENTE ${sesionesNum * 2} horas.
+   - ❌ INCORRECTO: ${sesionesNum} horas
+   - ✅ CORRECTO: ${sesionesNum * 2} horas
+
+2. **Distribución de sesiones:** DEBE mostrar EXACTAMENTE ${sesionesNum} sesiones:
+   - ❌ INCORRECTO: Solo "Sesión 1: 2 horas"
+   - ✅ CORRECTO: ${Array.from({length: sesionesNum}, (_, i) => `Sesión ${i + 1}: 2 horas`).join(' | ')}
+
+3. **Verificación final:** 
+   - Número de sesiones: ${sesionesNum}
+   - Duración total: ${sesionesNum * 2} horas
+   - Distribución: ${sesionesNum} sesiones de 2 horas cada una`
 
     return prompt
   }
