@@ -559,9 +559,9 @@ export default function ChatAssistant({
       )
       
       // Construir contexto enriquecido con configuración inicial + historial reciente del chat
-      // Normalizar horas y sesiones como números válidos dentro de rango
-      const horasNum = Math.min(2, Math.max(1, Number(planningConfig.horas || '1') || 1))
+      // Normalizar sesiones y calcular horas automáticamente (cada sesión = 2 horas)
       const sesionesNum = Math.min(2, Math.max(1, Number(planningConfig.sesiones || '1') || 1))
+      const horasNum = sesionesNum * 2 // Cada sesión = 2 horas
 
       const totalMinutes = horasNum * 60
       const minutesPerSessionBase = Math.floor(totalMinutes / sesionesNum)
@@ -737,9 +737,9 @@ export default function ChatAssistant({
       )
       
       // Generar respuesta estructurada basada en los documentos disponibles e integrando la configuración inicial
-      // Normalizar horas/sesiones también en fallback
-      const horasNum = Math.min(2, Math.max(1, Number(planningConfig.horas) || Number(analysis.horas) || 1))
+      // Normalizar sesiones y calcular horas automáticamente (cada sesión = 2 horas)
       const sesionesNum = Math.min(2, Math.max(1, Number(planningConfig.sesiones) || Number(analysis.sesiones) || 1))
+      const horasNum = sesionesNum * 2 // Cada sesión = 2 horas
 
       let response = `🎓 **PLAN DE CLASE GENERADO (Sistema de Fallback)**
 
