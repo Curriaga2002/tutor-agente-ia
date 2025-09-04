@@ -306,6 +306,30 @@ const ConfigurationForm = ({
   )
 }
 
+// Función para procesar markdown y convertir a HTML
+const processMarkdown = (text: string): string => {
+  return text
+    // Normalizar dobles dos puntos y títulos con ':' extra
+    .replace(/:{2,}/g, ':')
+    .replace(/^##\s*([^:]+):\s*$/gm, '## $1')
+    // Formateo de texto
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // Código
+    .replace(/```(.*?)```/g, '<pre><code>$1</code></pre>')
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    // Títulos
+    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+    // Listas
+    .replace(/^- (.*$)/gm, '<li>• $1</li>')
+    .replace(/^\d+\. (.*$)/gm, '<li>$&</li>')
+    // Saltos de línea
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>')
+}
+
 export default function ChatAssistant({ 
   onChatUpdate, 
   currentPlanningData, 
@@ -1754,22 +1778,7 @@ Evaluación: Formativa mediante observación, lista de cotejo y producto final d
                           .prose pre { background-color: #f3f4f6; padding: 12px; border-radius: 6px; border: 1px solid #d1d5db; }
                           .prose { overflow-wrap: anywhere; word-break: break-word; }
                         </style>
-                        ${message.text
-                          // Normalizar dobles dos puntos y títulos con ':' extra
-                          .replace(/:{2,}/g, ':')
-                          .replace(/^##\s*([^:]+):\s*$/gm, '## $1')
-                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                          .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                          .replace(/```(.*?)```/g, '<pre><code>$1</code></pre>')
-                          .replace(/`(.*?)`/g, '<code>$1</code>')
-                          .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-                          .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-                          .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-                          .replace(/^- (.*$)/gm, '<li>• $1</li>')
-                          .replace(/^\d+\. (.*$)/gm, '<li>$&</li>')
-                          .replace(/\n\n/g, '<br><br>')
-                          .replace(/\n/g, '<br>')
-                        }
+                        ${processMarkdown(message.text)}
                       `
                     }} 
                   />
