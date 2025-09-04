@@ -1465,9 +1465,12 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
     }
   }
 
-  // Scroll automático al final
+  // Scroll automático al final solo cuando se agregan nuevos mensajes
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Solo hacer scroll si hay mensajes reales del chat (no el mensaje inicial)
+    if (messages.length > 0 && messages[messages.length - 1]?.id !== 'initial') {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [messages])
 
   return (
@@ -1476,17 +1479,29 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
       <div className="bg-white border-b border-gray-100 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div className="flex-1 min-w-0">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-2 sm:mb-3 tracking-tight leading-tight">
-              <span className="bg-gradient-to-r from-blue-500 via-purple-500 via-pink-500 to-orange-500 bg-clip-text text-transparent" style={{WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}>
-                Planeador Inteligente
-              </span>
-            </h2>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-500 font-light">
-              Sistema de planeación de clases con inteligencia artificial
-            </p>
-            <p className="text-sm sm:text-base font-bold text-gray-700 mt-1">
-              Institución Educativa Camilo Torres
-            </p>
+            {/* Título principal con diseño compacto */}
+            <div className="mb-3 sm:mb-4">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-1 sm:mb-2 tracking-tight leading-tight">
+                <span className="bg-gradient-to-r from-blue-600 via-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent drop-shadow-sm" style={{WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}>
+                  Planeador Inteligente
+                </span>
+              </h1>
+              
+              {/* Subtítulo con tipografía compacta */}
+              <p className="text-sm sm:text-base lg:text-lg text-gray-700 font-semibold mb-2 sm:mb-3 leading-relaxed">
+                Sistema de planeación de clases con inteligencia artificial
+              </p>
+              
+              {/* Institución con badge compacto */}
+              <div className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl shadow-md shadow-blue-500/20 border border-blue-500/20">
+                <div className="flex items-center space-x-1.5">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                  <span className="text-xs sm:text-sm font-bold tracking-wide">
+                    🏫 Institución Educativa Camilo Torres
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4">
