@@ -189,68 +189,110 @@ export class GeminiService {
     recursos?: string,
     nombreDocente?: string
   ): string {
-    let prompt = `# Rol del agente
-Eres un asistente pedagógico especializado en generar planes de clase para el área de Tecnología e Informática de la IE Camilo Torres. Debes seguir las orientaciones curriculares, el modelo pedagógico crítico-social y mantener un estilo formal, claro y completo.
+    let prompt = `# Solicitud de Plan de Clase  
 
-# Entrada esperada
-El docente proporcionará:
-- Institución: IE Camilo Torres
-- Área: Tecnología e Informática
-- Grado: ${grado}
-- Tema: ${tema}
-- Duración: ${context.includes('horas') ? context : '2 horas'}
-- Número de sesiones: ${context.includes('sesiones') ? context : '2'}
-- Recursos tecnológicos disponibles: ${recursos || 'Computadores, internet, software educativo'}
-- Nombre del docente: ${nombreDocente || '[A definir por el docente]'}
+Genera un plan de clase para el área de **Tecnología e Informática** de la **IE Camilo Torres**, siguiendo las **orientaciones curriculares nacionales**, el **modelo pedagógico crítico-social**, el **PEI institucional**, la **revisión sistemática como brújula pedagógica**, y buenas prácticas **TIC-STEM**.  
 
-# Salida esperada
-Debes generar un **plan de clase completo en lenguaje natural**, estructurado en los siguientes apartados y siempre en este orden:
+---
 
-## IDENTIFICACIÓN
-• Institución: IE Camilo Torres
-• Grado: ${grado}
-• Asignatura: Tecnología e Informática
-• Tema: ${tema}
-• Recursos: ${recursos || 'Computadores, internet, software educativo'}
-• Sesiones: ${context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1' : '1'} sesión(es)
+## 📥 Datos de entrada  
+- **Institución:** IE Camilo Torres  
+- **Área:** Tecnología e Informática  
+- **Grado:** ${grado}  
+- **Tema:** ${tema}  
+- **Duración:** ${(() => {
+  const sesiones = parseInt(context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1' : '1');
+  return `${sesiones * 2} horas`;
+})()}  
+- **Número de sesiones:** ${context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1'}  
+- **Recursos tecnológicos disponibles:** ${recursos || 'Computadores, internet, software educativo'}  
+- **Nombre del docente:** ${nombreDocente || '[A definir por el docente]'}  
+
+---
+
+## 📤 Estructura esperada de salida  
+
+### 📌 IDENTIFICACIÓN  
+• Institución: IE Camilo Torres  
+• Grado: ${grado}  
+• Asignatura: Tecnología e Informática  
+• Tema: ${tema}  
+• Recursos: ${recursos || 'Computadores, internet, software educativo'}  
+• Sesiones: ${context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1'} sesión(es)  
 • Duración total: ${(() => {
   const sesiones = parseInt(context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1' : '1');
   return `${sesiones * 2} horas`;
-})()}
-• Docente: ${nombreDocente || '[A definir por el docente]'}
+})()}  
+• Docente: ${nombreDocente || '[A definir por el docente]'}  
 • Distribución de sesiones: ${(() => {
   const sesiones = parseInt(context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1' : '1');
   return Array.from({length: sesiones}, (_, i) => `Sesión ${i + 1}: 2 horas`).join(' | ');
-})()}
+})()}  
 
-## 📚 COMPONENTE CURRICULAR
-Selecciona uno o varios de los siguientes: Naturaleza y Evolución de la Tecnología, Uso y Apropiación de la Tecnología, Solución de Problemas con Tecnología, Tecnología, Informática y Sociedad.
+---
 
-## 🎯 COMPETENCIAS
-Redacta la(s) competencia(s) de acuerdo con el grado y al componente curricular seleccionado.
+### 📚 COMPONENTE CURRICULAR  
+Selecciona uno o varios de los siguientes y **justifica** con base en los documentos:  
+- Naturaleza y Evolución de la Tecnología  
+- Uso y Apropiación de la Tecnología  
+- Solución de Problemas con Tecnología  
+- Tecnología, Informática y Sociedad  
 
-## 🎯 Estrategia a Desarrollar
-Elige una de las siguientes estrategias: construcción-fabricación, diseño y rediseño, análisis de los productos tecnológicos, enfoques CTS.  
-Explica detalladamente la estrategia en mínimo 80 palabras y cómo se relaciona con los momentos pedagógicos.
+---
 
-## 🔍 MOMENTOS PEDAGÓGICOS (Modelo Crítico-Social)
-Para cada momento (Exploración, Problematización, Diálogo, Praxis-Reflexión, Acción-Transformación) redacta:
-- **Actividad**: texto completo, mínimo 100 palabras dividido en subsecciones si es necesario.  
-- **Rol docente**: texto de 30 a 50 palabras.  
-- **Rol estudiante**: texto de 30 a 50 palabras.  
+### 🎯 COMPETENCIAS  
+Redacta las competencias correspondientes al grado y componente curricular, fundamentadas en las **orientaciones curriculares** y conectadas con el **PEI** y el **modelo crítico-social**.  
 
-## 📂 EVIDENCIAS DE APRENDIZAJE
-Genera evidencias específicas relacionadas con las competencias y el grado.
+---
 
-## 📝 EVALUACIÓN
-Explica qué se evaluará en cada criterio según la Tabla 7 (orientaciones oficiales).  
-Asigna porcentajes de evaluación que sumen 100%.  
-Aclara la escala: 1.0 a 5.0, con nota mínima aprobatoria 3.2.
+### 🛠️ ESTRATEGIA A DESARROLLAR  
+Selecciona entre:  
+- construcción-fabricación  
+- diseño y rediseño  
+- análisis de los productos tecnológicos  
+- enfoques CTS  
 
-# Condiciones adicionales
-- La respuesta debe estar siempre completa y nunca en formato JSON.  
-- Usa títulos y subtítulos claros.  
-- Sé detallado, pero mantén un estilo pedagógico y fluido en español.
+Explica en mínimo **100 palabras**:  
+- Fundamenta en la **revisión sistemática** y en las **orientaciones curriculares**.  
+- Conecta explícitamente con los **momentos pedagógicos** del modelo crítico-social.  
+
+---
+
+### 🧩 MOMENTOS PEDAGÓGICOS (Modelo Crítico-Social)  
+Para cada momento redacta:  
+
+- **Actividad**: mínimo 120 palabras.  
+- **Rol docente**: 30-50 palabras, inspirado en el rol de mediador definido en el PEI.  
+- **Rol estudiante**: 30-50 palabras, fundamentado en la participación activa y crítica.  
+
+Momentos:  
+1. Exploración  
+2. Problematización  
+3. Diálogo  
+4. Praxis-Reflexión  
+5. Acción-Transformación  
+
+---
+
+### 📂 EVIDENCIAS DE APRENDIZAJE  
+Describe evidencias claras y observables, específicas al grado y competencias, con una breve justificación de cómo se relacionan con el **PEI** y el **modelo crítico-social**.  
+
+---
+
+### 📝 EVALUACIÓN  
+- Explica qué se evaluará según la **Tabla 7 de las orientaciones oficiales**.  
+- Asigna porcentajes que sumen **100%**.  
+- Justifica la pertinencia de los criterios en relación con las competencias.  
+- Escala: **1.0 a 5.0**, con nota mínima aprobatoria **3.2**.  
+
+---
+
+## 🔑 Reglas adicionales para el agente  
+- ❌ Nunca entregues la respuesta en formato JSON.  
+- ✅ Usa siempre títulos y subtítulos claros.  
+- ✅ Sé detallado, pedagógico y evita respuestas superficiales.  
+- ✅ Crea contenido original fundamentado en los documentos de referencia, sin copiar literal.  
+- ✅ Integra siempre la **perspectiva crítico-social**, **metodologías activas** y, cuando corresponda, el **enfoque STEM**.
 
 ${relevantDocs.length > 0 ? `
 DOCUMENTOS DISPONIBLES PARA REFERENCIA:
