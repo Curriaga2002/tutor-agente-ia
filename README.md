@@ -1,5 +1,78 @@
 # Planeación Didáctica - Sistema de Planeador Inteligente
 
+## 🎯 Agente Planeador de Clases IE Camilo Torres
+
+### Propósito
+El **Agente Planeador de Clases** es un asistente pedagógico experto diseñado para apoyar a los docentes de la **Institución Educativa Camilo Torres** en la planificación de clases del área de **Tecnología e Informática**. Su objetivo es generar **planes de clase completos, claros y aplicables** que estén alineados con:
+- El Proyecto Educativo Institucional (PEI)
+- Las Orientaciones Curriculares MEN 2022
+- La Revisión sistemática del modelo pedagógico crítico-social
+- La Tabla 7 MEN (criterios oficiales de evaluación)
+- Buenas prácticas en TIC y enfoque STEM
+
+### Cómo funciona
+El agente recibe información básica del docente (grado, tema, sesiones/horas, recursos, nombre del docente), consulta en tiempo real los documentos institucionales almacenados en el bucket, e integra los lineamientos del PEI, MEN 2022, revisión sistemática y Tabla 7 para generar un plan de clase estructurado, atractivo y aplicable.
+
+### Lógica de sesiones
+- Cada sesión equivale a **2 horas (120 minutos)**
+- La duración total = número de sesiones × 2
+- **Ejemplos:**
+  - 1 sesión = 2 horas
+  - 2 sesiones = 4 horas
+  - 3 sesiones = 6 horas
+
+**Distribución recomendada por sesión (120 min exactos):**
+- Exploración: 15–20%
+- Problematización: 15–20%
+- Diálogo: 20–25%
+- Praxis-Reflexión: 20–25%
+- Acción-Transformación: 10–15%
+
+### Estructura de salida
+Cada plan de clase generado incluye los siguientes apartados:
+1. **Identificación**
+2. **Componente Curricular**
+3. **Competencias**
+4. **Estrategia a desarrollar**
+5. **Momentos pedagógicos (Crítico-Social)**
+6. **Evidencias de aprendizaje**
+7. **Evaluación**
+
+Cada sesión se presenta como "Sesión X: 2 horas (120 min)", dividida en bloques de actividades con roles del docente, estudiante y minutaje exacto.
+
+### Evaluación con Tabla 7
+El agente usa exclusivamente los criterios oficiales de la **Tabla 7 MEN**. Selecciona los criterios según la estrategia didáctica (construcción, análisis, diseño, problemas, software o proyectos). Explica qué se evalúa y asigna porcentajes que sumen 100%. 
+
+**Escala:** 1.0 a 5.0, con nota mínima aprobatoria 3.2
+
+**Ejemplo (Diseño/Rediseño):**
+- Identificación del problema → 20%
+- Creatividad en propuestas de solución → 20%
+- Búsqueda y selección de información → 20%
+- Presentación gráfica → 20%
+- Argumentación del proceso → 20%
+
+### Beneficios
+- Consistencia con PEI, MEN y modelo crítico-social
+- Generación automática de sesiones y minutaje
+- Evaluación alineada con criterios oficiales
+- Planes claros, atractivos y aplicables
+- Integración completa de competencias, evidencias, momentos y evaluación
+
+### Validaciones automáticas
+Antes de entregar un plan, el agente verifica:
+- Número de sesiones = valor ingresado (no se cambia)
+- Duración total = sesiones × 2 horas
+- Distribución = sesiones × 2 horas exactas
+- Minutaje = 120 minutos por sesión
+- Evaluación = criterios de Tabla 7, suma 100%
+- Coherencia con PEI y enfoque crítico-social
+
+### Conclusión
+El **Agente Planeador de Clases IE Camilo Torres** garantiza que cada plan cumpla con políticas educativas nacionales, refuerce el modelo pedagógico crítico-social, promueva innovación TIC y STEM, y brinde a los docentes una herramienta práctica, clara y confiable para transformar su enseñanza.
+
+---
+
 ## Descripción General
 
 Sistema web para la generación automática de planes de clase didácticos utilizando inteligencia artificial. El sistema permite a los docentes crear planeaciones personalizadas mediante un chat interactivo con un asistente IA especializado en pedagogía.
@@ -383,6 +456,40 @@ SUPABASE_STORAGE_SECRET_KEY=tu_secret_key
 - Prettier para formato
 - Convenciones de naming
 - Documentación de funciones
+
+## 📋 Versión Resumida para Presentación
+
+### ¿Qué es?
+Agente pedagógico que genera planes de clase alineados con PEI, MEN 2022, Revisión sistemática y Tabla 7.
+
+### Entradas:
+- Grado
+- Tema
+- Sesiones u horas
+- Recursos
+- Nombre del docente
+
+### Funcionamiento:
+- Recupera información de documentos institucionales
+- Integra competencias, estrategias, evidencias y momentos pedagógicos
+- Evalúa con criterios oficiales de la Tabla 7
+- Divide sesiones en 120 minutos exactos
+
+### Salida:
+- Identificación
+- Componente Curricular
+- Competencias
+- Estrategia
+- Momentos pedagógicos
+- Evidencias
+- Evaluación
+
+### Beneficios:
+- Consistencia con documentos oficiales
+- Eficiencia en planeación
+- Evaluación robusta
+- Presentación clara y atractiva
+- Alineación crítico-social y STEM
 
 ## Licencia
 
