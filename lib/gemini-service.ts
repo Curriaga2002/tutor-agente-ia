@@ -189,6 +189,11 @@ export class GeminiService {
     recursos?: string,
     nombreDocente?: string
   ): string {
+    // Calcular variables antes del template string
+    const sesionesNum = parseInt(context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1' : '1');
+    const duracionTotal = `${sesionesNum * 2} horas`;
+    const distribucionSesiones = Array.from({length: sesionesNum}, (_, i) => `Sesión ${i + 1}: 2 horas`).join(' | ');
+    
     let prompt = `# Solicitud de Plan de Clase  
 
 Genera un plan de clase para el área de **Tecnología e Informática** de la **IE Camilo Torres**, siguiendo las **orientaciones curriculares nacionales**, el **modelo pedagógico crítico-social**, el **PEI institucional**, la **revisión sistemática como brújula pedagógica**, y buenas prácticas **TIC-STEM**.  
@@ -200,11 +205,8 @@ Genera un plan de clase para el área de **Tecnología e Informática** de la **
 - **Área:** Tecnología e Informática  
 - **Grado:** ${grado}  
 - **Tema:** ${tema}  
-- **Duración:** ${(() => {
-  const sesiones = parseInt(context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1' : '1');
-  return `${sesiones * 2} horas`;
-})()}  
-- **Número de sesiones:** ${context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1'}  
+- **Duración:** ${duracionTotal}  
+- **Número de sesiones:** ${sesionesNum}  
 - **Recursos tecnológicos disponibles:** ${recursos || 'Computadores, internet, software educativo'}  
 - **Nombre del docente:** ${nombreDocente || '[A definir por el docente]'}  
 
@@ -218,16 +220,10 @@ Genera un plan de clase para el área de **Tecnología e Informática** de la **
 • Asignatura: Tecnología e Informática  
 • Tema: ${tema}  
 • Recursos: ${recursos || 'Computadores, internet, software educativo'}  
-• Sesiones: ${context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1'} sesión(es)  
-• Duración total: ${(() => {
-  const sesiones = parseInt(context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1' : '1');
-  return `${sesiones * 2} horas`;
-})()}  
+• Sesiones: ${sesionesNum} sesión(es)  
+• Duración total: ${duracionTotal}  
 • Docente: ${nombreDocente || '[A definir por el docente]'}  
-• Distribución de sesiones: ${(() => {
-  const sesiones = parseInt(context.includes('sesiones') ? context.match(/\d+/)?.[0] || '1' : '1');
-  return Array.from({length: sesiones}, (_, i) => `Sesión ${i + 1}: 2 horas`).join(' | ');
-})()}  
+• Distribución de sesiones: ${distribucionSesiones}  
 
 ---
 
