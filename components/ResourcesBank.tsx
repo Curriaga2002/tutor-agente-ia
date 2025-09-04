@@ -843,7 +843,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
             {/* Header responsive */}
             <div className="relative p-4 sm:p-6 lg:p-8 border-b border-gray-200 bg-white">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-semibold pr-4 bg-gradient-to-r from-blue-500 via-purple-500 via-pink-500 to-orange-500 bg-clip-text text-transparent">
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold pr-4 bg-gradient-to-r from-blue-500 via-purple-500 via-pink-500 to-orange-500 bg-clip-text text-transparent">
                   💬 Historial Completo del Chat - {selectedPlan.tema}
                 </h3>
                 <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">

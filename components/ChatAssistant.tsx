@@ -629,7 +629,7 @@ Ejemplos:
         `5) No agregues sesiones extra; si necesitas más tiempo, prioriza y sintetiza.\n` +
         `6) Incluye una sección de "Distribución temporal (minutos)" con ${sesionesNum} líneas que sumen ${totalMinutes} min.\n` +
         `7) Añade una línea de verificación: "Verificación: suma de sesiones = ${totalMinutes} min".\n` +
-        `8) No incluyas "Institución" ni "Área". Mantente en la asignatura: ${planningConfig.asignatura}.\n` +
+        `8) Incluye la institución "IE Camilo Torres" y mantente en la asignatura: ${planningConfig.asignatura}.\n` +
         `9) Mantén la sección de duración total (min) y sesiones al inicio exactamente con estos valores.\n\n` +
         `Historial reciente del chat (usar como guía contextual, no repetir literalmente):\n${conversationTranscript}`
 
@@ -1482,7 +1482,10 @@ ${Array.from({ length: sesionesNum }, (_, i) => `• Sesión ${i + 1}: ${i === s
               </span>
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-gray-500 font-light">
-              Sistema de planeación inteligente con inteligencia artificial
+              Sistema de planeación de clases con inteligencia artificial
+            </p>
+            <p className="text-sm sm:text-base font-bold text-gray-700 mt-1">
+              Institución Educativa Camilo Torres
             </p>
           </div>
           
