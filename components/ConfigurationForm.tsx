@@ -28,18 +28,20 @@ export function ConfigurationForm({ onSubmit }: ConfigurationFormProps) {
       nombreDocente: planningConfig.nombreDocente
     })
     
-    if (
-      planningConfig.grado &&
-      planningConfig.asignatura &&
-      planningConfig.tema &&
-      sesionesValid &&
-      planningConfig.recursos &&
-      planningConfig.nombreDocente
-    ) {
+    // Validación detallada
+    const validationErrors = []
+    if (!planningConfig.grado) validationErrors.push('grado')
+    if (!planningConfig.asignatura) validationErrors.push('asignatura')
+    if (!planningConfig.tema) validationErrors.push('tema')
+    if (!sesionesValid) validationErrors.push('sesiones')
+    if (!planningConfig.recursos) validationErrors.push('recursos')
+    if (!planningConfig.nombreDocente) validationErrors.push('nombreDocente')
+    
+    if (validationErrors.length === 0) {
       console.log('✅ Formulario válido, llamando onSubmit')
       onSubmit()
     } else {
-      console.log('❌ Formulario inválido')
+      console.log('❌ Formulario inválido. Campos faltantes:', validationErrors)
     }
   }
 
@@ -60,6 +62,13 @@ export function ConfigurationForm({ onSubmit }: ConfigurationFormProps) {
     
     updateConfiguration({ [field]: value })
   }
+
+  // Asegurar que la asignatura esté siempre configurada
+  React.useEffect(() => {
+    if (!planningConfig.asignatura) {
+      updateConfiguration({ asignatura: 'Tecnología e informática' })
+    }
+  }, [planningConfig.asignatura, updateConfiguration])
 
   const normalizeNumericField = (field: 'sesiones') => {
     let num = Number(planningConfig[field])
