@@ -1,12 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '../lib/supabase/client'
 import { PDFContent, processAllPDFs } from '../lib/pdf-content-processor'
 
 // Crear cliente de Supabase
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+const supabase = createClient()
 
 interface UseBucketDocumentsReturn {
   documents: PDFContent[]

@@ -1,21 +1,21 @@
 "use client"
 
-import React, { useState } from 'react'
-import Navigation from './Navigation'
-import ChatAssistant from './ChatAssistant'
+import React from 'react'
+import { useAuth } from '../contexts/AuthContext'
+import { useNavigation } from '../contexts/NavigationContext'
+import { usePlanning } from '../contexts/PlanningContext'
+import { Navigation } from './Navigation'
+import { ChatAssistant } from './ChatAssistant'
 import ResourcesBank from './ResourcesBank'
 import AppStatus from './AppStatus'
 import UserAdmin from './UserAdmin'
 import ProtectedRoute from './ProtectedRoute'
-import { useAuth } from '../hooks/useAuth'
+import { ActiveTab } from '../types'
 
-type ActiveTab = 'generar' | 'estado' | 'historial' | 'usuarios'
-
-export default function PlanningAssistant() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('generar')
-  const [currentPlanningData, setCurrentPlanningData] = useState<any>(null)
-  const [chatHistory, setChatHistory] = useState<any[]>([])
-  const { user, isAdmin } = useAuth()
+export function PlanningAssistant() {
+  const { isAdmin } = useAuth()
+  const { activeTab } = useNavigation()
+  const { currentPlanningData, setCurrentPlanningData, chatHistory, setChatHistory } = usePlanning()
 
   const handleChatUpdate = (messages: any[]) => {
     setChatHistory(messages)
@@ -24,10 +24,10 @@ export default function PlanningAssistant() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
-        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <Navigation />
         
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
-          {activeTab === 'generar' && (
+          {activeTab === ActiveTab.GENERAR && (
             <div className="space-y-4 sm:space-y-6 lg:space-y-8">
               <ChatAssistant 
                 onChatUpdate={handleChatUpdate}
@@ -37,22 +37,24 @@ export default function PlanningAssistant() {
             </div>
           )}
           
-          {activeTab === 'estado' && isAdmin && (
+          {activeTab === ActiveTab.ESTADO && isAdmin && (
             <div className="space-y-4 sm:space-y-6 lg:space-y-8">
               <AppStatus />
             </div>
           )}
           
-          {activeTab === 'historial' && (
+          {activeTab === ActiveTab.HISTORIAL && (
             <div className="space-y-4 sm:space-y-6 lg:space-y-8">
               <ResourcesBank 
-                setActiveTab={setActiveTab}
+                setActiveTab={(tab) => {
+                  // Navigation will be handled by the context
+                }}
                 setCurrentPlanningData={setCurrentPlanningData}
               />
             </div>
           )}
           
-          {activeTab === 'usuarios' && isAdmin && (
+          {activeTab === ActiveTab.USUARIOS && isAdmin && (
             <div className="space-y-4 sm:space-y-6 lg:space-y-8">
               <UserAdmin />
             </div>

@@ -1,336 +1,514 @@
-# Planeación Didáctica - Sistema de Planeador Inteligente
+# 🎓 Planeador Didáctico Inteligente - IE Camilo Torres
 
-##  Agente Planeador de Clases IE Camilo Torres
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
+[![Google Gemini](https://img.shields.io/badge/Google-Gemini-orange?style=for-the-badge&logo=google)](https://ai.google.dev/)
 
-### Propósito
-El **Agente Planeador de Clases** es un asistente pedagógico experto diseñado para apoyar a los docentes de la **Institución Educativa Camilo Torres** en la planificación de clases del área de **Tecnología e Informática**. Su objetivo es generar **planes de clase completos, claros y aplicables** que estén alineados con:
-- El Proyecto Educativo Institucional (PEI)
-- Las Orientaciones Curriculares MEN 2022
-- La Revisión sistemática del modelo pedagógico crítico-social
-- La Tabla 7 MEN (criterios oficiales de evaluación)
-- Buenas prácticas en TIC y enfoque STEM
+> **Sistema de generación automática de planes de clase** utilizando inteligencia artificial, diseñado específicamente para docentes de Tecnología e Informática de la Institución Educativa Camilo Torres.
 
-### Cómo funciona
-El agente recibe información básica del docente (grado, tema, sesiones/horas, recursos, nombre del docente), consulta en tiempo real los documentos institucionales almacenados en el bucket, e integra los lineamientos del PEI, MEN 2022, revisión sistemática y Tabla 7 para generar un plan de clase estructurado, atractivo y aplicable.
+## 📋 Tabla de Contenidos
 
-### Lógica de sesiones
-- Cada sesión equivale a **2 horas (120 minutos)**
-- La duración total = número de sesiones × 2
-- **Ejemplos:**
-  - 1 sesión = 2 horas
-  - 2 sesiones = 4 horas
-  - 3 sesiones = 6 horas
+- [🎯 Descripción General](#-descripción-general)
+- [🏗️ Arquitectura del Sistema](#️-arquitectura-del-sistema)
+- [⚡ Características Principales](#-características-principales)
+- [🛠️ Stack Tecnológico](#️-stack-tecnológico)
+- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
+- [🚀 Instalación y Configuración](#-instalación-y-configuración)
+- [💻 Uso del Sistema](#-uso-del-sistema)
+- [🔧 API y Servicios](#-api-y-servicios)
+- [📊 Base de Datos](#-base-de-datos)
+- [🎨 Componentes Principales](#-componentes-principales)
+- [📈 Flujos de Datos](#-flujos-de-datos)
+- [🔒 Seguridad](#-seguridad)
+- [📝 Contribución](#-contribución)
+- [📄 Licencia](#-licencia)
 
-**Distribución recomendada por sesión (120 min exactos):**
-- Exploración: 15–20%
-- Problematización: 15–20%
-- Diálogo: 20–25%
-- Praxis-Reflexión: 20–25%
-- Acción-Transformación: 10–15%
+---
 
-### Estructura de salida
-Cada plan de clase generado incluye los siguientes apartados:
-1. **Identificación**
-2. **Componente Curricular**
-3. **Competencias**
-4. **Estrategia a desarrollar**
-5. **Momentos pedagógicos (Crítico-Social)**
-6. **Evidencias de aprendizaje**
-7. **Evaluación**
+## 🎯 Descripción General
+El **Planeador Didáctico Inteligente** es un sistema web avanzado que utiliza inteligencia artificial para generar planes de clase completos y estructurados. Está diseñado específicamente para docentes del área de **Tecnología e Informática** de la Institución Educativa Camilo Torres.
 
-Cada sesión se presenta como "Sesión X: 2 horas (120 min)", dividida en bloques de actividades con roles del docente, estudiante y minutaje exacto.
+### 🎯 Objetivos
 
-### Evaluación con Tabla 7
-El agente usa exclusivamente los criterios oficiales de la **Tabla 7 MEN**. Selecciona los criterios según la estrategia didáctica (construcción, análisis, diseño, problemas, software o proyectos). Explica qué se evalúa y asigna porcentajes que sumen 100%. 
+- **Automatizar** la creación de planes de clase didácticos
+- **Alinear** con políticas educativas nacionales (MEN 2022)
+- **Integrar** el modelo pedagógico crítico-social
+- **Facilitar** la evaluación con criterios oficiales (Tabla 7)
+- **Optimizar** el tiempo de planeación docente
 
-**Escala:** 1.0 a 5.0, con nota mínima aprobatoria 3.2
+### 🎓 Público Objetivo
 
-**Ejemplo (Diseño/Rediseño):**
-- Identificación del problema → 20%
-- Creatividad en propuestas de solución → 20%
-- Búsqueda y selección de información → 20%
-- Presentación gráfica → 20%
-- Argumentación del proceso → 20%
-
-### Beneficios
-- Consistencia con PEI, MEN y modelo crítico-social
-- Generación automática de sesiones y minutaje
-- Evaluación alineada con criterios oficiales
-- Planes claros, atractivos y aplicables
-- Integración completa de competencias, evidencias, momentos y evaluación
-
-### Validaciones automáticas
-Antes de entregar un plan, el agente verifica:
-- Número de sesiones = valor ingresado (no se cambia)
-- Duración total = sesiones × 2 horas
-- Distribución = sesiones × 2 horas exactas
-- Minutaje = 120 minutos por sesión
-- Evaluación = criterios de Tabla 7, suma 100%
-- Coherencia con PEI y enfoque crítico-social
-
-### Conclusión
-El **Agente Planeador de Clases IE Camilo Torres** garantiza que cada plan cumpla con políticas educativas nacionales, refuerce el modelo pedagógico crítico-social, promueva innovación TIC y STEM, y brinde a los docentes una herramienta práctica, clara y confiable para transformar su enseñanza.
+- Docentes de Tecnología e Informática
+- Coordinadores académicos
+- Directivos docentes
+- Estudiantes de pedagogía
 
 ---
 
 ## 🏗️ Arquitectura del Sistema
 
-### Diagrama de Flujo Principal
+### 📊 Diagrama de Arquitectura General
 
 ```mermaid
-flowchart TD
-    A[👨‍🏫 Docente<br/>Entrada: Grado, Tema, Sesiones] --> B[🧠 Agente de Planificación<br/>Análisis de contexto]
+graph TB
+    subgraph "Frontend Layer"
+        A[Next.js 14 App Router] --> B[React Components]
+        B --> C[Context Providers]
+        C --> D[Custom Hooks]
+    end
     
-    B --> C[📚 Consulta de Documentos<br/>PEI, MEN 2022, Tabla 7]
-    B --> D[🎯 Mapeo de Competencias<br/>Según grado y tema]
+    subgraph "AI Layer"
+        E[Google Gemini API] --> F[Prompt Engineering]
+        F --> G[Response Processing]
+    end
     
-    C --> E[⚙️ Generación de Plan<br/>Estructura completa]
-    D --> E
+    subgraph "Backend Layer"
+        H[Supabase PostgreSQL] --> I[Vector Search]
+        I --> J[Document Storage]
+    end
     
-    E --> F[🛡️ Guardrails<br/>• Filtrado de información interna<br/>• Validación de coherencia<br/>• Anti-alucinación]
+    subgraph "Integration Layer"
+        K[Document Processing] --> L[PDF Content Extraction]
+        L --> M[Vector Embeddings]
+    end
     
-    F --> G[📋 Plan de Clase Final<br/>• Identificación<br/>• Competencias<br/>• Momentos pedagógicos<br/>• Evaluación Tabla 7]
-    
-    G --> H[💾 Almacenamiento<br/>Base de datos + Historial]
-    
-    H --> I[📊 Exportación<br/>Word, PDF, etc.]
-    
-    %% Memoria y Aprendizaje
-    J[💾 Memoria del Sistema<br/>• Historial de chat<br/>• Perfil del docente<br/>• Estado de conversación] -.-> B
-    
-    %% Observabilidad
-    K[📈 Observabilidad<br/>• Métricas de rendimiento<br/>• Logs de interacción<br/>• Análisis de calidad] -.-> F
-    
-    %% Estilos
-    classDef userClass fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
-    classDef agentClass fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
-    classDef processClass fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    classDef outputClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef memoryClass fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    
-    class A userClass
-    class B agentClass
-    class C,D,E processClass
-    class F,G,H,I outputClass
-    class J,K memoryClass
+    A --> E
+    A --> H
+    E --> A
+    H --> A
+    K --> H
 ```
 
-### Flujo de Datos
+### 🔄 Flujo de Datos Principal
 
 ```mermaid
 sequenceDiagram
-    participant D as Docente
-    participant A as Agente
-    participant DB as Base de Datos
-    participant G as Gemini AI
-    participant E as Exportación
+    participant U as Usuario
+    participant F as Frontend
+    participant AI as Gemini AI
+    participant DB as Supabase
+    participant S as Storage
     
-    D->>A: Configuración inicial
-    A->>DB: Consulta documentos
-    DB-->>A: Documentos relevantes
-    A->>G: Generación de plan
-    G-->>A: Plan estructurado
-    A->>A: Aplicar guardrails
-    A->>D: Plan de clase final
-    D->>A: Solicitar guardado
-    A->>DB: Almacenar plan
-    D->>A: Solicitar exportación
-    A->>E: Generar Word/PDF
-    E-->>D: Archivo descargado
+    U->>F: Configuración inicial
+    F->>DB: Consulta documentos
+    DB-->>F: Documentos relevantes
+    F->>AI: Generación de plan
+    AI-->>F: Plan estructurado
+    F->>F: Validación y formateo
+    F->>U: Plan de clase final
+    U->>F: Solicitar guardado
+    F->>DB: Almacenar plan
+    U->>F: Solicitar exportación
+    F->>S: Generar Word/PDF
+    S-->>U: Archivo descargado
 ```
 
 ---
 
-## Descripción General
+## ⚡ Características Principales
 
-Sistema web para la generación automática de planes de clase didácticos utilizando inteligencia artificial. El sistema permite a los docentes crear planeaciones personalizadas mediante un chat interactivo con un asistente IA especializado en pedagogía.
+### 🎯 Generación Inteligente
+- **Planes de clase completos** con estructura pedagógica
+- **Alineación automática** con PEI y MEN 2022
+- **Integración de competencias** según grado y tema
+- **Evaluación con Tabla 7** (criterios oficiales)
 
-## Arquitectura del Sistema
+### 📚 Gestión de Documentos
+- **Consulta en tiempo real** de documentos institucionales
+- **Búsqueda vectorial** para contenido relevante
+- **Procesamiento automático** de PDFs
+- **Integración de múltiples fuentes** de información
 
-### Stack Tecnológico
+### 💬 Interfaz Intuitiva
+- **Chat interactivo** con asistente IA
+- **Formularios inteligentes** con validación
+- **Exportación a Word** con formato profesional
+- **Historial de planeaciones** organizado
 
-- **Frontend**: Next.js 14 con TypeScript
-- **Backend**: Supabase (PostgreSQL + Storage)
-- **IA**: Google Gemini API
-- **Estilos**: Tailwind CSS
-- **Gestión de Estado**: React Hooks
-- **Exportación**: docx (Word), file-saver
+### 🔒 Seguridad y Confiabilidad
+- **Autenticación robusta** con Supabase
+- **Validación de datos** en frontend y backend
+- **Políticas RLS** para protección de datos
+- **Anti-alucinación** en respuestas de IA
 
-### Estructura de Directorios
+---
+
+## 🛠️ Stack Tecnológico
+
+### Frontend
+- **Next.js 14** - Framework React con App Router
+- **TypeScript** - Tipado estático
+- **Tailwind CSS** - Framework de estilos
+- **React Context** - Gestión de estado global
+- **Custom Hooks** - Lógica reutilizable
+
+### Backend
+- **Supabase** - Backend as a Service
+- **PostgreSQL** - Base de datos relacional
+- **Vector Search** - Búsqueda semántica
+- **Storage** - Almacenamiento de archivos
+
+### IA y Procesamiento
+- **Google Gemini API** - Modelo de lenguaje
+- **PDF Processing** - Extracción de contenido
+- **Vector Embeddings** - Representación semántica
+- **Prompt Engineering** - Optimización de prompts
+
+### Herramientas de Desarrollo
+- **ESLint** - Linting de código
+- **Prettier** - Formateo de código
+- **Git** - Control de versiones
+- **Vercel** - Despliegue (opcional)
+
+---
+
+## 📁 Estructura del Proyecto
 
 ```
-planeacion-didactica/
-├── app/                          # App Router de Next.js
-│   ├── globals.css              # Estilos globales
-│   ├── layout.tsx               # Layout principal
-│   └── page.tsx                 # Página principal
-├── components/                   # Componentes React
-│   ├── AppStatus.tsx            # Estado del sistema
-│   ├── ChatAssistant.tsx        # Chat principal
-│   ├── Navigation.tsx           # Navegación
-│   ├── PlanningAssistant.tsx    # Layout principal
-│   └── ResourcesBank.tsx        # Banco de recursos
-├── hooks/                       # Custom Hooks
-│   └── useBucketDocuments.ts    # Hook para documentos
-├── lib/                         # Servicios y utilidades
-│   ├── educational-content-service.ts
-│   ├── gemini-service.ts        # Servicio de IA
-│   ├── pdf-content-processor.ts
-│   ├── supabase/
-│   │   └── client.ts            # Cliente Supabase
-│   └── vector-search.ts         # Búsqueda vectorial
-├── public/                      # Archivos estáticos
-└── package.json                 # Dependencias
+tutor-agente-ia/
+├── 📁 app/                          # Next.js App Router
+│   ├── 📁 api/                      # API Routes
+│   │   ├── 📁 admin/                # Rutas de administración
+│   │   └── 📁 chat/                 # Rutas de chat
+│   ├── globals.css                  # Estilos globales
+│   ├── layout.tsx                   # Layout principal
+│   └── page.tsx                     # Página principal
+├── 📁 components/                   # Componentes React
+│   ├── 📁 ui/                       # Componentes UI base
+│   │   ├── button.tsx               # Botones
+│   │   ├── input.tsx                # Inputs
+│   │   ├── label.tsx                # Labels
+│   │   ├── toast.tsx                # Notificaciones
+│   │   ├── toaster.tsx              # Contenedor de toasts
+│   │   └── use-toast.ts             # Hook de toast
+│   ├── AppStatus.tsx                # Estado del sistema
+│   ├── ChatAssistant.tsx            # Chat principal
+│   ├── ChatHeader.tsx               # Header del chat
+│   ├── ChatInput.tsx                # Input del chat
+│   ├── ChatMessages.tsx             # Mensajes del chat
+│   ├── ConfigurationForm.tsx        # Formulario de configuración
+│   ├── ConsultedDocuments.tsx       # Documentos consultados
+│   ├── InitialMessage.tsx           # Mensaje inicial
+│   ├── Navigation.tsx               # Navegación
+│   ├── PlanningAssistant.tsx        # Layout principal
+│   ├── ResourcesBank.tsx            # Banco de recursos
+│   └── UserAdmin.tsx                # Administración de usuarios
+├── 📁 contexts/                     # Contextos React
+│   ├── AppProvider.tsx              # Proveedor principal
+│   ├── AuthContext.tsx              # Contexto de autenticación
+│   ├── ChatContext.tsx              # Contexto del chat
+│   ├── DocumentContext.tsx          # Contexto de documentos
+│   ├── NavigationContext.tsx        # Contexto de navegación
+│   └── PlanningContext.tsx          # Contexto de planeación
+├── 📁 hooks/                        # Custom Hooks
+│   ├── useAuth.ts                   # Hook de autenticación
+│   ├── useBucketDocuments.ts        # Hook de documentos
+│   ├── useChatActions.ts            # Hook de acciones del chat
+│   ├── usePlanningActions.ts        # Hook de acciones de planeación
+│   └── index.ts                     # Exportaciones
+├── 📁 lib/                          # Servicios y utilidades
+│   ├── 📁 supabase/                 # Cliente Supabase
+│   │   ├── admin.ts                 # Cliente admin
+│   │   ├── client.ts                # Cliente público
+│   │   └── server.ts                # Cliente servidor
+│   ├── educational-content-service.ts # Servicio de contenido
+│   ├── gemini-service.ts            # Servicio de IA
+│   ├── pdf-content-processor.ts     # Procesador de PDFs
+│   ├── vector-search.ts             # Búsqueda vectorial
+│   └── utils.ts                     # Utilidades generales
+├── 📁 types/                        # Tipos TypeScript
+│   └── index.ts                     # Definiciones de tipos
+├── 📁 utils/                        # Utilidades
+│   ├── markdown.ts                  # Procesador de markdown
+│   └── index.ts                     # Exportaciones
+├── 📁 public/                       # Archivos estáticos
+│   └── placeholder.svg              # Imagen placeholder
+├── 📁 scripts/                      # Scripts de base de datos
+│   └── 008_setup_admin_user.sql     # Configuración de admin
+├── package.json                     # Dependencias
+├── tsconfig.json                    # Configuración TypeScript
+├── tailwind.config.js               # Configuración Tailwind
+├── next.config.mjs                  # Configuración Next.js
+└── README.md                        # Este archivo
 ```
 
-## Componentes Principales
+---
 
-### 1. PlanningAssistant.tsx
+## 🚀 Instalación y Configuración
 
-**Propósito**: Componente principal que actúa como layout y coordinador general.
+### 📋 Prerrequisitos
 
-**Funcionalidades**:
-- Maneja el estado de la pestaña activa
-- Coordina la comunicación entre componentes
-- Proporciona el layout base de la aplicación
+- **Node.js** 18.0 o superior
+- **npm** o **pnpm** (recomendado)
+- **Git** para clonar el repositorio
+- **Cuenta de Supabase** para backend
+- **API Key de Google Gemini** para IA
 
-**Estado**:
-- `activeTab`: Controla qué pestaña está visible
-- `currentPlanningData`: Datos de la planeación actual
+### 🔧 Instalación
 
-### 2. Navigation.tsx
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/tu-usuario/tutor-agente-ia.git
+   cd tutor-agente-ia
+   ```
 
-**Propósito**: Sistema de navegación por pestañas.
+2. **Instalar dependencias**
+   ```bash
+   npm install
+   # o
+   pnpm install
+   ```
 
-**Pestañas**:
-- Generar Planeación: Chat principal
-- Banco de Recursos: Historial de planeaciones
-- Estado de la App: Estado del sistema
+3. **Configurar variables de entorno**
+   ```bash
+   cp .env.example .env.local
+   ```
 
-**Características**:
-- Diseño Apple-inspired
-- Botones centrados y compactos
-- Transiciones suaves
+4. **Configurar variables en `.env.local`**
+   ```env
+   # Supabase
+   NEXT_PUBLIC_SUPABASE_URL=tu_url_supabase
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
+   
+   # Google Gemini
+   NEXT_PUBLIC_GEMINI_API_KEY=tu_gemini_api_key
+   
+   # Opcional: Claves de administración
+   SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
+   ```
 
-### 3. ChatAssistant.tsx
+5. **Configurar base de datos**
+   ```bash
+   # Ejecutar scripts SQL en Supabase
+   # Ver sección de Base de Datos
+   ```
 
-**Propósito**: Componente central del sistema, maneja la generación de planeaciones.
+6. **Ejecutar en desarrollo**
+   ```bash
+   npm run dev
+   # o
+   pnpm dev
+   ```
 
-**Funcionalidades Principales**:
+7. **Abrir en el navegador**
+   ```
+   http://localhost:3000
+   ```
 
-#### Configuración Inicial
-- Formulario con campos obligatorios:
-  - Grado (1° a 11°)
-  - Asignatura
-  - Tema específico
-  - Duración en horas
-  - Número de sesiones
-  - Recursos disponibles
-  - Nombre del docente
-- Validación de campos completos
-- Consulta automática de documentos institucionales
+### 🗄️ Configuración de Base de Datos
 
-#### Chat Interactivo
-- Interfaz de chat con mensajes
-- Integración con Gemini AI
-- Procesamiento de respuestas en tiempo real
-- Formato markdown para respuestas
+1. **Crear proyecto en Supabase**
+2. **Ejecutar scripts SQL** (ver sección Base de Datos)
+3. **Configurar políticas RLS**
+4. **Subir documentos al Storage**
 
-#### Gestión de Estado
-- `messages`: Array de mensajes del chat
-- `isConfigured`: Estado de configuración
-- `planningConfig`: Configuración de la planeación
-- `isLoading`: Estado de carga
-- `isSaving`: Estado de guardado
+---
 
-#### Funciones Principales
-- `handleSendMessage`: Envía mensajes al chat
-- `saveChatToDatabase`: Guarda el chat en la base de datos
-- `exportToWord`: Exporta el chat como documento Word
-- `clearChat`: Limpia la conversación
+## 💻 Uso del Sistema
 
-### 4. ResourcesBank.tsx
+### 🎯 Flujo de Trabajo Principal
 
-**Propósito**: Gestión y visualización del historial de planeaciones.
+#### 1. **Configuración Inicial**
+- Acceder a la aplicación
+- Completar formulario de configuración:
+  - **Grado**: 1° a 11°
+  - **Asignatura**: Tecnología e Informática (fijo)
+  - **Tema**: Tema específico a enseñar
+  - **Sesiones**: 1 o 2 sesiones (2-4 horas)
+  - **Recursos**: Recursos disponibles
+  - **Nombre del docente**: Nombre completo
 
-**Funcionalidades**:
+#### 2. **Generación de Plan**
+- Iniciar conversación con el asistente
+- Solicitar plan de clase específico
+- El sistema consulta documentos relevantes
+- Genera plan estructurado y completo
 
-#### Visualización de Recursos
-- Tarjetas con información de cada planeación
-- Filtro por búsqueda de texto
-- Información mostrada:
-  - Grado
-  - Tema
-  - Duración
-  - Sesiones
-  - Fecha de creación
+#### 3. **Revisión y Edición**
+- Revisar el plan generado
+- Solicitar modificaciones si es necesario
+- El asistente ajusta según solicitudes
 
-#### Modal de Chat
-- Visualización completa del historial de chat
-- Botones de acción:
-  - Copiar todo el chat
-  - Descargar como Word
-  - Cerrar modal
+#### 4. **Guardado y Exportación**
+- Guardar el chat en el banco de recursos
+- Exportar a documento Word
+- Reutilizar en futuras planeaciones
 
-#### Gestión de Datos
-- `fetchAllPlans`: Obtiene todas las planeaciones
-- `exportChatToWord`: Exporta chat específico como Word
-- `copyToClipboard`: Copia texto al portapapeles
+### 🎨 Interfaz de Usuario
 
-### 5. AppStatus.tsx
+#### **Pestaña "Generar"**
+- Formulario de configuración
+- Chat interactivo con asistente
+- Visualización de documentos consultados
+- Botones de acción (enviar, limpiar, guardar)
 
-**Propósito**: Monitoreo del estado del sistema.
+#### **Pestaña "Historial"**
+- Lista de planeaciones guardadas
+- Búsqueda y filtrado
+- Visualización de chats completos
+- Exportación individual
 
-**Información Mostrada**:
-- Estado del sistema de documentos
-- Estado del sistema de IA
-- Contador de documentos disponibles
-- Botón de actualización en tiempo real
+#### **Pestaña "Estado"** (Solo administradores)
+- Estado del sistema
+- Estadísticas de uso
+- Gestión de usuarios
+- Monitoreo de documentos
 
-## Servicios y Utilidades
+---
 
-### 1. gemini-service.ts
+## 🎨 Componentes Principales
 
-**Propósito**: Integración con Google Gemini AI.
+### 🏗️ Arquitectura de Componentes
 
-**Clase Principal**: `GeminiService`
+```mermaid
+graph TD
+    A[PlanningAssistant] --> B[Navigation]
+    A --> C[ChatAssistant]
+    A --> D[ResourcesBank]
+    A --> E[AppStatus]
+    
+    C --> F[ConfigurationForm]
+    C --> G[ChatHeader]
+    C --> H[ChatMessages]
+    C --> I[ChatInput]
+    C --> J[ConsultedDocuments]
+    C --> K[InitialMessage]
+    
+    B --> L[AuthContext]
+    C --> M[ChatContext]
+    D --> N[PlanningContext]
+    E --> O[DocumentContext]
+```
 
-**Métodos**:
-- `generateResponse`: Genera respuesta básica
-- `generateClassPlan`: Genera plan de clase personalizado
-- `buildClassPlanPrompt`: Construye prompt estructurado
-- `resetChat`: Reinicia la conversación
+### 📱 Componentes Clave
 
-**Configuración**:
-- Modelo: gemini-1.5-flash
+#### **PlanningAssistant.tsx**
+- **Propósito**: Componente principal y coordinador
+- **Estado**: Navegación, datos de planeación
+- **Contextos**: Auth, Navigation, Planning
+
+#### **ChatAssistant.tsx**
+- **Propósito**: Interfaz de chat principal
+- **Funcionalidades**: Configuración, chat, exportación
+- **Estado**: Mensajes, configuración, carga
+
+#### **ResourcesBank.tsx**
+- **Propósito**: Gestión de historial
+- **Funcionalidades**: Lista, búsqueda, exportación
+- **Estado**: Planeaciones, filtros
+
+#### **ConfigurationForm.tsx**
+- **Propósito**: Formulario de configuración inicial
+- **Validación**: Campos obligatorios, formatos
+- **Estado**: Configuración de planeación
+
+### 🎯 Contextos de Estado
+
+#### **AuthContext**
+```typescript
+interface AuthContextType {
+  user: User | null
+  loading: boolean
+  isAdmin: boolean
+  isAuthenticated: boolean
+  signOut: () => Promise<void>
+}
+```
+
+#### **ChatContext**
+```typescript
+interface ChatContextType {
+  messages: Message[]
+  isConfigured: boolean
+  planningConfig: PlanningConfig
+  isLoading: boolean
+  isSaving: boolean
+  consultedDocuments: ConsultedDocuments
+  // ... acciones
+}
+```
+
+#### **DocumentContext**
+```typescript
+interface DocumentContextType {
+  documents: PDFContent[]
+  isLoading: boolean
+  error: string | null
+  documentCount: number
+  lastUpdated: Date | null
+  // ... acciones
+}
+```
+
+---
+
+## 🔧 API y Servicios
+
+### 🤖 Servicio de IA (Gemini)
+
+```typescript
+// lib/gemini-service.ts
+class GeminiService {
+  async generateClassPlan(
+    grado: string,
+    tema: string,
+    contexto: string,
+    documentos: PDFContent[],
+    recursos: string,
+    nombreDocente: string
+  ): Promise<GeminiResponse>
+}
+```
+
+**Características:**
+- Modelo: `gemini-1.5-flash`
 - Temperatura: 0.7
 - Max tokens: 2048
+- Prompt engineering optimizado
 
-### 2. useBucketDocuments.ts
+### 📚 Servicio de Documentos
 
-**Propósito**: Hook personalizado para gestión de documentos del bucket.
+```typescript
+// lib/educational-content-service.ts
+class EducationalContentService {
+  async getDocuments(): Promise<PDFContent[]>
+  async searchDocuments(query: string): Promise<PDFContent[]>
+  async getDocumentById(id: string): Promise<PDFContent>
+}
+```
 
-**Funcionalidades**:
-- Carga documentos desde Supabase Storage
-- Estado de carga y errores
-- Función de actualización
-- Filtrado de documentos
+**Funcionalidades:**
+- Carga de documentos desde Supabase Storage
+- Búsqueda vectorial semántica
+- Procesamiento de PDFs
+- Extracción de contenido
 
-### 3. vector-search.ts
+### 🔍 Búsqueda Vectorial
 
-**Propósito**: Sistema de búsqueda vectorial para documentos.
+```typescript
+// lib/vector-search.ts
+class VectorSearchService {
+  async searchSimilar(
+    query: string,
+    limit: number = 5
+  ): Promise<SearchResult[]>
+}
+```
 
-**Funcionalidades**:
+**Características:**
+- Embeddings de 1536 dimensiones
 - Búsqueda híbrida (texto + vector)
-- Filtrado por metadatos
 - Scoring combinado
-- Fallbacks para errores
+- Filtrado por metadatos
 
-## Base de Datos
+---
 
-### Esquema Principal
+## 📊 Base de Datos
 
-#### Tabla: planeaciones
+### 🗄️ Esquema Principal
+
+#### **Tabla: planeaciones**
 ```sql
 CREATE TABLE planeaciones (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -341,22 +519,23 @@ CREATE TABLE planeaciones (
   contenido JSONB,
   chat_history JSONB,
   created_at TIMESTAMP DEFAULT NOW(),
-  user_id UUID
+  user_id UUID REFERENCES auth.users(id)
 );
 ```
 
-#### Tabla: documents
+#### **Tabla: documents**
 ```sql
 CREATE TABLE documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
+  content TEXT NOT NULL,
   doc_type VARCHAR(50),
-  url TEXT,
+  metadata JSONB,
   created_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
-#### Tabla: chunks
+#### **Tabla: chunks**
 ```sql
 CREATE TABLE chunks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -368,199 +547,229 @@ CREATE TABLE chunks (
 );
 ```
 
-### Funciones SQL
+### 🔧 Funciones SQL
 
-#### search_educational_content
-Búsqueda híbrida que combina texto y vectores.
-
-#### insert_educational_document
-Inserta documentos con embeddings.
-
-#### get_search_stats
-Obtiene estadísticas del sistema de búsqueda.
-
-## Configuración del Proyecto
-
-### Variables de Entorno
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=tu_url_supabase
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
-NEXT_PUBLIC_GEMINI_API_KEY=tu_gemini_api_key
-SUPABASE_STORAGE_ACCESS_KEY=tu_access_key
-SUPABASE_STORAGE_SECRET_KEY=tu_secret_key
+#### **search_educational_content**
+```sql
+CREATE OR REPLACE FUNCTION search_educational_content(
+  query_text TEXT,
+  query_embedding vector(1536),
+  match_threshold FLOAT DEFAULT 0.5,
+  match_count INT DEFAULT 5
+)
+RETURNS TABLE (
+  id UUID,
+  title TEXT,
+  content TEXT,
+  doc_type VARCHAR(50),
+  similarity FLOAT
+)
 ```
 
-### Instalación
-
-1. Clonar el repositorio
-2. Instalar dependencias:
-   ```bash
-   pnpm install
-   ```
-3. Configurar variables de entorno
-4. Ejecutar en desarrollo:
-   ```bash
-   pnpm dev
-   ```
-
-### Dependencias Principales
-
-```json
-{
-  "dependencies": {
-    "next": "^14.0.0",
-    "react": "^18.0.0",
-    "typescript": "^5.0.0",
-    "@supabase/supabase-js": "^2.0.0",
-    "@google/generative-ai": "^0.0.0",
-    "docx": "^9.5.1",
-    "file-saver": "^2.0.5",
-    "tailwindcss": "^3.0.0"
-  }
-}
+#### **insert_educational_document**
+```sql
+CREATE OR REPLACE FUNCTION insert_educational_document(
+  p_title TEXT,
+  p_content TEXT,
+  p_doc_type VARCHAR(50),
+  p_metadata JSONB,
+  p_embedding vector(1536)
+)
+RETURNS UUID
 ```
 
-## Flujo de Trabajo
+### 🔒 Políticas RLS
 
-### 1. Configuración Inicial
-1. Usuario accede a la aplicación
-2. Completa el formulario de configuración
-3. Sistema valida campos obligatorios
-4. Usuario confirma configuración
+```sql
+-- Política para planeaciones
+CREATE POLICY "Users can view their own planeaciones" ON planeaciones
+  FOR SELECT USING (auth.uid() = user_id);
 
-### 2. Generación de Planeación
-1. Usuario inicia conversación con el asistente
-2. Sistema consulta documentos relevantes
-3. Gemini AI genera respuesta personalizada
-4. Respuesta se muestra en el chat con formato
+CREATE POLICY "Users can insert their own planeaciones" ON planeaciones
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+```
 
-### 3. Gestión de Recursos
-1. Usuario puede guardar el chat
-2. Sistema almacena en base de datos
-3. Planeación aparece en Banco de Recursos
-4. Usuario puede exportar o reutilizar
+---
 
-### 4. Exportación
-1. Usuario selecciona exportar
-2. Sistema genera documento Word
-3. Archivo se descarga automáticamente
-4. Documento es compatible con cualquier software
+## 📈 Flujos de Datos
 
-## Características Técnicas
+### 🔄 Flujo de Generación de Plan
 
-### Rendimiento
-- Lazy loading de componentes
-- Optimización de imágenes
-- Caching de respuestas de IA
-- Debounce en búsquedas
+```mermaid
+flowchart TD
+    A[Usuario completa configuración] --> B[Validación de campos]
+    B --> C[Consulta documentos relevantes]
+    C --> D[Construcción de prompt]
+    D --> E[Envío a Gemini API]
+    E --> F[Procesamiento de respuesta]
+    F --> G[Validación de estructura]
+    G --> H[Formateo markdown]
+    H --> I[Mostrar al usuario]
+    I --> J[Opción de guardar/exportar]
+```
 
-### Seguridad
-- Validación de entrada
-- Sanitización de datos
-- Autenticación con Supabase
+### 💾 Flujo de Persistencia
+
+```mermaid
+flowchart TD
+    A[Usuario solicita guardar] --> B[Validación de datos]
+    B --> C[Preparación de payload]
+    C --> D[Inserción en base de datos]
+    D --> E[Actualización de estado local]
+    E --> F[Confirmación al usuario]
+    F --> G[Actualización de historial]
+```
+
+### 📤 Flujo de Exportación
+
+```mermaid
+flowchart TD
+    A[Usuario solicita exportar] --> B[Recolección de datos]
+    B --> C[Generación de documento Word]
+    C --> D[Formateo de contenido]
+    D --> E[Descarga automática]
+    E --> F[Confirmación de éxito]
+```
+
+---
+
+## 🔒 Seguridad
+
+### 🛡️ Medidas de Seguridad Implementadas
+
+#### **Autenticación y Autorización**
+- Autenticación con Supabase Auth
 - Políticas RLS en base de datos
+- Verificación de roles de usuario
+- Tokens JWT seguros
 
-### Escalabilidad
-- Arquitectura modular
-- Separación de responsabilidades
-- Hooks reutilizables
-- Servicios independientes
+#### **Validación de Datos**
+- Validación en frontend (TypeScript)
+- Sanitización de inputs
+- Validación de tipos
+- Escape de caracteres especiales
 
-## Mantenimiento
-
-### Logs y Monitoreo
-- Console logs para debugging
-- Estados de error manejados
-- Alertas de usuario
+#### **Protección de API**
+- Rate limiting en endpoints
 - Validación de API keys
+- CORS configurado
+- Headers de seguridad
 
-### Actualizaciones
-- Dependencias actualizadas regularmente
-- Compatibilidad con versiones de Node.js
-- Migraciones de base de datos
-- Backup de configuraciones
+#### **Protección de IA**
+- Filtrado de prompts maliciosos
+- Validación de respuestas
+- Anti-alucinación
+- Límites de tokens
 
-## Troubleshooting
+### 🔐 Configuración de Seguridad
 
-### Problemas Comunes
+```typescript
+// Configuración de Supabase
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true
+    }
+  }
+)
+```
 
-1. **Error de API Key de Gemini**
-   - Verificar variable de entorno
-   - Comprobar cuota de API
-   - Revisar formato de la clave
+---
 
-2. **Error de conexión a Supabase**
-   - Verificar URL y anon key
-   - Comprobar políticas RLS
-   - Revisar configuración de red
+## 📝 Contribución
 
-3. **Error de exportación**
-   - Verificar dependencias instaladas
-   - Comprobar permisos de descarga
-   - Revisar formato de datos
+### 🤝 Cómo Contribuir
 
-### Soluciones
+1. **Fork** el repositorio
+2. **Crear** una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
+3. **Commit** tus cambios (`git commit -m 'feat: agregar nueva funcionalidad'`)
+4. **Push** a la rama (`git push origin feature/nueva-funcionalidad`)
+5. **Abrir** un Pull Request
 
-1. Reiniciar servidor de desarrollo
-2. Limpiar cache del navegador
-3. Verificar variables de entorno
-4. Revisar logs de consola
-5. Comprobar estado de servicios externos
+### 📋 Estándares de Código
 
-## Contribución
+#### **TypeScript**
+- Tipado estricto habilitado
+- Interfaces bien definidas
+- Evitar `any` cuando sea posible
+- Documentación de tipos complejos
 
-### Estructura de Commits
-- feat: nueva funcionalidad
-- fix: corrección de bugs
-- docs: documentación
-- style: formato de código
-- refactor: refactorización
-- test: pruebas
+#### **React**
+- Componentes funcionales
+- Hooks personalizados para lógica
+- Props tipadas
+- Estado inmutable
 
-### Estándares de Código
-- TypeScript estricto
-- ESLint configurado
-- Prettier para formato
-- Convenciones de naming
-- Documentación de funciones
+#### **Estilos**
+- Tailwind CSS para estilos
+- Clases semánticas
+- Responsive design
+- Consistencia visual
 
-## 📋 Versión Resumida para Presentación
+#### **Commits**
+- `feat:` nueva funcionalidad
+- `fix:` corrección de bugs
+- `docs:` documentación
+- `style:` formato de código
+- `refactor:` refactorización
+- `test:` pruebas
 
-### ¿Qué es?
-Agente pedagógico que genera planes de clase alineados con PEI, MEN 2022, Revisión sistemática y Tabla 7.
+### 🧪 Testing
 
-### Entradas:
-- Grado
-- Tema
-- Sesiones u horas
-- Recursos
-- Nombre del docente
+```bash
+# Ejecutar tests
+npm run test
 
-### Funcionamiento:
-- Recupera información de documentos institucionales
-- Integra competencias, estrategias, evidencias y momentos pedagógicos
-- Evalúa con criterios oficiales de la Tabla 7
-- Divide sesiones en 120 minutos exactos
+# Tests con coverage
+npm run test:coverage
 
-### Salida:
-- Identificación
-- Componente Curricular
-- Competencias
-- Estrategia
-- Momentos pedagógicos
-- Evidencias
-- Evaluación
+# Tests de integración
+npm run test:integration
+```
 
-### Beneficios:
-- Consistencia con documentos oficiales
-- Eficiencia en planeación
-- Evaluación robusta
-- Presentación clara y atractiva
-- Alineación crítico-social y STEM
+### 📚 Documentación
 
-## Licencia
+- README actualizado
+- Comentarios en código complejo
+- JSDoc para funciones públicas
+- Diagramas actualizados
 
-Este proyecto está bajo la licencia MIT. Ver archivo LICENSE para más detalles.
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+
+---
+
+## 📞 Soporte y Contacto
+
+- **Email**: soporte@ie-camilo-torres.edu.co
+- **Documentación**: [Wiki del proyecto](https://github.com/tu-usuario/tutor-agente-ia/wiki)
+- **Issues**: [GitHub Issues](https://github.com/tu-usuario/tutor-agente-ia/issues)
+- **Discusiones**: [GitHub Discussions](https://github.com/tu-usuario/tutor-agente-ia/discussions)
+
+---
+
+## 🙏 Agradecimientos
+
+- **Institución Educativa Camilo Torres** por la confianza y apoyo
+- **Google Gemini** por la API de inteligencia artificial
+- **Supabase** por la infraestructura de backend
+- **Comunidad de Next.js** por el framework
+- **Contribuidores** del proyecto
+
+---
+
+<div align="center">
+
+**Desarrollado con ❤️ para la educación colombiana**
+
+[⬆️ Volver al inicio](#-planeador-didáctico-inteligente---ie-camilo-torres)
+
+</div>
 
 
