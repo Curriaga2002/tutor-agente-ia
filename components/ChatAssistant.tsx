@@ -40,13 +40,24 @@ export function ChatAssistant({
     }
   }, [messages, onChatUpdate])
 
+  // Debug: Monitorear cambios en isConfigured
+  useEffect(() => {
+    console.log('🔍 ChatAssistant: isConfigured changed to:', isConfigured)
+  }, [isConfigured])
+
   // Persistencia de sesión
   useEffect(() => {
     setSessionRestored(true)
   }, [])
 
   const handleConfigurationSubmit = () => {
+    console.log('🔍 ChatAssistant: handleConfigurationSubmit called')
+    console.log('🔍 Current planningConfig:', planningConfig)
+    console.log('🔍 Current isConfigured before setConfiguration:', isConfigured)
+    
     setConfiguration(planningConfig)
+    
+    console.log('🔍 setConfiguration called, isConfigured should be true now')
     
     // Solo mostrar mensaje de confirmación sin enviar automáticamente
               const configMessage: Message = {
@@ -74,6 +85,7 @@ Evaluación: Formativa mediante observación, lista de cotejo y producto final d
                 isFormatted: true,
               }
     
+    console.log('🔍 Adding config message to chat')
     // Agregar mensaje de confirmación sin enviar automáticamente
     addMessage(configMessage)
   }
