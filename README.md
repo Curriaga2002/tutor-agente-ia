@@ -48,60 +48,66 @@ El **Planeador Didáctico Inteligente** es un sistema web avanzado que utiliza i
 
 ## 🏗️ Arquitectura del Sistema
 
-### 📊 Diagrama de Arquitectura General
+### 📊 Diagrama de Flujo Principal
 
 ```mermaid
 graph TB
-    subgraph "Frontend Layer"
-        A[Next.js 14 App Router] --> B[React Components]
-        B --> C[Context Providers]
-        C --> D[Custom Hooks]
-    end
+    %% Entradas Iniciales
+    A[🎓 Docente<br/>Entrada: Grado, Tema, Sesiones] 
+    B[🧠 Memoria del Sistema<br/>• Historial de chat<br/>• Perfil del docente<br/>• Estado de conversación]
     
-    subgraph "AI Layer"
-        E[Google Gemini API] --> F[Prompt Engineering]
-        F --> G[Response Processing]
-    end
+    %% Agente de Planificación
+    C[🤖 Agente de Planificación<br/>Análisis de contexto]
     
-    subgraph "Backend Layer"
-        H[Supabase PostgreSQL] --> I[Vector Search]
-        I --> J[Document Storage]
-    end
+    %% Procesos Paralelos
+    D[📄 Consulta de Documentos<br/>PEI, MEN 2022, Tabla 7]
+    E[🎯 Mapeo de Competencias<br/>Según grado y tema]
     
-    subgraph "Integration Layer"
-        K[Document Processing] --> L[PDF Content Extraction]
-        L --> M[Vector Embeddings]
-    end
+    %% Generación del Plan
+    F[⚙️ Generación de Plan<br/>Estructura completa]
     
-    A --> E
-    A --> H
-    E --> A
-    H --> A
-    K --> H
-```
-
-### 🔄 Flujo de Datos Principal
-
-```mermaid
-sequenceDiagram
-    participant U as Usuario
-    participant F as Frontend
-    participant AI as Gemini AI
-    participant DB as Supabase
-    participant S as Storage
+    %% Observabilidad
+    G[📊 Observabilidad<br/>• Métricas de rendimiento<br/>• Logs de interacción<br/>• Análisis de calidad]
     
-    U->>F: Configuración inicial
-    F->>DB: Consulta documentos
-    DB-->>F: Documentos relevantes
-    F->>AI: Generación de plan
-    AI-->>F: Plan estructurado
-    F->>F: Validación y formateo
-    F->>U: Plan de clase final
-    U->>F: Solicitar guardado
-    F->>DB: Almacenar plan
-    U->>F: Solicitar exportación
-    F->>S: Generar Word/PDF
-    S-->>U: Archivo descargado
+    %% Guardrails
+    H[🛡️ Guardrails<br/>• Filtrado de información interna<br/>• Validación de coherencia<br/>• Anti-alucinación]
+    
+    %% Plan de Clase Final
+    I[📋 Plan de Clase Final<br/>• Identificación<br/>• Competencias<br/>• Momentos pedagógicos<br/>• Evaluación Tabla 7]
+    
+    %% Almacenamiento y Exportación
+    J[💾 Almacenamiento<br/>Base de datos + Historial]
+    K[📤 Exportación<br/>Word, PDF, etc.]
+    
+    %% Flujo principal
+    A --> C
+    B --> C
+    C --> D
+    C --> E
+    D --> F
+    E --> F
+    F --> H
+    H --> I
+    I --> J
+    J --> K
+    
+    %% Observabilidad (línea punteada)
+    F -.-> G
+    
+    %% Estilos
+    classDef entrada fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef agente fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef proceso fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef guardrail fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef resultado fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
+    classDef observabilidad fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class A,B entrada
+    class C agente
+    class D,E,F proceso
+    class H guardrail
+    class I,J,K resultado
+    class G observabilidad
 ```
 
 ---
