@@ -1,6 +1,6 @@
 # Planeación Didáctica - Sistema de Planeador Inteligente
 
-## 🎯 Agente Planeador de Clases IE Camilo Torres
+##  Agente Planeador de Clases IE Camilo Torres
 
 ### Propósito
 El **Agente Planeador de Clases** es un asistente pedagógico experto diseñado para apoyar a los docentes de la **Institución Educativa Camilo Torres** en la planificación de clases del área de **Tecnología e Informática**. Su objetivo es generar **planes de clase completos, claros y aplicables** que estén alineados con:
