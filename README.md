@@ -110,30 +110,6 @@ graph TB
     class G observabilidad
 ```
 
-### 🔄 Flujo de Datos Principal
-
-```mermaid
-sequenceDiagram
-    participant U as Usuario
-    participant F as Frontend
-    participant AI as Gemini AI
-    participant DB as Supabase
-    participant S as Storage
-    
-    U->>F: Configuración inicial
-    F->>DB: Consulta documentos
-    DB-->>F: Documentos relevantes
-    F->>AI: Generación de plan
-    AI-->>F: Plan estructurado
-    F->>F: Validación y formateo
-    F->>U: Plan de clase final
-    U->>F: Solicitar guardado
-    F->>DB: Almacenar plan
-    U->>F: Solicitar exportación
-    F->>S: Generar Word/PDF
-    S-->>U: Archivo descargado
-```
-
 ---
 
 ## ⚡ Características Principales
@@ -161,6 +137,72 @@ sequenceDiagram
 - **Validación de datos** en frontend y backend
 - **Políticas RLS** para protección de datos
 - **Anti-alucinación** en respuestas de IA
+
+---
+
+## 📈 Flujos de Datos
+
+### 🔄 Flujo de Datos Principal
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant F as Frontend
+    participant AI as Gemini AI
+    participant DB as Supabase
+    participant S as Storage
+    
+    U->>F: Configuración inicial
+    F->>DB: Consulta documentos
+    DB-->>F: Documentos relevantes
+    F->>AI: Generación de plan
+    AI-->>F: Plan estructurado
+    F->>F: Validación y formateo
+    F->>U: Plan de clase final
+    U->>F: Solicitar guardado
+    F->>DB: Almacenar plan
+    U->>F: Solicitar exportación
+    F->>S: Generar Word/PDF
+    S-->>U: Archivo descargado
+```
+
+### 🔄 Flujo de Generación de Plan
+
+```mermaid
+flowchart TD
+    A[Usuario completa configuración] --> B[Validación de campos]
+    B --> C[Consulta documentos relevantes]
+    C --> D[Construcción de prompt]
+    D --> E[Envío a Gemini API]
+    E --> F[Procesamiento de respuesta]
+    F --> G[Validación de estructura]
+    G --> H[Formateo markdown]
+    H --> I[Mostrar al usuario]
+    I --> J[Opción de guardar/exportar]
+```
+
+### 💾 Flujo de Persistencia
+
+```mermaid
+flowchart TD
+    A[Usuario solicita guardar] --> B[Validación de datos]
+    B --> C[Preparación de payload]
+    C --> D[Inserción en base de datos]
+    D --> E[Actualización de estado local]
+    E --> F[Confirmación al usuario]
+    F --> G[Actualización de historial]
+```
+
+### 📤 Flujo de Exportación
+
+```mermaid
+flowchart TD
+    A[Usuario solicita exportar] --> B[Recolección de datos]
+    B --> C[Generación de documento Word]
+    C --> D[Formateo de contenido]
+    D --> E[Descarga automática]
+    E --> F[Confirmación de éxito]
+```
 
 ---
 
@@ -620,46 +662,6 @@ CREATE POLICY "Users can insert their own planeaciones" ON planeaciones
 ```
 
 ---
-
-## 📈 Flujos de Datos
-
-### 🔄 Flujo de Generación de Plan
-
-```mermaid
-flowchart TD
-    A[Usuario completa configuración] --> B[Validación de campos]
-    B --> C[Consulta documentos relevantes]
-    C --> D[Construcción de prompt]
-    D --> E[Envío a Gemini API]
-    E --> F[Procesamiento de respuesta]
-    F --> G[Validación de estructura]
-    G --> H[Formateo markdown]
-    H --> I[Mostrar al usuario]
-    I --> J[Opción de guardar/exportar]
-```
-
-### 💾 Flujo de Persistencia
-
-```mermaid
-flowchart TD
-    A[Usuario solicita guardar] --> B[Validación de datos]
-    B --> C[Preparación de payload]
-    C --> D[Inserción en base de datos]
-    D --> E[Actualización de estado local]
-    E --> F[Confirmación al usuario]
-    F --> G[Actualización de historial]
-```
-
-### 📤 Flujo de Exportación
-
-```mermaid
-flowchart TD
-    A[Usuario solicita exportar] --> B[Recolección de datos]
-    B --> C[Generación de documento Word]
-    C --> D[Formateo de contenido]
-    D --> E[Descarga automática]
-    E --> F[Confirmación de éxito]
-```
 
 ---
 
