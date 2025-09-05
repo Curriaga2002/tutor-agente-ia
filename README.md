@@ -110,6 +110,30 @@ graph TB
     class G observabilidad
 ```
 
+### 🔄 Flujo de Datos Principal
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant F as Frontend
+    participant AI as Gemini AI
+    participant DB as Supabase
+    participant S as Storage
+    
+    U->>F: Configuración inicial
+    F->>DB: Consulta documentos
+    DB-->>F: Documentos relevantes
+    F->>AI: Generación de plan
+    AI-->>F: Plan estructurado
+    F->>F: Validación y formateo
+    F->>U: Plan de clase final
+    U->>F: Solicitar guardado
+    F->>DB: Almacenar plan
+    U->>F: Solicitar exportación
+    F->>S: Generar Word/PDF
+    S-->>U: Archivo descargado
+```
+
 ---
 
 ## ⚡ Características Principales
