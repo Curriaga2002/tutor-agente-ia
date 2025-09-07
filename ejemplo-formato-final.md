@@ -17,23 +17,31 @@
 
 ## 📚 COMPONENTE CURRICULAR
 
-**Pensamiento computacional, Sistemas y entornos informáticos, Diseño y desarrollo de software**
-Estos componentes se justifican por la naturaleza del tema "Programación", el cual se encuentra intrínsicamente ligado a la comprensión de algoritmos, estructuras de datos, y el diseño y creación de soluciones informáticas. Las orientaciones curriculares del MEN 2022 indican que estos componentes son fundamentales para el desarrollo de las competencias en tecnología e informática en el grado 8°.
+**COMPONENTES CURRICULARES OFICIALES MEN 2022:**
+1. **Pensamiento Computacional** - Desarrollo de habilidades para resolver problemas mediante algoritmos, estructuras de control y lógica computacional.
+2. **Sistemas y Entornos Informáticos** - Comprensión de hardware, software, redes y entornos digitales.
+3. **Diseño y Desarrollo de Software** - Creación de programas, aplicaciones y soluciones tecnológicas.
+4. **Tecnología, Sociedad y Ambiente (CTS)** - Análisis del impacto social y ambiental de la tecnología.
+
+**Justificación:** Estos componentes se integran coherentemente con el tema "Programación", promoviendo el desarrollo integral de competencias tecnológicas, pensamiento crítico y responsabilidad social, alineados con el modelo pedagógico crítico-social y el PEI de la institución.
 
 ---
 
 ## 🎯 PROPÓSITO GENERAL
 
-Fortalecer el pensamiento computacional y las competencias tecnológicas de los estudiantes de 8° grado a través del aprendizaje de la programación, aplicando la lógica de algoritmos, estructuras de control y resolución de problemas, para diseñar soluciones creativas e innovadoras que respondan a necesidades sociales y ambientales, en coherencia con el modelo pedagógico crítico-social y el PEI de la IE Camilo Torres, promoviendo el trabajo colaborativo, la responsabilidad social y la ética en el uso de la tecnología.
+Fortalecer el pensamiento computacional y las competencias tecnológicas de los estudiantes de 8° grado a través del aprendizaje de la programación, aplicando la lógica de algoritmos, estructuras de control y resolución de problemas, para diseñar soluciones creativas e innovadoras que respondan a necesidades sociales y ambientales. Este propósito se fundamenta en el desarrollo integral de habilidades del siglo XXI, promoviendo el trabajo colaborativo, la responsabilidad social y la ética en el uso de la tecnología. Los estudiantes desarrollarán competencias específicas en programación, pensamiento lógico, resolución de problemas y ciudadanía digital, alineadas con el modelo pedagógico crítico-social y el PEI de la IE Camilo Torres. El objetivo es formar estudiantes capaces de utilizar la tecnología como herramienta de transformación social, fomentando la reflexión crítica sobre el impacto de la tecnología en la sociedad y el medio ambiente, mientras desarrollan habilidades técnicas y competencias socioemocionales esenciales para su formación integral.
 
 ---
 
 ## 🎯 COMPETENCIAS
 
-- **Diseño y desarrollo de soluciones tecnológicas** Los estudiantes diseñarán y desarrollarán programas simples utilizando un lenguaje de programación, aplicando la lógica de algoritmos y estructuras de control.
-- **Pensamiento computacional** Los estudiantes analizarán problemas, descomponiéndolos en partes más pequeñas para crear algoritmos de solución.
-- **Comunicación y colaboración** Los estudiantes trabajarán en equipo para diseñar y desarrollar programas, compartiendo ideas y conocimientos.
-- **Ciudadanía digital** Los estudiantes utilizarán la tecnología de forma responsable y ética, considerando el impacto social de sus creaciones.
+- **Diseño y desarrollo de soluciones tecnológicas** Los estudiantes diseñarán y desarrollarán programas simples utilizando un lenguaje de programación, aplicando la lógica de algoritmos y estructuras de control. Esta competencia se desarrolla a través de la creación de programas funcionales que resuelvan problemas específicos, utilizando herramientas de programación apropiadas para el grado, y aplicando principios de diseño de software. Los estudiantes demostrarán esta competencia mediante la implementación de código limpio, la documentación de sus programas y la resolución de errores de programación.
+
+- **Pensamiento computacional** Los estudiantes analizarán problemas complejos, descomponiéndolos en partes más pequeñas para crear algoritmos de solución eficientes. Esta competencia incluye el desarrollo de habilidades de abstracción, reconocimiento de patrones, y diseño de algoritmos. Los estudiantes aplicarán esta competencia mediante la creación de diagramas de flujo, pseudocódigo, y la implementación de soluciones algorítmicas que demuestren comprensión de estructuras de control y lógica computacional.
+
+- **Comunicación y colaboración** Los estudiantes trabajarán en equipo para diseñar y desarrollar programas, compartiendo ideas, conocimientos y responsabilidades. Esta competencia se desarrolla a través de la participación activa en discusiones grupales, la presentación de ideas de manera clara y efectiva, y la colaboración en la resolución de problemas. Los estudiantes demostrarán esta competencia mediante la participación en proyectos colaborativos, la presentación de sus trabajos y la retroalimentación constructiva a sus compañeros.
+
+- **Ciudadanía digital** Los estudiantes utilizarán la tecnología de forma responsable y ética, considerando el impacto social y ambiental de sus creaciones tecnológicas. Esta competencia incluye el desarrollo de conciencia sobre el uso responsable de la tecnología, la comprensión de los derechos y responsabilidades digitales, y la reflexión crítica sobre el impacto de la tecnología en la sociedad. Los estudiantes aplicarán esta competencia mediante la creación de programas que aborden problemas sociales, la reflexión sobre el uso ético de la tecnología y la promoción de prácticas digitales responsables.
 
 ---
 
