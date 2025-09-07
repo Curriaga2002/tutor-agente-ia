@@ -65,6 +65,7 @@ export function ChatAssistant({
 • **Duración:** ${Number(planningConfig.sesiones) * 2} horas
 • **Sesiones:** ${planningConfig.sesiones}
 
+
 **💡 Ejemplo de solicitud para Tecnología e Informática:**
 
 "Genera un plan de clase para grado 8° sobre programación básica con Scratch.
