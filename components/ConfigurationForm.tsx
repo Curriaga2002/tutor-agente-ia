@@ -13,17 +13,14 @@ export function ConfigurationForm({ onSubmit }: ConfigurationFormProps) {
 
   const handleConfigSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('🔍 ConfigurationForm: handleConfigSubmit called')
-    console.log('🔍 Current planningConfig:', planningConfig)
     
     const sesionesNum = Number(planningConfig.sesiones)
     const sesionesValid = Number.isFinite(sesionesNum) && sesionesNum >= 1 && sesionesNum <= 2
     
-    console.log('🔍 Validation check:', {
+    updateConfiguration({
       grado: planningConfig.grado,
       asignatura: planningConfig.asignatura,
       tema: planningConfig.tema,
-      sesionesValid,
       recursos: planningConfig.recursos,
       nombreDocente: planningConfig.nombreDocente
     })
@@ -38,10 +35,8 @@ export function ConfigurationForm({ onSubmit }: ConfigurationFormProps) {
     if (!planningConfig.nombreDocente) validationErrors.push('nombreDocente')
     
     if (validationErrors.length === 0) {
-      console.log('✅ Formulario válido, llamando onSubmit')
       onSubmit()
     } else {
-      console.log('❌ Formulario inválido. Campos faltantes:', validationErrors)
     }
   }
 

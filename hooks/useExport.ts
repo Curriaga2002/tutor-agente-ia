@@ -6,7 +6,6 @@ import { Planeacion, Message } from '../types'
 export function useExport() {
   const exportChatToWord = useCallback(async (plan: Planeacion) => {
     try {
-      console.log('🚀 Iniciando exportación de chat a Word...', plan)
       
       // Validar datos de entrada
       if (!plan) {
@@ -136,7 +135,6 @@ export function useExport() {
 
       // Agregar cada mensaje del chat
       if (plan.chat_history && plan.chat_history.length > 0) {
-        console.log('📝 Procesando historial de chat:', plan.chat_history.length, 'mensajes')
         
         plan.chat_history.forEach((message, index) => {
           try {
@@ -251,7 +249,6 @@ export function useExport() {
       )
 
       // Crear el documento
-      console.log('📄 Creando documento Word con', paragraphs.length, 'párrafos')
       const doc = new Document({
         sections: [{
           properties: {},
@@ -260,22 +257,17 @@ export function useExport() {
       })
 
       // Generar y descargar el archivo
-      console.log('🔧 Generando buffer del documento...')
       const buffer = await Packer.toBuffer(doc)
-      console.log('📦 Buffer generado exitosamente, tamaño:', buffer.length)
       
       const blob = new Blob([buffer], { 
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
       })
-      console.log('💾 Blob creado exitosamente, tamaño:', blob.size)
       
       const fileName = `plan-clase-${plan.tema.replace(/[^a-zA-Z0-9]/g, '-')}-${new Date().toISOString().split('T')[0]}.docx`
-      console.log('💾 Descargando archivo:', fileName)
       
       // Usar una implementación más robusta de saveAs
       try {
         saveAs(blob, fileName)
-        console.log('✅ Archivo descargado exitosamente')
       } catch (saveError) {
         console.error('❌ Error al descargar archivo:', saveError)
         // Fallback: crear un enlace de descarga manual
@@ -287,7 +279,6 @@ export function useExport() {
         link.click()
         document.body.removeChild(link)
         URL.revokeObjectURL(url)
-        console.log('✅ Archivo descargado usando fallback')
       }
 
       return { success: true, fileName }

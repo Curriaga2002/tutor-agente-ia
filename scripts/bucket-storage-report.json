@@ -1,0 +1,52 @@
+{
+  "timestamp": "2025-09-07T02:47:57.688Z",
+  "totalFiles": 5,
+  "totalSize": 8262135,
+  "averageSize": 1652427,
+  "fileTypes": {
+    "emptyfolderplaceholder": 1,
+    "pdf": 4
+  },
+  "files": [
+    {
+      "name": ".emptyFolderPlaceholder",
+      "id": "fd7cf800-7429-4aae-9307-a2d4ba0131b2",
+      "size": 0,
+      "mimeType": "application/octet-stream",
+      "lastModified": "2025-09-01T23:00:35.073Z",
+      "eTag": "\"d41d8cd98f00b204e9800998ecf8427e\""
+    },
+    {
+      "name": "Orientaciones_Curricures_Tecnologia (1).pdf",
+      "id": "42c72830-f2f3-4441-aa2e-5dc3962c632d",
+      "size": 5966199,
+      "mimeType": "application/pdf",
+      "lastModified": "2025-09-03T09:38:12.196Z",
+      "eTag": "\"f5437d0ca5ac0157fddccaec82f52adf-1\""
+    },
+    {
+      "name": "Proyecto Educativo Institucional PEI.pdf",
+      "id": "7e76135a-3240-44e3-854e-91dbc3cc395e",
+      "size": 1170153,
+      "mimeType": "application/pdf",
+      "lastModified": "2025-09-07T02:26:31.724Z",
+      "eTag": "\"cf63f74ad880893979827d8eada67da2-1\""
+    },
+    {
+      "name": "Revision Sistematica - Modelo Pedagogico Critico Social.pdf",
+      "id": "66daa46f-6cf6-4a7f-85d6-2c88759687b4",
+      "size": 318915,
+      "mimeType": "application/pdf",
+      "lastModified": "2025-09-07T02:26:31.532Z",
+      "eTag": "\"14ffb585cde25d5e5aee1daa19460736-1\""
+    },
+    {
+      "name": "tabla-7.pdf",
+      "id": "c37292d2-38b9-4586-a54c-2c49bf25767d",
+      "size": 806868,
+      "mimeType": "application/pdf",
+      "lastModified": "2025-09-04T19:18:18.403Z",
+      "eTag": "\"234e03c8ca1d921b108867d37061413c\""
+    }
+  ]
+}

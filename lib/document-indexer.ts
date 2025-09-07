@@ -164,7 +164,6 @@ export async function saveToDatabase(
     // Por ahora simulamos el guardado
     const documentId = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
-    console.log(`✅ Documento guardado con ID: ${documentId}`)
     return documentId
     
   } catch (error) {
@@ -200,7 +199,6 @@ export async function reindexDocument(
 export async function deleteIndexedDocument(documentId: string): Promise<boolean> {
   try {
     // Aquí implementarías la lógica para eliminar de la base de datos
-    console.log(`🗑️ Documento eliminado: ${documentId}`)
     return true
     
   } catch (error) {

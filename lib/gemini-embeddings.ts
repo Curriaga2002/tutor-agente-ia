@@ -109,7 +109,6 @@ export class GeminiEmbeddingService {
       // Procesar en batches para evitar rate limits
       for (let i = 0; i < texts.length; i += batchSize) {
         const batch = texts.slice(i, i + batchSize)
-        console.log(`🔄 Procesando batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(texts.length / batchSize)}`)
         
         // Procesar batch en paralelo
         const batchPromises = batch.map(text => 
@@ -149,7 +148,6 @@ export class GeminiEmbeddingService {
    */
   async generateEducationalEmbeddings(chunks: string[]): Promise<number[][]> {
     try {
-      console.log(`🎓 Generando embeddings para ${chunks.length} chunks educativos...`)
       
       const response = await this.generateBatchEmbeddings({
         texts: chunks,
@@ -157,8 +155,6 @@ export class GeminiEmbeddingService {
         model: this.defaultModel
       })
       
-      console.log(`✅ Embeddings generados: ${response.embeddings.length} vectores`)
-      console.log(`📊 Total de tokens: ${response.totalTokens}`)
       
       return response.embeddings
       

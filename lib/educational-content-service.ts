@@ -58,7 +58,6 @@ export interface PlanSubsection {
  */
 export async function getOfficialPlanStructure(): Promise<PlanStructure | null> {
   try {
-    console.log('🔄 Obteniendo estructura oficial del Plan de Clases...')
     
     // Buscar archivos que contengan la estructura oficial
     const { data: files, error: listError } = await supabase.storage
@@ -83,7 +82,6 @@ export async function getOfficialPlanStructure(): Promise<PlanStructure | null> 
     )
 
     if (officialFiles.length === 0) {
-      console.log('⚠️ No se encontraron archivos de estructura oficial')
       return null
     }
 
@@ -99,7 +97,6 @@ export async function getOfficialPlanStructure(): Promise<PlanStructure | null> 
     }
 
     const content = await fileData.text()
-    console.log(`✅ Archivo oficial leído: ${officialFile.name} (${content.length} caracteres)`)
 
     // Parsear la estructura del documento
     return parsePlanStructure(content, officialFile.name)
@@ -115,7 +112,6 @@ export async function getOfficialPlanStructure(): Promise<PlanStructure | null> 
  */
 export async function getMENOrientations(): Promise<EducationalDocument[]> {
   try {
-    console.log('🔄 Obteniendo Orientaciones Curriculares MEN 2022...')
     
     const { data: files, error } = await supabase.storage
       .from('educacion')
@@ -164,7 +160,6 @@ export async function getMENOrientations(): Promise<EducationalDocument[]> {
       }
     }
 
-    console.log(`✅ Orientaciones curriculares obtenidas: ${documents.length} documentos`)
     return documents
     
   } catch (error) {
@@ -178,7 +173,6 @@ export async function getMENOrientations(): Promise<EducationalDocument[]> {
  */
 export async function getCriticalSocialModel(): Promise<EducationalDocument[]> {
   try {
-    console.log('🔄 Obteniendo modelo crítico-social...')
     
     const { data: files, error } = await supabase.storage
       .from('educacion')
@@ -228,7 +222,6 @@ export async function getCriticalSocialModel(): Promise<EducationalDocument[]> {
       }
     }
 
-    console.log(`✅ Modelo crítico-social obtenido: ${documents.length} documentos`)
     return documents
     
   } catch (error) {
@@ -242,7 +235,6 @@ export async function getCriticalSocialModel(): Promise<EducationalDocument[]> {
  */
 export async function getPEI(): Promise<EducationalDocument[]> {
   try {
-    console.log('🔄 Obteniendo PEI institucional...')
     
     const { data: files, error } = await supabase.storage
       .from('educacion')
@@ -291,7 +283,6 @@ export async function getPEI(): Promise<EducationalDocument[]> {
       }
     }
 
-    console.log(`✅ PEI obtenido: ${documents.length} documentos`)
     return documents
     
   } catch (error) {
@@ -391,7 +382,6 @@ export async function getAllEducationalContent(): Promise<{
   pei: EducationalDocument[]
 }> {
   try {
-    console.log('🚀 Obteniendo todo el contenido educativo necesario...')
     
     const [planStructure, menOrientations, criticalSocialModel, pei] = await Promise.all([
       getOfficialPlanStructure(),
@@ -400,11 +390,6 @@ export async function getAllEducationalContent(): Promise<{
       getPEI()
     ])
     
-    console.log('✅ Contenido educativo obtenido exitosamente')
-    console.log(`  📚 Estructura del plan: ${planStructure ? '✅' : '❌'}`)
-    console.log(`  📋 Orientaciones MEN: ${menOrientations.length} documentos`)
-    console.log(`  🔍 Modelo crítico-social: ${criticalSocialModel.length} documentos`)
-    console.log(`  🏫 PEI: ${pei.length} documentos`)
     
     return {
       planStructure,

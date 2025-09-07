@@ -21,22 +21,13 @@ export class GeminiService {
 
   constructor() {
     try {
-      console.log('🔧 Inicializando Gemini Service...')
-      console.log('🔑 API Key disponible:', !!process.env.NEXT_PUBLIC_GEMINI_API_KEY)
-      console.log('🔑 API Key valor:', process.env.NEXT_PUBLIC_GEMINI_API_KEY ? 'Configurada' : 'NO CONFIGURADA')
-      console.log('🔑 API Key longitud:', process.env.NEXT_PUBLIC_GEMINI_API_KEY?.length || 0)
       
       if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
         throw new Error('API Key de Gemini no está configurada')
       }
       
-      console.log('🚀 Creando modelo Gemini...')
       this.model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
-      console.log('✅ Modelo creado:', !!this.model)
-      console.log('📊 Configuración de tokens: maxOutputTokens=4096, temperature=0.7, topP=0.9, topK=40')
-      console.log('💡 Usando Gemini 1.5 Flash (plan gratuito) - Si necesitas más tokens, considera actualizar a un plan de pago')
       
-      console.log('💬 Iniciando chat...')
       this.chat = this.model.startChat({
         history: [],
         generationConfig: {
@@ -46,9 +37,7 @@ export class GeminiService {
           topK: 40,
         },
       })
-      console.log('✅ Chat iniciado:', !!this.chat)
       
-      console.log('✅ Gemini Service inicializado exitosamente')
     } catch (error) {
       console.error('❌ Error inicializando Gemini:', error)
       console.error('🔍 Detalles del error:', error)
@@ -67,9 +56,6 @@ export class GeminiService {
   async generateResponse(prompt: string, maxRetries: number = 3): Promise<GeminiResponse> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-        console.log(`🔍 Gemini generateResponse: Intento ${attempt}/${maxRetries}`)
-      console.log('📱 Modelo disponible:', !!this.model)
-      console.log('🔑 API Key en uso:', !!process.env.NEXT_PUBLIC_GEMINI_API_KEY)
       
       if (!this.model) {
         throw new Error('Gemini no está inicializado')
@@ -79,22 +65,12 @@ export class GeminiService {
         throw new Error('API Key de Gemini no está configurada en generateResponse')
       }
 
-      console.log('🤖 Gemini generando respuesta para:', prompt.substring(0, 100) + '...')
-      console.log('📏 Longitud del prompt:', prompt.length)
       
-      console.log('🚀 Llamando a model.generateContent...')
       const result = await this.model.generateContent(prompt)
-      console.log('📨 Resultado recibido:', !!result)
       
-      console.log('🔄 Procesando response...')
       const response = await result.response
-      console.log('📝 Response procesado:', !!response)
       
-      console.log('📖 Extrayendo texto...')
       const text = response.text()
-      console.log('✅ Texto extraído, longitud:', text.length)
-        console.log('📊 Tokens estimados en respuesta:', Math.ceil(text.length / 4))
-      console.log('📄 Primeros 200 caracteres:', text.substring(0, 200))
       
       return {
         text,
@@ -109,7 +85,6 @@ export class GeminiService {
           
           if (attempt < maxRetries) {
             const waitTime = Math.pow(2, attempt) * 1000 // Backoff exponencial: 2s, 4s, 8s
-            console.log(`⏳ Esperando ${waitTime/1000} segundos antes del siguiente intento...`)
             await new Promise(resolve => setTimeout(resolve, waitTime))
             continue
           }
@@ -141,13 +116,11 @@ export class GeminiService {
         throw new Error('Chat de Gemini no está inicializado')
       }
 
-      console.log('💬 Gemini procesando mensaje de chat...')
       
       const result = await this.chat.sendMessage(message)
       const response = await result.response
       const text = response.text()
       
-      console.log('✅ Gemini chat response generado')
       
       return {
         text,
@@ -173,24 +146,14 @@ export class GeminiService {
     nombreDocente?: string
   ): Promise<GeminiResponse> {
     try {
-      console.log('🎯 Gemini: Iniciando generación de plan de clase...')
-      console.log('📋 Parámetros recibidos:', { grado, tema, context, relevantDocsCount: relevantDocs.length })
       
       // Analizar documentos para extraer información real
       const extractedInfo = this.extractInstitutionalInfo(relevantDocs)
-      console.log('📊 Información extraída de documentos:', extractedInfo)
       
       const prompt = this.buildClassPlanPrompt(grado, tema, context, relevantDocs, recursos, nombreDocente, extractedInfo)
-      console.log('📝 Prompt construido:', prompt.substring(0, 200) + '...')
       
-      console.log('🚀 Llamando a generateResponse...')
       const response = await this.generateResponse(prompt)
       
-      console.log('📨 Respuesta recibida de generateResponse:', {
-        success: response.success,
-        textLength: response.text?.length || 0,
-        error: response.error
-      })
       
       return response
     } catch (error) {
@@ -315,12 +278,6 @@ export class GeminiService {
     const distribucionSesiones = Array.from({length: sesionesNum}, (_, i) => `Sesión ${i + 1}: 2 horas`).join(' | ');
     
     // Debug: verificar qué se está calculando
-    console.log('🔍 DEBUG - Cálculo en gemini-service.ts:', {
-      context: context.substring(0, 200) + '...',
-      sesionesNum,
-      duracionTotal,
-      distribucionSesiones
-    });
     
     let prompt = `# 🧠 Capa de Inteligencia (no modificar la estructura de salida)
 
@@ -762,7 +719,6 @@ Genera el plan de clase completo basándote EXCLUSIVAMENTE en la información re
           topK: 40,
         },
       })
-      console.log('🔄 Chat de Gemini reiniciado')
     } catch (error) {
       console.error('❌ Error reiniciando chat:', error)
     }
@@ -807,26 +763,11 @@ Genera el plan de clase completo basándote EXCLUSIVAMENTE en la información re
     }
     
     const result = `${academicYear} – ${period}`
-    console.log(`📅 Año lectivo calculado: ${result} (Mes actual: ${currentMonth})`)
     return result
   }
 
   // Mostrar información sobre cuotas
   showQuotaInfo() {
-    console.log('📊 INFORMACIÓN SOBRE CUOTAS DE GEMINI API:')
-    console.log('🆓 Plan Gratuito (Gemini 1.5 Flash):')
-    console.log('   • 15 solicitudes por minuto')
-    console.log('   • 1,500 solicitudes por día')
-    console.log('   • 32,000 tokens de entrada por minuto')
-    console.log('   • 1,000,000 tokens de entrada por día')
-    console.log('')
-    console.log('💳 Plan de Pago (Gemini 1.5 Pro):')
-    console.log('   • 360 solicitudes por minuto')
-    console.log('   • 1,500 solicitudes por día')
-    console.log('   • 1,000,000 tokens de entrada por minuto')
-    console.log('   • 50,000,000 tokens de entrada por día')
-    console.log('')
-    console.log('🔗 Más información: https://ai.google.dev/gemini-api/docs/rate-limits')
   }
 }
 

@@ -38,7 +38,6 @@ export interface PDFSubsection {
  */
 export async function listAvailablePDFs(): Promise<Array<{name: string, size: number}>> {
   try {
-    console.log('📁 Listando PDFs disponibles en el bucket...')
     
     // Listar TODOS los archivos del bucket sin restricciones
     const { data: files, error } = await supabase.storage
@@ -55,8 +54,6 @@ export async function listAvailablePDFs(): Promise<Array<{name: string, size: nu
     }
 
     // Incluir TODOS los tipos de archivos, no solo PDFs
-    console.log(`✅ Archivos encontrados en bucket: ${files.length}`)
-    console.log('📋 Archivos disponibles:', files.map(f => f.name))
     
     return files.map(file => ({
       name: file.name,
@@ -74,13 +71,11 @@ export async function listAvailablePDFs(): Promise<Array<{name: string, size: nu
  */
 export async function processPDF(file: any): Promise<PDFContent | null> {
   try {
-    console.log(`📄 **PROCESANDO ARCHIVO:** ${file.name}`)
     
     // Extraer texto del PDF
     const extractedText = await extractTextFromPDF(file.name)
     
     if (!extractedText) {
-      console.log(`⚠️ No se pudo extraer texto de: ${file.name}`)
       return null
     }
     
@@ -98,7 +93,6 @@ export async function processPDF(file: any): Promise<PDFContent | null> {
       }
     }
     
-    console.log(`✅ Archivo procesado exitosamente: ${file.name}`)
     return pdfContent
     
   } catch (error) {
@@ -114,7 +108,6 @@ async function extractTextFromPDF(fileName: string): Promise<string | null> {
   try {
     // En el navegador, simulamos la extracción de texto
     // En producción, esto se haría con una API del backend
-    console.log('🔄 Simulando extracción de texto del PDF en el navegador...')
     
     // Fallback: simular extracción de texto
     return simulatePDFTextExtraction(fileName)
@@ -475,38 +468,31 @@ function cleanSubsectionName(name: string): string {
  */
 export async function processAllPDFs(files?: any[]): Promise<PDFContent[]> {
   try {
-    console.log('🔄 **PROCESANDO ARCHIVOS DEL BUCKET**')
     
     let filesToProcess: any[] = []
     
     if (files && files.length > 0) {
       // Usar la lista de archivos proporcionada
-      console.log(`📁 Usando lista de archivos proporcionada: ${files.length} archivos`)
       filesToProcess = files
     } else {
       // Fallback: listar archivos del bucket
-      console.log('📁 Listando archivos del bucket (fallback)')
       const availableFiles = await listAvailablePDFs()
       filesToProcess = availableFiles
     }
     
     if (filesToProcess.length === 0) {
-      console.log('⚠️ No hay archivos para procesar')
       return []
     }
     
-    console.log(`📚 Procesando ${filesToProcess.length} archivos...`)
     
     const processedDocs: PDFContent[] = []
     
     for (const file of filesToProcess) {
       try {
-        console.log(`📄 Procesando: ${file.name}`)
         
         const processedDoc = await processPDF(file)
         if (processedDoc) {
           processedDocs.push(processedDoc)
-          console.log(`✅ Procesado exitosamente: ${file.name}`)
         }
       } catch (error) {
         console.error(`❌ Error procesando ${file.name}:`, error)
@@ -514,10 +500,6 @@ export async function processAllPDFs(files?: any[]): Promise<PDFContent[]> {
       }
     }
     
-    console.log(`🎯 **PROCESAMIENTO COMPLETADO**`)
-    console.log(`📊 Total de archivos: ${filesToProcess.length}`)
-    console.log(`✅ Procesados exitosamente: ${processedDocs.length}`)
-    console.log(`❌ Fallidos: ${filesToProcess.length - processedDocs.length}`)
     
     return processedDocs
     
@@ -558,7 +540,6 @@ export function searchInPDFs(pdfs: PDFContent[], query: string): PDFContent[] {
     return false
   })
   
-  console.log(`🔍 Búsqueda: "${query}" encontró ${relevantFiles.length} archivos relevantes`)
   
   return relevantFiles
 }

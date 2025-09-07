@@ -118,10 +118,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
   }, [])
 
   const setConfiguration = useCallback((config: PlanningConfig) => {
-    console.log('🔍 ChatContext: setConfiguration called with:', config)
     setPlanningConfig(config)
     setIsConfigured(true)
-    console.log('🔍 ChatContext: isConfigured set to true')
   }, [])
 
   const updateConfiguration = useCallback((updates: Partial<PlanningConfig>) => {

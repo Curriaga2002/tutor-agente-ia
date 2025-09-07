@@ -17,7 +17,7 @@ export function useChatActions() {
   } = useChat()
   
   const { addToChatHistory } = usePlanning()
-  const { searchDocuments } = useDocuments()
+  const { searchDocuments, documents } = useDocuments()
 
   // Función para buscar documentos relevantes
   const searchRelevantDocuments = useCallback(async (query: string): Promise<PDFContent[]> => {
@@ -38,12 +38,6 @@ export function useChatActions() {
     todosLosDocumentos: PDFContent[]
   }> => {
     try {
-      // Obtener documentos del contexto correctamente
-      const { documents } = useDocuments()
-      
-      console.log('🔍 DEBUG - Documentos obtenidos del contexto:', documents.length)
-      console.log('📚 DEBUG - Títulos de documentos:', documents.map(doc => doc.title))
-      
       // Buscar PEI
       const peiDocs = documents.filter(doc => 
         doc.title.toLowerCase().includes('pei') ||
@@ -74,12 +68,6 @@ export function useChatActions() {
       
       const todosLosDocumentos = [...documents]
       
-      console.log('📊 DEBUG - Documentos encontrados por tipo:')
-      console.log('🏫 PEI:', peiDocs.length, peiDocs.map(doc => doc.title))
-      console.log('🎓 Modelo Pedagógico:', modeloPedagogicoDocs.length, modeloPedagogicoDocs.map(doc => doc.title))
-      console.log('📋 Orientaciones Curriculares:', orientacionesCurricularesDocs.length, orientacionesCurricularesDocs.map(doc => doc.title))
-      console.log('📊 Tabla 7:', tabla7Docs.length, tabla7Docs.map(doc => doc.title))
-      console.log('📚 Total documentos:', todosLosDocumentos.length)
       
       return {
         pei: peiDocs,
@@ -98,7 +86,7 @@ export function useChatActions() {
         todosLosDocumentos: []
       }
     }
-  }, [useDocuments])
+  }, [documents])
 
   // Función para generar respuesta pedagógica
   const generatePedagogicalResponse = useCallback(async (userInput: string, relevantDocs: PDFContent[], chatHistory: any[]): Promise<string> => {
@@ -117,22 +105,22 @@ export function useChatActions() {
         relevantDocs: relevantDocs
       })
       
-      // Usar todos los documentos disponibles
+      // Usar TODOS los documentos disponibles del bucket
       let relevantFiles = [...documentosInstitucionales.todosLosDocumentos]
       
-      // Agregar documentos específicos de la consulta
+      // Agregar TODOS los documentos del contexto (ya incluye todos los documentos del bucket)
       relevantDocs.forEach(doc => {
         if (!relevantFiles.some(existing => existing.id === doc.id)) {
           relevantFiles.push(doc)
         }
       })
       
+      
       // Construir contexto con historial del chat
       const sesionesNum = Math.min(2, Math.max(1, Number(planningConfig.sesiones || '1') || 1))
       const horasNum = sesionesNum * 2
       
       // Construir historial del chat para el contexto
-      console.log('🔧 DEBUG - Construyendo contexto del chat con', chatHistory.length, 'mensajes')
       
       const chatContext = chatHistory.length > 0 ? `
 ## 📝 HISTORIAL DE LA CONVERSACIÓN:
@@ -151,7 +139,6 @@ ${userInput}
 
 `
       
-      console.log('📄 DEBUG - Contexto del chat construido:', chatContext.substring(0, 500) + '...')
       
       const combinedContext = `REGLAS ESTRICTAS PARA LA RESPUESTA (OBLIGATORIAS):
 1) Usa EXACTAMENTE la duración total: ${horasNum} horas.
@@ -205,18 +192,15 @@ ${chatContext}`
       // El userMessage se agrega al final del array, así que tomamos todos excepto el último
       const currentChatHistory = messages.slice(0, -1)
       
-      console.log('💬 DEBUG - Historial del chat enviado al agente:', currentChatHistory.length, 'mensajes')
-      console.log('📝 DEBUG - Contenido del historial:', currentChatHistory.map(msg => ({
+      // Debug: mostrar historial que se envía al agente
+      console.log('📝 Historial del chat enviado al agente:', currentChatHistory.map(msg => ({
         sender: msg.isUser ? 'Docente' : 'Asistente',
         text: msg.text.substring(0, 100) + '...',
         timestamp: msg.timestamp
       })))
       
-      // Buscar documentos relevantes
-      const relevantDocs = await searchRelevantDocuments(inputText)
-      
-      // Generar respuesta con historial del chat
-      const aiResponse = await generatePedagogicalResponse(inputText, relevantDocs, currentChatHistory)
+      // Generar respuesta con historial del chat y TODOS los documentos
+      const aiResponse = await generatePedagogicalResponse(inputText, documents, currentChatHistory)
       
       const assistantMessage = {
         text: aiResponse,

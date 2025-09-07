@@ -7,7 +7,6 @@ import { ConfigurationForm } from './ConfigurationForm'
 import { ChatHeader } from './ChatHeader'
 import { ChatMessages } from './ChatMessages'
 import { ChatInput } from './ChatInput'
-import { ConsultedDocuments } from './ConsultedDocuments'
 import { InitialMessage } from './InitialMessage'
 import { Message } from '../types'
 
@@ -42,7 +41,6 @@ export function ChatAssistant({
 
   // Debug: Monitorear cambios en isConfigured
   useEffect(() => {
-    console.log('🔍 ChatAssistant: isConfigured changed to:', isConfigured)
   }, [isConfigured])
 
   // Persistencia de sesión
@@ -51,13 +49,9 @@ export function ChatAssistant({
   }, [])
 
   const handleConfigurationSubmit = () => {
-    console.log('🔍 ChatAssistant: handleConfigurationSubmit called')
-    console.log('🔍 Current planningConfig:', planningConfig)
-    console.log('🔍 Current isConfigured before setConfiguration:', isConfigured)
     
     setConfiguration(planningConfig)
     
-    console.log('🔍 setConfiguration called, isConfigured should be true now')
     
     // Solo mostrar mensaje de confirmación sin enviar automáticamente
               const configMessage: Message = {
@@ -85,9 +79,16 @@ Evaluación: Formativa mediante observación, lista de cotejo y producto final d
                 isFormatted: true,
               }
     
-    console.log('🔍 Adding config message to chat')
     // Agregar mensaje de confirmación sin enviar automáticamente
     addMessage(configMessage)
+    
+    // Scroll automático al final de la página después de un breve delay
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth'
+      })
+    }, 100)
   }
 
   return (
@@ -100,8 +101,6 @@ Evaluación: Formativa mediante observación, lista de cotejo y producto final d
           <ConfigurationForm onSubmit={handleConfigurationSubmit} />
         )}
         
-        {/* Documentos consultados en tiempo real */}
-        <ConsultedDocuments />
         
         {/* Mensaje inicial del asistente */}
         {!isConfigured && sessionRestored && (

@@ -26,7 +26,6 @@ export function useBucketDocuments(): UseBucketDocumentsReturn {
       setIsLoading(true)
       setError(null)
       
-      console.log('🔄 Cargando documentos del bucket...')
       
       // Listar archivos del bucket
       const { data: files, error } = await supabase.storage
@@ -43,12 +42,10 @@ export function useBucketDocuments(): UseBucketDocumentsReturn {
       }
       
       if (!files || files.length === 0) {
-        console.log('📁 No se encontraron archivos en el bucket')
         setDocuments([])
         return
       }
       
-      console.log(`📁 Archivos encontrados en el bucket: ${files.length}`)
       
       // Filtrar archivos del sistema y archivos problemáticos
       const validFiles = files.filter(file => {
@@ -62,13 +59,11 @@ export function useBucketDocuments(): UseBucketDocumentsReturn {
         ]
         
         if (systemFiles.includes(file.name)) {
-          console.log(`🚫 Archivo del sistema excluido: ${file.name}`)
           return false
         }
         
         // Excluir archivos ocultos
         if (file.name.startsWith('.')) {
-          console.log(`🚫 Archivo oculto excluido: ${file.name}`)
           return false
         }
         
@@ -79,27 +74,23 @@ export function useBucketDocuments(): UseBucketDocumentsReturn {
         )
         
         if (!hasValidExtension) {
-          console.log(`🚫 Archivo sin extensión válida excluido: ${file.name}`)
           return false
         }
         
         return true
       })
       
-      console.log(`✅ Archivos válidos después del filtrado: ${validFiles.length}`)
       
       if (validFiles.length === 0) {
-        console.log('⚠️ No hay archivos válidos después del filtrado')
         setDocuments([])
         return
       }
       
       // Procesar solo los archivos válidos
       const processedDocs = await processAllPDFs(validFiles)
-      console.log(`📚 Documentos procesados exitosamente: ${processedDocs.length}`)
       
       setDocuments(processedDocs)
-      setLastUpdated(Date.now())
+      setLastUpdated(new Date())
       
     } catch (error) {
       console.error('❌ Error cargando documentos:', error)
@@ -121,7 +112,6 @@ export function useBucketDocuments(): UseBucketDocumentsReturn {
 
   // Configurar suscripción en tiempo real al bucket
   useEffect(() => {
-    console.log('🔔 Configurando suscripción en tiempo real al bucket...')
     
     // Suscribirse a cambios en el bucket
     const channel = supabase
@@ -135,11 +125,9 @@ export function useBucketDocuments(): UseBucketDocumentsReturn {
           filter: `bucket_id=eq.educacion`
         },
         (payload) => {
-          console.log('🔄 Cambio detectado en el bucket:', payload)
           
           // Refrescar documentos cuando hay cambios
           if (payload.eventType === 'INSERT' || payload.eventType === 'DELETE' || payload.eventType === 'UPDATE') {
-            console.log('📝 Cambio detectado, refrescando documentos...')
             loadDocuments()
           }
         }
@@ -148,7 +136,6 @@ export function useBucketDocuments(): UseBucketDocumentsReturn {
 
     // Limpiar suscripción al desmontar
     return () => {
-      console.log('🔕 Desuscribiendo del bucket...')
       supabase.removeChannel(channel)
     }
   }, [loadDocuments])
