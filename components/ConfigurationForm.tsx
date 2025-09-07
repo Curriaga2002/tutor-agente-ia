@@ -78,7 +78,7 @@ export function ConfigurationForm({ onSubmit }: ConfigurationFormProps) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 backdrop-blur-xl border border-white/60 rounded-3xl p-6 sm:p-8 lg:p-10 xl:p-12 mb-6 sm:mb-8 shadow-2xl shadow-blue-500/10 ring-1 ring-blue-200/30">
+    <div className="bg-white/95 backdrop-blur-xl border border-slate-200/60 rounded-3xl p-6 sm:p-8 lg:p-10 xl:p-12 mb-6 sm:mb-8 shadow-2xl shadow-slate-900/10 ring-1 ring-slate-200/40">
       {/* Header */}
       <div className="text-center mb-8 sm:mb-10 lg:mb-12">
         <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 tracking-tight">
@@ -113,7 +113,7 @@ export function ConfigurationForm({ onSubmit }: ConfigurationFormProps) {
             <select
               value={planningConfig.grado}
               onChange={(e) => handleInputChange('grado', e.target.value)}
-              className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
+              className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-slate-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 bg-slate-50/50 text-slate-900 placeholder-slate-500 text-sm sm:text-base"
               required
             >
               <option value="">Selecciona el grado</option>
@@ -139,7 +139,7 @@ export function ConfigurationForm({ onSubmit }: ConfigurationFormProps) {
               type="text"
               value="Tecnología e informática"
               readOnly
-              className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl bg-gray-100 text-gray-700 text-sm sm:text-base cursor-not-allowed"
+              className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-slate-300 rounded-xl sm:rounded-2xl bg-slate-100 text-slate-700 text-sm sm:text-base cursor-not-allowed"
               required
             />
           </div>
@@ -153,7 +153,7 @@ export function ConfigurationForm({ onSubmit }: ConfigurationFormProps) {
               value={planningConfig.tema}
               onChange={(e) => handleInputChange('tema', e.target.value)}
               placeholder="Ej: El computador, Internet, Programación básica..."
-              className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
+              className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-slate-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 bg-slate-50/50 text-slate-900 placeholder-slate-500 text-sm sm:text-base"
               required
             />
           </div>
@@ -165,7 +165,7 @@ export function ConfigurationForm({ onSubmit }: ConfigurationFormProps) {
             <select
               value={planningConfig.sesiones}
               onChange={(e) => handleInputChange('sesiones', e.target.value)}
-              className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
+              className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-slate-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 bg-slate-50/50 text-slate-900 placeholder-slate-500 text-sm sm:text-base"
               required
             >
               <option value="">Selecciona número de sesiones</option>
@@ -186,7 +186,7 @@ export function ConfigurationForm({ onSubmit }: ConfigurationFormProps) {
               value={planningConfig.recursos}
               onChange={(e) => handleInputChange('recursos', e.target.value)}
               placeholder="Ej: Computadores, internet, sala de cómputo, software..."
-              className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
+              className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-slate-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 bg-slate-50/50 text-slate-900 placeholder-slate-500 text-sm sm:text-base"
               required
             />
           </div>
@@ -200,7 +200,7 @@ export function ConfigurationForm({ onSubmit }: ConfigurationFormProps) {
               value={planningConfig.nombreDocente}
               onChange={(e) => handleInputChange('nombreDocente', e.target.value)}
               placeholder="Ej: María González, Juan Pérez..."
-              className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 text-sm sm:text-base"
+              className="w-full px-4 sm:px-6 py-3 sm:py-4 border border-slate-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 bg-slate-50/50 text-slate-900 placeholder-slate-500 text-sm sm:text-base"
               required
             />
           </div>

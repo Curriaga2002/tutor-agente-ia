@@ -89,8 +89,8 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
   // Si ya está autenticado, mostrar información del usuario
   if (user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white/70 backdrop-blur-xl border border-white/30 rounded-3xl p-8 shadow-lg shadow-black/5 max-w-md w-full">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-8 shadow-2xl shadow-slate-900/20 max-w-md w-full">
           <div className="text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">✅</span>
@@ -116,7 +116,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center p-4">
       <div className="bg-white/70 backdrop-blur-xl border border-white/30 rounded-3xl p-8 shadow-lg shadow-black/5 max-w-md w-full">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -144,7 +144,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-white/40 rounded-2xl focus:outline-none focus:ring-4 focus:ring-white/20 focus:border-white/60 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 placeholder-gray-500"
+              className="w-full px-4 py-3 border-2 border-blue-400 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-900 placeholder-gray-500"
               placeholder="tu@email.com"
             />
           </div>
@@ -159,7 +159,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-white/40 rounded-2xl focus:outline-none focus:ring-4 focus:ring-white/20 focus:border-white/60 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 placeholder-gray-500"
+              className="w-full px-4 py-3 border-2 border-blue-400 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-900 placeholder-gray-500"
               placeholder="••••••••"
             />
           </div>

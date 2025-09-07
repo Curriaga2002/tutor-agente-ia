@@ -92,7 +92,7 @@ Evaluación: Formativa mediante observación, lista de cotejo y producto final d
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 rounded-3xl shadow-[0_10px_30px_rgba(59,130,246,0.08)] ring-1 ring-blue-200/40 border border-gray-100 overflow-hidden">
+    <div className="flex flex-col h-full bg-white/80 backdrop-blur-sm rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] ring-1 ring-slate-200/60 border border-slate-200/50 overflow-hidden">
       <ChatHeader />
       
       <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6">
