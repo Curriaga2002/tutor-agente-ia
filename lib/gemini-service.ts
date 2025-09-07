@@ -1,5 +1,6 @@
 // Servicio para interactuar con Gemini AI
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { buildClassPlanPrompt } from './class-plan-prompt'
 
 // Configurar Gemini
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '')
@@ -190,72 +191,179 @@ export class GeminiService {
       const title = doc.title || ''
       const docType = doc.doc_type || ''
 
-      // Extraer nombre de institución
-      if (docType.includes('PEI') || docType.includes('proyecto') || content.includes('institución')) {
-        const institutionMatch = content.match(/(?:institución|IE|colegio|escuela)[:\s]*([^.\n]+)/i)
-        if (institutionMatch && !info.institution) {
-          info.institution = institutionMatch[1].trim()
+      // Extraer nombre de institución (mejorado)
+      if (docType.includes('PEI') || docType.includes('proyecto') || content.includes('institución') || content.includes('IE')) {
+        const institutionPatterns = [
+          /(?:institución|IE|colegio|escuela)[:\s]*([^.\n]+)/i,
+          /(?:nombre de la institución|institución educativa)[:\s]*([^.\n]+)/i,
+          /IE\s+([^.\n]+)/i,
+          /(?:colegio|escuela)\s+([^.\n]+)/i
+        ]
+        
+        for (const pattern of institutionPatterns) {
+          const match = content.match(pattern)
+          if (match && !info.institution) {
+            info.institution = match[1].trim()
+            break
+          }
         }
       }
 
-      // Extraer asignatura/área
-      if (docType.includes('curricular') || content.includes('asignatura') || content.includes('área')) {
-        const subjectMatch = content.match(/(?:asignatura|área)[:\s]*([^.\n]+)/i)
-        if (subjectMatch && !info.subject) {
-          info.subject = subjectMatch[1].trim()
+      // Extraer asignatura/área (mejorado)
+      if (docType.includes('curricular') || content.includes('asignatura') || content.includes('área') || content.includes('tecnología')) {
+        const subjectPatterns = [
+          /(?:asignatura|área|materia)[:\s]*([^.\n]+)/i,
+          /(?:tecnología e informática|informática|tecnología)[:\s]*([^.\n]+)/i,
+          /(?:área de|asignatura de)[:\s]*([^.\n]+)/i
+        ]
+        
+        for (const pattern of subjectPatterns) {
+          const match = content.match(pattern)
+          if (match && !info.subject) {
+            info.subject = match[1].trim()
+            break
+          }
         }
       }
 
-      // Extraer grados
-      const gradeMatches = content.match(/(?:grado|nivel)[:\s]*(\d+°?)/gi)
-      if (gradeMatches) {
-        gradeMatches.forEach((match: string) => {
-          const grade = match.replace(/[^\d]/g, '')
-          if (grade && !info.grades.includes(grade)) {
-            info.grades.push(grade)
+      // Extraer grados (mejorado)
+      const gradePatterns = [
+        /(?:grado|nivel)[:\s]*(\d+°?)/gi,
+        /(\d+°\s*(?:básica|media)?)/gi,
+        /(?:primero|segundo|tercero|cuarto|quinto|sexto|séptimo|octavo|noveno|décimo|undécimo)[:\s]*(\d+°?)/gi
+      ]
+      
+      gradePatterns.forEach(pattern => {
+        const matches = content.match(pattern)
+        if (matches) {
+          matches.forEach((match: string) => {
+            const grade = match.replace(/[^\d]/g, '')
+            if (grade && !info.grades.includes(grade)) {
+              info.grades.push(grade)
+            }
+          })
+        }
+      })
+
+      // Extraer duración de sesiones (mejorado)
+      const durationPatterns = [
+        /(?:duración|tiempo|horario)[:\s]*(\d+)\s*(?:min|minutos|hora|horas)/i,
+        /(?:sesión|clase)[:\s]*(\d+)\s*(?:min|minutos|hora|horas)/i,
+        /(\d+)\s*(?:min|minutos|hora|horas)\s*(?:por sesión|por clase)/i
+      ]
+      
+      for (const pattern of durationPatterns) {
+        const match = content.match(pattern)
+        if (match && !info.sessionDuration) {
+          const unit = content.includes('hora') ? ' horas' : ' minutos'
+          info.sessionDuration = match[1] + unit
+          break
+        }
+      }
+
+      // Extraer recursos (mejorado)
+      const resourcePatterns = [
+        /(?:recursos|materiales|equipos)[:\s]*([^.\n]+)/gi,
+        /(?:disponibles|utilizados)[:\s]*([^.\n]+)/gi,
+        /(?:computadores|computadoras|tablets|laptops|proyectores)/gi
+      ]
+      
+      resourcePatterns.forEach(pattern => {
+        const matches = content.match(pattern)
+        if (matches) {
+          matches.forEach((match: string) => {
+            const resources = match.split(/[,;]/).map((r: string) => r.trim()).filter((r: string) => r.length > 0)
+            info.resources.push(...resources)
+          })
+        }
+      })
+
+      // Extraer metodologías (mejorado)
+      const methodologyPatterns = [
+        /(?:metodología|estrategia|enfoque)[:\s]*([^.\n]+)/gi,
+        /(?:ABP|aprendizaje basado en proyectos|modelo crítico-social|CTS)/gi,
+        /(?:construcción-fabricación|diseño-rediseño|análisis de productos)/gi
+      ]
+      
+      methodologyPatterns.forEach(pattern => {
+        const matches = content.match(pattern)
+        if (matches) {
+          matches.forEach((match: string) => {
+            const methodologies = match.split(/[,;]/).map((m: string) => m.trim()).filter((m: string) => m.length > 0)
+            info.methodologies.push(...methodologies)
+          })
+        }
+      })
+
+      // Extraer modelo pedagógico
+      if (content.includes('modelo') && content.includes('pedagógico')) {
+        const modelMatch = content.match(/(?:modelo pedagógico|enfoque pedagógico)[:\s]*([^.\n]+)/i)
+        if (modelMatch && !info.pedagogicalModel) {
+          info.pedagogicalModel = modelMatch[1].trim()
+        }
+      }
+
+      // Extraer criterios de evaluación
+      if (content.includes('evaluación') || content.includes('criterios')) {
+        const criteriaPatterns = [
+          /(?:criterio|criterios)[:\s]*([^.\n]+)/gi,
+          /(?:tabla 7|evaluación)[:\s]*([^.\n]+)/gi
+        ]
+        
+        criteriaPatterns.forEach(pattern => {
+          const matches = content.match(pattern)
+          if (matches) {
+            matches.forEach((match: string) => {
+              const criteria = match.split(/[,;]/).map((c: string) => c.trim()).filter((c: string) => c.length > 0)
+              info.evaluationCriteria.push(...criteria)
+            })
           }
         })
       }
 
-      // Extraer duración de sesiones
-      const durationMatch = content.match(/(?:duración|tiempo|horario)[:\s]*(\d+)\s*(?:min|minutos|hora|horas)/i)
-      if (durationMatch && !info.sessionDuration) {
-        info.sessionDuration = durationMatch[1] + (content.includes('hora') ? ' horas' : ' minutos')
-      }
-
-      // Extraer recursos
-      const resourceMatches = content.match(/(?:recursos|materiales|equipos)[:\s]*([^.\n]+)/gi)
-      if (resourceMatches) {
-        resourceMatches.forEach((match: string) => {
-          const resources = match.split(/[,;]/).map((r: string) => r.trim()).filter((r: string) => r.length > 0)
-          info.resources.push(...resources)
-        })
-      }
-
-      // Extraer metodologías
-      const methodologyMatches = content.match(/(?:metodología|estrategia|enfoque)[:\s]*([^.\n]+)/gi)
-      if (methodologyMatches) {
-        methodologyMatches.forEach((match: string) => {
-          const methodologies = match.split(/[,;]/).map((m: string) => m.trim()).filter((m: string) => m.length > 0)
-          info.methodologies.push(...methodologies)
-        })
-      }
-
-      // Extraer misión y visión
-      if (content.includes('misión')) {
-        const missionMatch = content.match(/misión[:\s]*([^.\n]+)/i)
-        if (missionMatch && !info.mission) {
-          info.mission = missionMatch[1].trim()
+      // Extraer misión y visión (mejorado)
+      const missionPatterns = [
+        /misión[:\s]*([^.\n]+)/i,
+        /(?:nuestra misión|la misión)[:\s]*([^.\n]+)/i
+      ]
+      
+      for (const pattern of missionPatterns) {
+        const match = content.match(pattern)
+        if (match && !info.mission) {
+          info.mission = match[1].trim()
+          break
         }
       }
 
-      if (content.includes('visión')) {
-        const visionMatch = content.match(/visión[:\s]*([^.\n]+)/i)
-        if (visionMatch && !info.vision) {
-          info.vision = visionMatch[1].trim()
+      const visionPatterns = [
+        /visión[:\s]*([^.\n]+)/i,
+        /(?:nuestra visión|la visión)[:\s]*([^.\n]+)/i
+      ]
+      
+      for (const pattern of visionPatterns) {
+        const match = content.match(pattern)
+        if (match && !info.vision) {
+          info.vision = match[1].trim()
+          break
+        }
+      }
+
+      // Extraer valores
+      if (content.includes('valores')) {
+        const valuesMatch = content.match(/valores[:\s]*([^.\n]+)/i)
+        if (valuesMatch) {
+          const values = valuesMatch[1].split(/[,;]/).map((v: string) => v.trim()).filter((v: string) => v.length > 0)
+          info.values.push(...values)
         }
       }
     })
+
+    // Limpiar y deduplicar arrays
+    info.grades = Array.from(new Set(info.grades))
+    info.resources = Array.from(new Set(info.resources))
+    info.methodologies = Array.from(new Set(info.methodologies))
+    info.evaluationCriteria = Array.from(new Set(info.evaluationCriteria))
+    info.values = Array.from(new Set(info.values))
 
     return info
   }
@@ -270,268 +378,7 @@ export class GeminiService {
     nombreDocente?: string,
     extractedInfo?: any
   ): string {
-    // Calcular variables antes del template string
-    // Buscar específicamente el número de sesiones en el contexto
-    const sesionesMatch = context.match(/número de sesiones:\s*(\d+)/i) || context.match(/sesiones:\s*(\d+)/i);
-    const sesionesNum = sesionesMatch ? parseInt(sesionesMatch[1]) : 1; // Fallback: 1 sesión = 2 horas
-    const duracionTotal = `${sesionesNum * 2} horas`;
-    const distribucionSesiones = Array.from({length: sesionesNum}, (_, i) => `Sesión ${i + 1}: 2 horas`).join(' | ');
-    
-    // Debug: verificar qué se está calculando
-    
-    let prompt = `# 🧠 Capa de Inteligencia (no modificar la estructura de salida)
-
-## 0) Reglas de uso
-- NO cambies el orden ni los títulos de la salida ya definida.
-- NO muestres citas textuales, IDs ni fragmentos de documentos.
-- Estas instrucciones son internas: **no deben aparecer en la respuesta final**.
-
-## 0.1) Formato de salida OBLIGATORIO
-- Usa EXACTAMENTE los títulos y emojis definidos en la estructura.
-- NO agregues líneas en blanco entre secciones.
-- NO agregues espacios extra al final de las líneas.
-- Mantén los textos juntos sin espacios innecesarios.
-- Preserva la estructura de markdown con títulos, subtítulos y listas.
-- Para los momentos pedagógicos, incluye el tiempo estimado al final de cada momento.
-- Genera contenido específico y detallado, no placeholders genéricos.
-- Incluye actividades concretas y contextualizadas para cada momento.
-- El formato debe ser compacto y sin espacios extra.
-- CRÍTICO: En la sección IDENTIFICACIÓN, mantén todos los campos juntos sin líneas en blanco entre ellos.
-- CRÍTICO: No agregues espacios extra entre los campos de la identificación.
-
-## 0.2) INSTRUCCIONES PARA RESPUESTAS EXTENSAS Y COMPLETAS
-- **DETALLA CADA SECCIÓN:** Proporciona información exhaustiva y específica para cada apartado.
-- **COMPETENCIAS:** Redacta 3-5 competencias detalladas con verbos de acción específicos y contextos claros.
-- **SUBTEMAS:** Genera 4-6 subtemas progresivos con descripciones específicas y vinculación clara a las sesiones.
-- **ESTRATEGIA:** Explica en mínimo 150 palabras la fundamentación pedagógica, metodológica y teórica.
-- **MOMENTOS PEDAGÓGICOS:** Para cada momento, incluye:
-  * Actividades específicas y detalladas (mínimo 3-4 líneas por actividad)
-  * Roles del docente y estudiante claramente definidos
-  * Tiempo estimado específico
-  * Recursos y materiales necesarios
-  * Criterios de evaluación del momento
-- **EVIDENCIAS:** Especifica evidencias observables, medibles y contextualizadas para cada tipo (cognitivas, procedimentales, actitudinales).
-- **EVALUACIÓN:** Detalla criterios específicos con porcentajes justificados, indicadores de logro específicos y escalas de valoración.
-- **CONTEXTUALIZACIÓN:** Adapta todo el contenido al grado específico, recursos disponibles y contexto institucional.
-- **COHERENCIA:** Asegura que todas las secciones estén interconectadas y alineadas con el modelo crítico-social.
-
-## 1) Recuperación de documentos (bucket/RAG)
-Antes de responder:
-1. Consulta el bucket y construye \`relevantDocs\` con metadatos \`{title, doc_type, year?, source?}\`.
-2. Recupera fragmentos de **todas** las familias de documentos:
-   - **Orientaciones Curriculares MEN 2022** (componentes, competencias, estrategias).
-   - **Tabla 7 MEN** (criterios de evaluación por estrategia).
-   - **Revisión Sistemática / Modelo Crítico-Social** (momentos, principios, metodologías).
-   - **PEI IE Camilo Torres** (coherencia institucional y ética).
-3. Cobertura mínima: **1 fragmento por familia**; máximo **5 por documento**, evitando redundancia.
-4. Expande consulta con sinónimos de **tema**, **grado**, **estrategia**.
-
-## 2) Priorización y resolución de conflictos
-Jerarquía:
-1) **Tabla 7** → evaluación  
-2) **Orientaciones MEN 2022** → componentes, competencias, estrategias  
-3) **Revisión Sistemática** → momentos pedagógicos y enfoque crítico-social  
-4) **PEI** → coherencia institucional, valores y perfil  
-Si persiste conflicto: selecciona lo más alineado con el modelo crítico-social y el grado.
-
-## 3) Ensamble por secciones
-- **Componente Curricular** → MEN 2022  
-- **Competencias** → MEN 2022 (ajustadas al grado + PEI)  
-- **Subtemas** → MEN 2022 + Revisión Sistemática  
-- **Estrategia a desarrollar** → MEN 2022 + Revisión Sistemática  
-- **Momentos pedagógicos** → Revisión Sistemática  
-- **Evidencias** → MEN 2022 + PEI  
-- **Evaluación** → SOLO Tabla 7  
-
-## 4) Lógica de sesiones
-- Cada sesión = **2 horas (120 min)**.  
-- Duración total = \`${sesionesNum} × 2\` horas (**autocorrige inconsistencias**).  
-- Genera exactamente \`${sesionesNum}\` sesiones.  
-- Distribución interna (120 min exactos):  
-  - Exploración: 18–24 min  
-  - Problematización: 18–24 min  
-  - Diálogo: 24–30 min  
-  - Praxis-Reflexión: 24–30 min  
-  - Acción-Transformación: 12–18 min  
-
-## 5) Evaluación (Tabla 7)
-- Usa SOLO criterios de la estrategia seleccionada en **Tabla 7**.
-- Pesos que sumen 100% (base: 5 × 20%, ajusta con justificación).  
-- Conecta criterios ↔ competencias ↔ evidencias ↔ momentos.  
-- Escala: **1.0 a 5.0**, mínimo aprobatorio **3.2**.
-
-### 📊 Banco de criterios (Tabla 7 MEN)  
-*(usar solo los que correspondan a la estrategia seleccionada)*  
-
-**Construcción – Fabricación**  
-- Interpretación de planos o esquemas de elaboración.  
-- Selección de materiales, herramientas y recursos adecuados.  
-- Apropiación de técnicas y procedimientos de fabricación.  
-- Aplicación de condiciones de calidad, estética y acabado.  
-- Argumentación sobre el proceso de construcción realizado.  
-
-**Análisis de productos tecnológicos**  
-- Desarrollo histórico y evolución del producto.  
-- Dominio de conceptos de forma, función y estructura.  
-- Comprensión de condiciones de funcionamiento y principios tecnológicos.  
-- Descripción estética y formal (color, textura, interfaz, usabilidad).  
-- Análisis estructural físico-químico, matemático o digital.  
-
-**Actividades de Diseño / Rediseño**  
-- Identificación de condiciones del problema de diseño.  
-- Capacidad creativa para formular alternativas de solución.  
-- Búsqueda y selección de información relevante.  
-- Presentación de la solución mediante recursos gráficos u otros.  
-- Argumentación sobre el proceso de diseño y solución propuesta.  
-
-**Solución de problemas**  
-- Identificación de variables y aspectos del problema.  
-- Reconocimiento de saberes previos y necesarios.  
-- Planteamiento de estrategia o plan de trabajo.  
-- Implementación del plan conforme a momentos establecidos.  
-- Argumentación sobre el desarrollo y evaluación de la solución.  
-
-**Modelos de desarrollo de software o gestión de proyectos**  
-- Selección y uso de un modelo o metodología pertinente.  
-- Respuesta adecuada a la necesidad inicial.  
-- Propuesta de licenciamiento (costos, tiempo, compatibilidad).  
-- Proceso de gestión y toma de decisiones.  
-- Elaboración de algoritmos o productos computacionales.  
-
-**Aprendizaje basado en problemas / retos / proyectos**  
-- Evaluar tanto el proceso como el producto.  
-- Desarrollo de fases de la experiencia de aprendizaje.  
-- Roles asumidos en el trabajo.  
-- Calidad de la solución implementada.  
-- Impacto del producto o presentación final.  
-
-## 6) Guardas anti-alucinación
-- Si falta un documento, usa los otros sin anunciar carencia.  
-- No inventes criterios fuera de Tabla 7.  
-- No cambies \`${sesionesNum}\`.  
-
-## 7) Filtrado interno
-Antes de emitir salida:  
-- ❌ Elimina cálculos, validaciones, restricciones.  
-- ✅ Mantén solo información clara para el docente.  
-
-## 8) Lista de verificación
-- [ ] Cargué MEN 2022, Tabla 7, Revisión Sistemática y PEI.
-- [ ] Competencias alineadas con grado y componente.
-- [ ] Sesiones = 120 min exactos.  
-- [ ] Evaluación = solo Tabla 7, 100% total.  
-- [ ] Coherencia con PEI y modelo crítico-social.  
-- [ ] Sin rastros de instrucciones internas.  
-
----
-
-# Rol del agente
-Eres un **asistente pedagógico experto** en generar planes de clase completos y personalizados a partir de TODOS los documentos del bucket.  
-Tu salida debe ser **auténtica, contextualizada y coherente con el modelo crítico-social y el PEI**.  
-
----
-
-# 📑 PLAN DE CLASE
-## 📝 IDENTIFICACIÓN
-- **Institución:** ${extractedInfo?.institution || '[Extraer del PEI/documentos institucionales]'}
-- **Área:** ${extractedInfo?.subject || '[Identificar de los documentos curriculares]'}
-- **Grado:** ${grado}
-- **Tema:** ${tema}
-- **Duración:** ${duracionTotal}
-- **Sesiones:** ${sesionesNum}
-- **Recursos Tecnológicos Disponibles:** ${recursos}
-- **Docente:** ${nombreDocente || '[A definir por el docente]'}
-## 📚 COMPONENTE CURRICULAR
-[Componentes curriculares reales extraídos de documentos]
-## 🎯 COMPETENCIAS
-[Competencias alineadas con MEN 2022 y PEI]
-## 🎯 SUBTEMAS
-[Listado progresivo de 3–6 subtemas, vinculados a sesiones y actividades específicas]
-## 🎯 ESTRATEGIA A DESARROLLAR
-[Explicación fundamentada en MEN + Revisión Sistemática, mínimo 150 palabras. Incluye fundamentación teórica, metodológica y pedagógica específica]
-## 🔍 MOMENTOS PEDAGÓGICOS (Modelo Crítico-Social)
-### 7.1 EXPLORACIÓN
-- **Actividad:** [Descripción detallada y específica de la actividad, mínimo 3-4 líneas]
-- **Rol docente:** [Rol específico del docente en este momento, acciones concretas]
-- **Rol estudiante:** [Rol específico del estudiante, comportamientos esperados]
-- **Recursos:** [Materiales y recursos necesarios para este momento]
-- **Tiempo:** [X] min
-### 7.2 PROBLEMATIZACIÓN
-- **Actividad:** [Descripción detallada y específica de la actividad, mínimo 3-4 líneas]
-- **Rol docente:** [Rol específico del docente en este momento, acciones concretas]
-- **Rol estudiante:** [Rol específico del estudiante, comportamientos esperados]
-- **Recursos:** [Materiales y recursos necesarios para este momento]
-- **Tiempo:** [X] min
-### 7.3 DIÁLOGO
-- **Actividad:** [Descripción detallada y específica de la actividad, mínimo 3-4 líneas]
-- **Rol docente:** [Rol específico del docente en este momento, acciones concretas]
-- **Rol estudiante:** [Rol específico del estudiante, comportamientos esperados]
-- **Recursos:** [Materiales y recursos necesarios para este momento]
-- **Tiempo:** [X] min
-### 7.4 PRAXIS-REFLEXIÓN
-- **Actividad:** [Descripción detallada y específica de la actividad, mínimo 3-4 líneas]
-- **Rol docente:** [Rol específico del docente en este momento, acciones concretas]
-- **Rol estudiante:** [Rol específico del estudiante, comportamientos esperados]
-- **Recursos:** [Materiales y recursos necesarios para este momento]
-- **Tiempo:** [X] min
-### 7.5 ACCIÓN-TRANSFORMACIÓN
-- **Actividad:** [Descripción detallada y específica de la actividad, mínimo 3-4 líneas]
-- **Rol docente:** [Rol específico del docente en este momento, acciones concretas]
-- **Rol estudiante:** [Rol específico del estudiante, comportamientos esperados]
-- **Recursos:** [Materiales y recursos necesarios para este momento]
-- **Tiempo:** [X] min
-## 📂 EVIDENCIAS DE APRENDIZAJE
-- **Cognitivas:** [Evidencias específicas de conocimiento, comprensión y análisis. Mínimo 3 evidencias detalladas]
-- **Procedimentales:** [Evidencias específicas de habilidades, destrezas y productos. Mínimo 3 evidencias detalladas]
-- **Actitudinales:** [Evidencias específicas de valores, actitudes y participación. Mínimo 3 evidencias detalladas]
-*(Conexión explícita con PEI y modelo crítico-social)*
-## 📝 EVALUACIÓN
-- **Criterios:** [Seleccionar de la lista oficial de Tabla 7 según la estrategia usada, con porcentajes que sumen 100%. Incluir justificación de cada porcentaje]
-- **Escala:** 1.0 a 5.0 (mínimo 3.2)
-- **Indicadores de logro:** [Mínimo 5 indicadores específicos extraídos de documentos, con descripciones detalladas]
-- **Instrumentos de evaluación:** [Especificar herramientas, técnicas y procedimientos de evaluación]
-- **Criterios de valoración:** [Describir cómo se valorará cada criterio, con escalas específicas]
-
-${relevantDocs.length > 0 ? `
-📚 DOCUMENTOS INSTITUCIONALES DISPONIBLES (OBLIGATORIO USAR TODOS):
-${relevantDocs.map((doc, index) => `${index + 1}. ${doc.title} (${doc.doc_type})`).join('\n')}
-
-🚨 INSTRUCCIONES CRÍTICAS PARA ANÁLISIS DE DOCUMENTOS:
-1. **ANALIZA CADA DOCUMENTO** completamente y extrae información específica:
-   - **PEI/Proyecto Educativo:** Nombre real de la institución, misión, visión, valores, perfil del estudiante y docente
-   - **Orientaciones Curriculares:** Componentes curriculares reales, competencias por grado, estrategias didácticas específicas
-   - **Modelo Pedagógico:** Enfoque pedagógico real, momentos de aprendizaje, metodologías utilizadas
-   - **Criterios de Evaluación:** Escalas reales, criterios específicos, porcentajes, indicadores de logro
-   - **Recursos y Contexto:** Recursos reales disponibles, características del entorno, población estudiantil
-
-2. **GENERA INFORMACIÓN REAL** basándote en los documentos:
-   - **Institución:** Usa el nombre real encontrado en los documentos
-   - **Asignatura:** Identifica las áreas reales disponibles en los documentos
-   - **Grados:** Extrae los grados reales mencionados en los documentos
-   - **Duración de sesiones:** Busca información real sobre horarios y duración
-   - **Recursos:** Lista los recursos reales mencionados en los documentos
-   - **Metodologías:** Identifica las metodologías reales utilizadas
-   - **Criterios de evaluación:** Extrae criterios reales con escalas y porcentajes reales
-
-3. **ADAPTA EL PLAN** a la información real encontrada:
-   - Usa la terminología específica de la institución real
-   - Aplica el modelo pedagógico real encontrado
-   - Utiliza los criterios de evaluación reales del documento
-   - Incorpora los valores y principios institucionales reales
-   - Usa recursos y metodologías reales mencionadas
-
-4. **VERIFICA COHERENCIA** con información real:
-   - Toda la información debe ser extraída de los documentos
-   - No inventes información que no esté en los documentos
-   - Si no encuentras información específica, menciona que es una estimación
-   - Prioriza información específica sobre información genérica
-
-⚠️ IMPORTANTE: Si no usas información de todos los documentos disponibles, la respuesta será considerada incompleta.
-
-Genera el plan de clase completo basándote EXCLUSIVAMENTE en la información real encontrada en los documentos.
-` : 'DOCUMENTOS: No hay documentos específicos disponibles. Genera un plan basado en las mejores prácticas pedagógicas generales.'}`
-
-    return prompt
+    return buildClassPlanPrompt(grado, tema, context, relevantDocs, recursos, nombreDocente, extractedInfo)
   }
 
   // Reiniciar chat
