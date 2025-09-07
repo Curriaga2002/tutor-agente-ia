@@ -12,7 +12,8 @@ export function useChatActions() {
     setSaving, 
     setError,
     updateConsultedDocuments,
-    planningConfig 
+    planningConfig,
+    messages
   } = useChat()
   
   const { addToChatHistory } = usePlanning()
@@ -37,7 +38,11 @@ export function useChatActions() {
     todosLosDocumentos: PDFContent[]
   }> => {
     try {
-      const { documents } = useDocuments.getState?.() || { documents: [] }
+      // Obtener documentos del contexto correctamente
+      const { documents } = useDocuments()
+      
+      console.log('🔍 DEBUG - Documentos obtenidos del contexto:', documents.length)
+      console.log('📚 DEBUG - Títulos de documentos:', documents.map(doc => doc.title))
       
       // Buscar PEI
       const peiDocs = documents.filter(doc => 
@@ -69,6 +74,13 @@ export function useChatActions() {
       
       const todosLosDocumentos = [...documents]
       
+      console.log('📊 DEBUG - Documentos encontrados por tipo:')
+      console.log('🏫 PEI:', peiDocs.length, peiDocs.map(doc => doc.title))
+      console.log('🎓 Modelo Pedagógico:', modeloPedagogicoDocs.length, modeloPedagogicoDocs.map(doc => doc.title))
+      console.log('📋 Orientaciones Curriculares:', orientacionesCurricularesDocs.length, orientacionesCurricularesDocs.map(doc => doc.title))
+      console.log('📊 Tabla 7:', tabla7Docs.length, tabla7Docs.map(doc => doc.title))
+      console.log('📚 Total documentos:', todosLosDocumentos.length)
+      
       return {
         pei: peiDocs,
         modeloPedagogico: modeloPedagogicoDocs,
@@ -86,10 +98,10 @@ export function useChatActions() {
         todosLosDocumentos: []
       }
     }
-  }, [])
+  }, [useDocuments])
 
   // Función para generar respuesta pedagógica
-  const generatePedagogicalResponse = useCallback(async (userInput: string, relevantDocs: PDFContent[]): Promise<string> => {
+  const generatePedagogicalResponse = useCallback(async (userInput: string, relevantDocs: PDFContent[], chatHistory: any[]): Promise<string> => {
     try {
       setLoading(true)
       
@@ -115,16 +127,40 @@ export function useChatActions() {
         }
       })
       
-      // Construir contexto
+      // Construir contexto con historial del chat
       const sesionesNum = Math.min(2, Math.max(1, Number(planningConfig.sesiones || '1') || 1))
       const horasNum = sesionesNum * 2
+      
+      // Construir historial del chat para el contexto
+      console.log('🔧 DEBUG - Construyendo contexto del chat con', chatHistory.length, 'mensajes')
+      
+      const chatContext = chatHistory.length > 0 ? `
+## 📝 HISTORIAL DE LA CONVERSACIÓN:
+${chatHistory.map((msg, index) => {
+  const sender = msg.isUser ? '👤 Docente' : '🤖 Asistente IA'
+  const timestamp = msg.timestamp ? new Date(msg.timestamp).toLocaleString('es-ES') : 'Sin fecha'
+  return `${sender} (${timestamp}):\n${msg.text}\n`
+}).join('\n---\n')}
+
+## 🎯 MENSAJE ACTUAL DEL DOCENTE:
+${userInput}
+
+` : `
+## 🎯 MENSAJE ACTUAL DEL DOCENTE:
+${userInput}
+
+`
+      
+      console.log('📄 DEBUG - Contexto del chat construido:', chatContext.substring(0, 500) + '...')
       
       const combinedContext = `REGLAS ESTRICTAS PARA LA RESPUESTA (OBLIGATORIAS):
 1) Usa EXACTAMENTE la duración total: ${horasNum} horas.
 2) Usa EXACTAMENTE el número de sesiones: ${sesionesNum}.
 3) Distribuye el tiempo en ${sesionesNum} sesiones; la suma total debe ser ${horasNum} horas.
 4) Trabaja únicamente en minutos en toda la respuesta.
-5) Incluye la institución "IE Camilo Torres" y mantente en la asignatura: ${planningConfig.asignatura}.`
+5) Incluye la institución "IE Camilo Torres" y mantente en la asignatura: ${planningConfig.asignatura}.
+
+${chatContext}`
       
       // Generar respuesta con Gemini
       const geminiResponse = await geminiService.generateClassPlan(
@@ -165,11 +201,22 @@ export function useChatActions() {
     addToChatHistory(userMessage as any)
 
     try {
+      // Obtener historial actual del chat (sin incluir el mensaje que acabamos de agregar)
+      // El userMessage se agrega al final del array, así que tomamos todos excepto el último
+      const currentChatHistory = messages.slice(0, -1)
+      
+      console.log('💬 DEBUG - Historial del chat enviado al agente:', currentChatHistory.length, 'mensajes')
+      console.log('📝 DEBUG - Contenido del historial:', currentChatHistory.map(msg => ({
+        sender: msg.isUser ? 'Docente' : 'Asistente',
+        text: msg.text.substring(0, 100) + '...',
+        timestamp: msg.timestamp
+      })))
+      
       // Buscar documentos relevantes
       const relevantDocs = await searchRelevantDocuments(inputText)
       
-      // Generar respuesta
-      const aiResponse = await generatePedagogicalResponse(inputText, relevantDocs)
+      // Generar respuesta con historial del chat
+      const aiResponse = await generatePedagogicalResponse(inputText, relevantDocs, currentChatHistory)
       
       const assistantMessage = {
         text: aiResponse,
@@ -189,7 +236,7 @@ export function useChatActions() {
       }
       addMessage(errorMessage)
     }
-  }, [addMessage, addToChatHistory, searchRelevantDocuments, generatePedagogicalResponse])
+  }, [addMessage, addToChatHistory, messages, searchRelevantDocuments, generatePedagogicalResponse])
 
   return {
     sendMessage,

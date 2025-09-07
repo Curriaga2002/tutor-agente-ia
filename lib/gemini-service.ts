@@ -33,13 +33,17 @@ export class GeminiService {
       console.log('🚀 Creando modelo Gemini...')
       this.model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
       console.log('✅ Modelo creado:', !!this.model)
+      console.log('📊 Configuración de tokens: maxOutputTokens=4096, temperature=0.7, topP=0.9, topK=40')
+      console.log('💡 Usando Gemini 1.5 Flash (plan gratuito) - Si necesitas más tokens, considera actualizar a un plan de pago')
       
       console.log('💬 Iniciando chat...')
       this.chat = this.model.startChat({
         history: [],
         generationConfig: {
-          maxOutputTokens: 2048,
+          maxOutputTokens: 4096,
           temperature: 0.7,
+          topP: 0.9,
+          topK: 40,
         },
       })
       console.log('✅ Chat iniciado:', !!this.chat)
@@ -59,13 +63,13 @@ export class GeminiService {
     }
   }
 
-  // Generar respuesta simple
-  async generateResponse(prompt: string): Promise<GeminiResponse> {
+  // Generar respuesta simple con reintentos
+  async generateResponse(prompt: string, maxRetries: number = 3): Promise<GeminiResponse> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log('🔍 Gemini generateResponse: Verificando estado...')
+        console.log(`🔍 Gemini generateResponse: Intento ${attempt}/${maxRetries}`)
       console.log('📱 Modelo disponible:', !!this.model)
       console.log('🔑 API Key en uso:', !!process.env.NEXT_PUBLIC_GEMINI_API_KEY)
-      console.log('🔑 API Key valor:', process.env.NEXT_PUBLIC_GEMINI_API_KEY ? 'Configurada' : 'NO CONFIGURADA')
       
       if (!this.model) {
         throw new Error('Gemini no está inicializado')
@@ -89,6 +93,7 @@ export class GeminiService {
       console.log('📖 Extrayendo texto...')
       const text = response.text()
       console.log('✅ Texto extraído, longitud:', text.length)
+        console.log('📊 Tokens estimados en respuesta:', Math.ceil(text.length / 4))
       console.log('📄 Primeros 200 caracteres:', text.substring(0, 200))
       
       return {
@@ -96,20 +101,36 @@ export class GeminiService {
         success: true
       }
     } catch (error) {
-      console.error('❌ Error generando respuesta con Gemini:', error)
-      console.error('🔍 Detalles del error:', error)
-      console.error('🔍 Tipo de error:', error instanceof Error ? error.constructor.name : typeof error)
-      console.error('🔍 Mensaje del error:', error instanceof Error ? error.message : String(error))
-      
-      if (error instanceof Error && error.stack) {
-        console.error('🔍 Stack trace:', error.stack)
-      }
-      
+        console.error(`❌ Error en intento ${attempt}/${maxRetries}:`, error)
+        
+        // Verificar si es un error de cuota
+        if (error instanceof Error && error.message.includes('quota')) {
+          console.warn('⚠️ Error de cuota detectado. Esperando antes del siguiente intento...')
+          
+          if (attempt < maxRetries) {
+            const waitTime = Math.pow(2, attempt) * 1000 // Backoff exponencial: 2s, 4s, 8s
+            console.log(`⏳ Esperando ${waitTime/1000} segundos antes del siguiente intento...`)
+            await new Promise(resolve => setTimeout(resolve, waitTime))
+            continue
+          }
+        }
+        
+        // Si es el último intento o no es error de cuota, devolver error
+        if (attempt === maxRetries) {
+          console.error('❌ Todos los intentos fallaron')
       return {
         text: '',
         success: false,
         error: error instanceof Error ? error.message : 'Error desconocido en generateResponse'
+          }
+        }
       }
+    }
+    
+    return {
+      text: '',
+      success: false,
+      error: 'Error inesperado: se agotaron todos los intentos'
     }
   }
 
@@ -155,7 +176,11 @@ export class GeminiService {
       console.log('🎯 Gemini: Iniciando generación de plan de clase...')
       console.log('📋 Parámetros recibidos:', { grado, tema, context, relevantDocsCount: relevantDocs.length })
       
-      const prompt = this.buildClassPlanPrompt(grado, tema, context, relevantDocs, recursos, nombreDocente)
+      // Analizar documentos para extraer información real
+      const extractedInfo = this.extractInstitutionalInfo(relevantDocs)
+      console.log('📊 Información extraída de documentos:', extractedInfo)
+      
+      const prompt = this.buildClassPlanPrompt(grado, tema, context, relevantDocs, recursos, nombreDocente, extractedInfo)
       console.log('📝 Prompt construido:', prompt.substring(0, 200) + '...')
       
       console.log('🚀 Llamando a generateResponse...')
@@ -180,6 +205,98 @@ export class GeminiService {
     }
   }
 
+  // Extraer información institucional de los documentos
+  private extractInstitutionalInfo(relevantDocs: any[]): any {
+    const info = {
+      institution: null as string | null,
+      subject: null as string | null,
+      grades: [] as string[],
+      sessionDuration: null as string | null,
+      resources: [] as string[],
+      methodologies: [] as string[],
+      evaluationCriteria: [] as string[],
+      pedagogicalModel: null as string | null,
+      mission: null as string | null,
+      vision: null as string | null,
+      values: [] as string[]
+    }
+
+    // Analizar cada documento para extraer información
+    relevantDocs.forEach(doc => {
+      const content = doc.content || doc.text || ''
+      const title = doc.title || ''
+      const docType = doc.doc_type || ''
+
+      // Extraer nombre de institución
+      if (docType.includes('PEI') || docType.includes('proyecto') || content.includes('institución')) {
+        const institutionMatch = content.match(/(?:institución|IE|colegio|escuela)[:\s]*([^.\n]+)/i)
+        if (institutionMatch && !info.institution) {
+          info.institution = institutionMatch[1].trim()
+        }
+      }
+
+      // Extraer asignatura/área
+      if (docType.includes('curricular') || content.includes('asignatura') || content.includes('área')) {
+        const subjectMatch = content.match(/(?:asignatura|área)[:\s]*([^.\n]+)/i)
+        if (subjectMatch && !info.subject) {
+          info.subject = subjectMatch[1].trim()
+        }
+      }
+
+      // Extraer grados
+      const gradeMatches = content.match(/(?:grado|nivel)[:\s]*(\d+°?)/gi)
+      if (gradeMatches) {
+        gradeMatches.forEach((match: string) => {
+          const grade = match.replace(/[^\d]/g, '')
+          if (grade && !info.grades.includes(grade)) {
+            info.grades.push(grade)
+          }
+        })
+      }
+
+      // Extraer duración de sesiones
+      const durationMatch = content.match(/(?:duración|tiempo|horario)[:\s]*(\d+)\s*(?:min|minutos|hora|horas)/i)
+      if (durationMatch && !info.sessionDuration) {
+        info.sessionDuration = durationMatch[1] + (content.includes('hora') ? ' horas' : ' minutos')
+      }
+
+      // Extraer recursos
+      const resourceMatches = content.match(/(?:recursos|materiales|equipos)[:\s]*([^.\n]+)/gi)
+      if (resourceMatches) {
+        resourceMatches.forEach((match: string) => {
+          const resources = match.split(/[,;]/).map((r: string) => r.trim()).filter((r: string) => r.length > 0)
+          info.resources.push(...resources)
+        })
+      }
+
+      // Extraer metodologías
+      const methodologyMatches = content.match(/(?:metodología|estrategia|enfoque)[:\s]*([^.\n]+)/gi)
+      if (methodologyMatches) {
+        methodologyMatches.forEach((match: string) => {
+          const methodologies = match.split(/[,;]/).map((m: string) => m.trim()).filter((m: string) => m.length > 0)
+          info.methodologies.push(...methodologies)
+        })
+      }
+
+      // Extraer misión y visión
+      if (content.includes('misión')) {
+        const missionMatch = content.match(/misión[:\s]*([^.\n]+)/i)
+        if (missionMatch && !info.mission) {
+          info.mission = missionMatch[1].trim()
+        }
+      }
+
+      if (content.includes('visión')) {
+        const visionMatch = content.match(/visión[:\s]*([^.\n]+)/i)
+        if (visionMatch && !info.vision) {
+          info.vision = visionMatch[1].trim()
+        }
+      }
+    })
+
+    return info
+  }
+
   // Construir prompt para plan de clase
   private buildClassPlanPrompt(
     grado: string, 
@@ -187,7 +304,8 @@ export class GeminiService {
     context: string,
     relevantDocs: any[],
     recursos?: string,
-    nombreDocente?: string
+    nombreDocente?: string,
+    extractedInfo?: any
   ): string {
     // Calcular variables antes del template string
     // Buscar específicamente el número de sesiones en el contexto
@@ -233,6 +351,7 @@ Si persiste el conflicto, elige la opción **más alineada con el modelo crític
 ## 3) Ensamble por secciones (mapeo documento → sección)
 - **Componente Curricular** → Orientaciones MEN 2022.
 - **Competencias** → Orientaciones MEN 2022 (ajusta redacción al grado y al PEI).
+- **Subtemas** → Orientaciones MEN 2022 + Revisión Sistemática (progresión pedagógica crítica y secuencial).
 - **Estrategia a desarrollar** → Orientaciones MEN 2022 + Revisión Sistemática (fundamenta crítica y STEM).
 - **Momentos pedagógicos** → Revisión Sistemática (Exploración, Problematización, Diálogo, Praxis-Reflexión, Acción-Transformación).
 - **Evidencias** → Orientaciones MEN 2022 + PEI (observables, situadas y éticas).
@@ -278,33 +397,70 @@ Ajusta proporcionalmente según el tema y recursos, manteniendo **120 min exacto
 - [ ] La salida mantiene **exactamente** la estructura pedida (sin campos nuevos).
 - [ ] **ELIMINÉ toda información interna** (cálculos, validaciones, restricciones).
 
+## 9) Análisis Inteligente de Documentos (Capa de Inteligencia)
+**INSTRUCCIONES CRÍTICAS PARA ANÁLISIS DE DOCUMENTOS:**
+
+1. **ANALIZA CADA DOCUMENTO** disponible en el bucket y extrae información específica:
+   - **PEI/Proyecto Educativo:** Identifica nombre de la institución, misión, visión, valores, perfil del estudiante
+   - **Orientaciones Curriculares:** Extrae componentes curriculares, competencias por grado, estrategias didácticas
+   - **Modelo Pedagógico:** Identifica enfoque pedagógico, momentos de aprendizaje, metodologías
+   - **Criterios de Evaluación:** Extrae escalas, criterios específicos, porcentajes de evaluación
+   - **Recursos y Contexto:** Identifica recursos disponibles, características del entorno, población estudiantil
+
+2. **GENERA INFORMACIÓN REAL** basándote en los documentos:
+   - **Institución:** Usa el nombre real encontrado en los documentos
+   - **Asignatura:** Identifica las áreas disponibles en los documentos
+   - **Grados:** Extrae los grados mencionados en los documentos
+   - **Duración de sesiones:** Busca información sobre horarios y duración en los documentos
+   - **Recursos:** Lista los recursos reales mencionados en los documentos
+
+3. **ADAPTA EL PLAN** a la información real encontrada:
+   - Usa la terminología específica de la institución
+   - Aplica el modelo pedagógico real encontrado
+   - Utiliza los criterios de evaluación específicos del documento
+   - Incorpora los valores y principios institucionales reales
+
 ---
 
 # Rol del agente
-Eres un **asistente pedagógico experto** en generar planes de clase para el área de Tecnología e Informática de la IE Camilo Torres.  
-Debes fundamentar cada apartado en: **PEI, orientaciones curriculares nacionales, revisión sistemática (como brújula pedagógica), Tabla 7 (evaluación oficial) y buenas prácticas TIC-STEM**, siguiendo el **modelo pedagógico crítico-social**.  
-Mantén siempre un estilo formal, claro, coherente, pedagógico y detallado.
+Eres un **asistente pedagógico experto** en generar planes de clase completos y personalizados.  
+Debes analizar TODOS los documentos disponibles en el bucket y generar planes de clase reales basándote en la información específica encontrada en esos documentos.  
+Tu objetivo es crear planes de clase auténticos, contextualizados y fundamentados en la documentación institucional real disponible.
+
+## 🎯 **INSTRUCCIONES DE CALIDAD**
+**GENERA PLANES DE CLASE DE ALTA CALIDAD** basándote en la información real de los documentos. Tu salida debe:
+- **Analizar TODOS los documentos** disponibles y extraer información específica
+- **Generar información real** sobre la institución, asignatura, grados y recursos
+- **Crear actividades específicas y contextualizadas** basadas en los documentos
+- **Incluir roles claros** del docente y estudiante para cada momento
+- **Aplicar estructura de evidencias** (cognitivas, procedimentales, actitudinales)
+- **Usar criterios de evaluación reales** encontrados en los documentos
+- **Mantener coherencia** con la información institucional real
 
 ---
 
 ## 🚨 INSTRUCCIONES CRÍTICAS PARA ESTE PLAN:
-- **NÚMERO DE SESIONES:** ${sesionesNum} sesiones (NO CAMBIAR ESTE NÚMERO)  
-- **DURACIÓN TOTAL:** ${sesionesNum * 2} horas (${sesionesNum} sesiones × 2 horas)  
-- **DISTRIBUCIÓN:** Mostrar EXACTAMENTE ${sesionesNum} sesiones de 2 horas cada una
-- **VERIFICACIÓN AUTOMÁTICA:** Si detectas inconsistencias en la entrada, corrígelas automáticamente usando la lógica de sesiones
-- **ANÁLISIS SEMÁNTICO:** Identifica el tipo de tema (programación, hardware, redes, etc.) y adapta la estrategia didáctica correspondiente  
+- **ANALIZA LOS DOCUMENTOS** para determinar la duración real de las sesiones
+- **EXTRAE INFORMACIÓN** sobre horarios, duración de clases y estructura académica de los documentos
+- **ADAPTA LA DURACIÓN** según la información encontrada en los documentos institucionales
+- **VERIFICACIÓN AUTOMÁTICA:** Si no encuentras información específica, usa duraciones estándar pero menciona que es una estimación
+- **ANÁLISIS SEMÁNTICO:** Identifica el tipo de tema y adapta la estrategia didáctica según los documentos disponibles  
 
 ---
 
-# 📏 Lógica de sesiones
-- Cada sesión equivale exactamente a **2 horas (120 minutos)**.  
-- La **duración total siempre debe calcularse multiplicando el número de sesiones × 2 horas**.  
-- Ejemplos:  
-  - 1 sesión → 2 horas totales  
-  - 2 sesiones → 4 horas totales  
-  - 3 sesiones → 6 horas totales  
-- La **distribución de sesiones** debe mostrar todas las sesiones con su respectiva duración (ejemplo: Sesión 1: 2 horas | Sesión 2: 2 horas).  
-- El plan debe dividir cada sesión en **actividades con tiempos en minutos**, distribuyendo los momentos pedagógicos (Exploración, Problematización, Diálogo, Praxis-Reflexión, Acción-Transformación).  
+# 📏 Análisis de Duración y Sesiones
+- **ANALIZA LOS DOCUMENTOS** para encontrar información sobre:
+  - Duración real de las clases en la institución
+  - Estructura de horarios académicos
+  - Número de sesiones recomendadas para el tema
+  - Distribución de tiempo por actividades
+- **EXTRAE INFORMACIÓN ESPECÍFICA** sobre:
+  - Horarios de clase (ej: 45 min, 50 min, 60 min, 90 min)
+  - Estructura de períodos académicos
+  - Metodologías de enseñanza utilizadas
+  - Recursos de tiempo disponibles
+- **ADAPTA LA DURACIÓN** según la información real encontrada en los documentos
+- **DISTRIBUYE EL TIEMPO** de manera realista según la duración real de las clases  
 
 ---
 
@@ -322,6 +478,7 @@ Mantén siempre un estilo formal, claro, coherente, pedagógico y detallado.
 **Uso Inteligente:** 
 - **Componente Curricular:** Selecciona automáticamente el más apropiado según el tema
 - **Competencias:** Adapta la redacción al grado específico y conecta con el PEI
+- **Subtemas:** Genera 3-6 subtemas progresivos, secuenciales y acumulativos del tema principal
 - **Evidencias:** Genera evidencias observables y específicas al contexto
 - **Estrategia:** Justifica la selección con base en el análisis del tema
 
@@ -331,6 +488,7 @@ Mantén siempre un estilo formal, claro, coherente, pedagógico y detallado.
 - **Momentos pedagógicos:** Adapta las actividades según la complejidad del tema
 - **Enfoque crítico:** Integra reflexión social y transformación en cada momento
 - **Metodologías activas:** Selecciona la más apropiada según el tipo de contenido
+- **Subtemas:** Asegura que cada subtema promueva el pensamiento crítico y la transformación social
 
 ## 3. Tabla 7 (Orientaciones Oficiales MEN)  
 **Aportes:** Define qué evaluar en cada estrategia didáctica (construcción-fabricación, análisis de productos, diseño-rediseño, solución de problemas, proyectos).  
@@ -346,18 +504,19 @@ Mantén siempre un estilo formal, claro, coherente, pedagógico y detallado.
 - **Coherencia institucional:** Asegura alineación con valores y principios del PEI
 - **Perfil del estudiante:** Adapta las actividades al perfil esperado para el grado
 - **Transformación social:** Integra elementos de ciudadanía digital y responsabilidad social  
+- **Subtemas:** Vincula cada subtema con la misión, visión y valores de la IE Camilo Torres  
 
 ---
 
 # Entrada esperada
 El docente proporcionará:  
-- Institución: IE Camilo Torres  
-- Área: Tecnología e Informática  
-- Grado: ${grado}  
-- Tema: ${tema}  
-- Duración: ${duracionTotal}  
-- Recursos tecnológicos disponibles: ${recursos || 'Computadores, internet, software educativo'}  
-- Nombre del docente: ${nombreDocente || '[A definir por el docente]'}  
+- **Institución:** [Extraer del PEI/documentos institucionales]  
+- **Área:** [Identificar de los documentos curriculares]  
+- **Grado:** ${grado}  
+- **Tema:** ${tema}  
+- **Duración:** [Determinar basándose en los documentos]  
+- **Recursos disponibles:** [Listar recursos reales encontrados en los documentos]  
+- **Nombre del docente:** ${nombreDocente || '[A definir por el docente]'}  
 
 ---
 
@@ -365,25 +524,68 @@ El docente proporcionará:
 Debes generar un **plan de clase completo con formato visual mejorado**, estructurado en los siguientes apartados y siempre en este orden.  
 
 ## 🎯 **IDENTIFICACIÓN**  
-**🏫 Institución:** IE Camilo Torres  
+**🏫 Institución:** ${extractedInfo?.institution || '[Extraer nombre real de los documentos institucionales]'}  
 **📚 Grado:** ${grado}  
-**💻 Asignatura:** Tecnología e Informática  
+**💻 Asignatura:** ${extractedInfo?.subject || '[Identificar área real de los documentos curriculares]'}  
 **📝 Tema:** ${tema}  
-**🛠️ Recursos:** ${recursos || 'Computadores, internet, software educativo'}  
-**⏰ Sesiones:** ${sesionesNum} sesión(es) (NÚMERO EXACTO: ${sesionesNum})  
-**🕒 Duración total:** ${duracionTotal} (CÁLCULO OBLIGATORIO: ${sesionesNum} sesiones × 2 horas = ${sesionesNum * 2} horas - NO CAMBIAR ESTE NÚMERO)  
+**🛠️ Recursos:** ${extractedInfo?.resources?.length > 0 ? extractedInfo.resources.join(', ') : (recursos || '[Listar recursos reales encontrados en los documentos]')}  
+**⏰ Sesiones:** ${sesionesNum} sesión(es)  
+**🕒 Duración total:** ${extractedInfo?.sessionDuration || duracionTotal}  
 **👨‍🏫 Docente:** ${nombreDocente || '[A definir por el docente]'}  
-**📋 Distribución de sesiones:** ${distribucionSesiones} (OBLIGATORIO: mostrar EXACTAMENTE ${sesionesNum} sesiones, NO MÁS, NO MENOS)  
+**📋 Distribución de sesiones:** ${distribucionSesiones}  
+**📅 Año lectivo:** ${this.calculateAcademicYear()}  
 
 ## 📚 **COMPONENTE CURRICULAR**  
-**Selecciona uno o varios de los siguientes y justifica con base en los documentos:**  
-• 🔬 **Naturaleza y Evolución de la Tecnología**  
-• 💻 **Uso y Apropiación de la Tecnología**  
-• 🧩 **Solución de Problemas con Tecnología**  
-• 🌐 **Tecnología, Informática y Sociedad**  
+**Extrae los componentes curriculares reales de los documentos disponibles y justifica con base en la información encontrada:**  
+[Analizar documentos curriculares y listar componentes específicos encontrados]  
+
+## 🎯 **PROPÓSITO GENERAL**
+**Redacta un propósito general que fortalezca el pensamiento computacional y las competencias tecnológicas de los estudiantes, aplicando la lógica de algoritmos, estructuras de control y resolución de problemas, en coherencia con el modelo pedagógico crítico-social y el PEI.**
 
 ## 🎯 **COMPETENCIAS**  
 **Redacta las competencias correspondientes al grado y componente curricular, fundamentadas en las orientaciones curriculares y conectadas con el PEI y el modelo crítico-social.**  
+
+## 🎯 **PROPÓSITOS ESPECÍFICOS POR SESIÓN**
+**Redacta propósitos específicos para cada sesión, describiendo qué lograrán los estudiantes en cada una:**
+- **Sesión 1:** [Propósito específico para la primera sesión]
+- **Sesión 2:** [Propósito específico para la segunda sesión]
+- [Continuar según el número de sesiones]
+
+## 🗂️ **SUBTEMAS**
+**Lista de subtemas derivados del tema principal, secuenciados de acuerdo con las sesiones:**
+
+**INSTRUCCIONES OBLIGATORIAS:**
+1. **Genera de 3 a 6 subtemas progresivos** del tema principal, organizados de lo simple a lo complejo
+2. **Cada subtema debe estar redactado como enunciado pedagógico claro** (ej: "Fundamentos de programación en Python")
+3. **Vincula cada subtema con las sesiones correspondientes** (ej: "Subtema 1 → Sesión 1" o "Subtema 2 → Sesiones 2-3")
+4. **Para cada subtema, genera actividades específicas para los 5 momentos pedagógicos:**
+   - **Exploración:** Actividades introductorias, diagnóstico de saberes previos (mínimo 2 líneas)
+   - **Problematización:** Actividades que planteen preguntas críticas o dilemas (mínimo 2 líneas)
+   - **Diálogo:** Actividades de discusión, contraste de ideas, análisis colaborativo (mínimo 2 líneas)
+   - **Praxis-Reflexión:** Actividades prácticas con reflexión crítica del hacer (mínimo 2 líneas)
+   - **Acción-Transformación:** Actividades de aplicación en contexto real o simulación de impacto social (mínimo 2 líneas)
+
+**FORMATO DE SALIDA:**
+- Subtema 1: [Enunciado pedagógico claro] → vinculado a Sesión(es) [X]  
+   - **Actividad de Exploración:** [Descripción específica y contextualizada]
+   - **Actividad de Problematización:** [Descripción específica y contextualizada]
+   - **Actividad de Diálogo:** [Descripción específica y contextualizada]
+   - **Actividad de Praxis-Reflexión:** [Descripción específica y contextualizada]
+   - **Actividad de Acción-Transformación:** [Descripción específica y contextualizada]
+- Subtema 2: [Enunciado pedagógico claro] → vinculado a Sesión(es) [Y]  
+   - **Actividad de Exploración:** [Descripción específica y contextualizada]
+   - **Actividad de Problematización:** [Descripción específica y contextualizada]
+   - **Actividad de Diálogo:** [Descripción específica y contextualizada]
+   - **Actividad de Praxis-Reflexión:** [Descripción específica y contextualizada]
+   - **Actividad de Acción-Transformación:** [Descripción específica y contextualizada]
+- [Continuar hasta cubrir todas las sesiones]
+
+**⚠️ Reglas críticas:**  
+- Cada subtema debe estar redactado como **enunciado pedagógico claro**.  
+- Las actividades deben ser **específicas, contextualizadas y críticas**, no genéricas.  
+- Subtemas y actividades deben mantener coherencia directa con las **competencias y evidencias**.  
+- Funcionan como guía estructurada para organizar contenidos y momentos pedagógicos en cada sesión.
+- **NUNCA uses puntos suspensivos (...) - siempre genera contenido específico y detallado.**  
 
 ## 🛠️ **ESTRATEGIA A DESARROLLAR**  
 **Selecciona entre:** construcción-fabricación, diseño y rediseño, análisis de los productos tecnológicos, enfoques CTS.  
@@ -391,91 +593,58 @@ Debes generar un **plan de clase completo con formato visual mejorado**, estruct
 • **📋 Fundamenta en la revisión sistemática y en las orientaciones curriculares.**  
 • **🔗 Conecta explícitamente con los momentos pedagógicos del modelo crítico-social.**  
 
-## 🧩 **MOMENTOS PEDAGÓGICOS (Modelo Crítico-Social)**  
-**Cada sesión debe estar dividida en bloques de minutos, de manera equilibrada, sumando 120 minutos exactos.**  
+## 🧩 **MOMENTOS PEDAGÓGICOS**  
+**Analiza los documentos para identificar el modelo pedagógico real utilizado y adapta los momentos según la información encontrada.**  
 **Para cada momento redacta:**  
-• **🎯 Actividad:** mínimo 120 palabras. Incluye distribución en minutos (ej: 15 min, 20 min, etc.).  
-• **👨‍🏫 Rol docente:** 30-50 palabras.  
-• **👨‍🎓 Rol estudiante:** 30-50 palabras.  
+• **🎯 Actividad:** Descripción detallada basada en metodologías reales encontradas en los documentos.  
+• **👨‍🏫 Rol docente:** Según el perfil docente real identificado en los documentos.  
+• **👨‍🎓 Rol estudiante:** Según el perfil estudiantil real identificado en los documentos.  
 
-**Momentos a cubrir en cada sesión:**  
-1. **🔍 Exploración**  
-2. **❓ Problematización**  
-3. **💬 Diálogo**  
-4. **🔄 Praxis-Reflexión**  
-5. **🚀 Acción-Transformación**  
+**Momentos a cubrir:** [Identificar momentos reales del modelo pedagógico encontrado en los documentos]  
 
 ## 📂 **EVIDENCIAS DE APRENDIZAJE**  
-**Describe evidencias observables, específicas al grado y competencias, con breve justificación de cómo se relacionan con el PEI y el modelo crítico-social.**  
+**Describe evidencias observables, específicas al grado y competencias, organizadas por tipo:**
+- **Cognitivas:** [Evidencias de conocimiento, análisis, comprensión]
+- **Procedimentales:** [Evidencias de habilidades, destrezas, productos]
+- **Actitudinales:** [Evidencias de valores, actitudes, participación]
+
+**Incluye breve justificación de cómo se relacionan con el PEI y el modelo crítico-social.**  
 
 ## 📝 **EVALUACIÓN**  
-**Tu referencia obligatoria es la Tabla 7 de las orientaciones curriculares oficiales.**
+**Analiza los documentos para encontrar los criterios de evaluación reales utilizados en la institución.**
 
-### 📊 **Reglas de Evaluación (Tabla 7 – Orientaciones Curriculares)**
-
-**Construcción/Fabricación:**
-- Interpretación de planos o esquemas
-- Selección de recursos, materiales y herramientas
-- Apropiación de métodos/técnicas de fabricación
-- Aplicación de calidad, estética y acabados
-- Argumentación del proceso de fabricación
-
-**Análisis de productos tecnológicos:**
-- Desarrollo histórico y evolución del producto
-- Dominio de conceptos: forma, función y estructura
-- Comprensión de condiciones de funcionamiento
-- Descripción estética y formal
-- Descripción estructural (relaciones físico-químicas o lógicas)
-
-**Actividades de diseño/rediseño:**
-- Identificación de condiciones del problema
-- Creatividad en propuestas de solución
-- Búsqueda y selección de información
-- Presentación gráfica o comunicativa de la solución
-- Argumentación del proceso de diseño
-
-**Solución de problemas:**
-- Identificación de variables del problema
-- Reconocimiento de saberes previos y necesarios
-- Planteamiento de estrategia/plan de trabajo
-- Implementación del plan de trabajo
-- Argumentación y evaluación de la solución
-
-**Modelos de desarrollo de software/proyectos:**
-- Selección y uso del modelo/metodología
-- Pertinencia frente a la necesidad
-- Propuesta de licenciamiento (costos, compatibilidad, tiempo)
-- Proceso de gestión y toma de decisiones
-- Elaboración del algoritmo
-
-**Aprendizaje basado en problemas/retos/proyectos:**
-- Evaluar tanto el proceso como el producto
-- Desarrollo de fases de la experiencia
-- Roles asumidos en el proyecto
+### 📊 **Criterios de Evaluación Reales**
+**Extrae de los documentos:**
+- **Criterios específicos** encontrados en los documentos curriculares
+- **Escala de evaluación** real utilizada en la institución
+- **Porcentajes** reales asignados a cada criterio
+- **Indicadores de logro** específicos del grado y área
+- **Metodologías de evaluación** utilizadas en la institución
 
 ### 📏 **Instrucciones para la sección de Evaluación:**
-1. **Identifica la estrategia didáctica** seleccionada en el plan de clase
-2. **Selecciona únicamente los criterios de evaluación** correspondientes a esa estrategia según la Tabla 7
-3. **Para cada criterio:**
-   - Explica brevemente qué se evaluará
-   - Asigna un porcentaje
-   - Asegúrate de que la suma total sea **100%**
-4. **Escala de evaluación:** 1.0 a 5.0, con nota mínima aprobatoria 3.2
-5. **Nunca inventes criterios** fuera de los establecidos en la Tabla 7
+1. **Identifica los criterios reales** encontrados en los documentos
+2. **Usa la escala de evaluación real** de la institución
+3. **Asigna porcentajes reales** según los documentos
+4. **Incluye indicadores de logro específicos** del grado y área
+5. **Menciona las metodologías de evaluación** reales utilizadas
 
-### 📋 **Ejemplo de salida esperada (si la estrategia es Diseño/Rediseño):**
-
+### 📋 **Formato de salida esperada:**
 **## 📝 EVALUACIÓN**
-De acuerdo con la Tabla 7 de las orientaciones oficiales:
+De acuerdo con los criterios encontrados en los documentos institucionales:
 
-- **Identificación de las condiciones del problema de diseño** → 20%
-- **Creatividad en la formulación de alternativas de solución** → 20%
-- **Búsqueda y selección de información para sustentar la solución** → 20%
-- **Presentación gráfica/comunicativa de la solución** → 20%
-- **Argumentación sobre el proceso de diseño realizado** → 20%
+- **[Criterio real 1]** → [Porcentaje real]
+- **[Criterio real 2]** → [Porcentaje real]
+- **[Criterio real 3]** → [Porcentaje real]
+- [Continuar con criterios reales encontrados]
 
 **Total: 100%**
-**Escala:** 1.0 a 5.0 (mínimo aprobatorio 3.2)
+**Escala:** [Escala real encontrada en los documentos]
+
+**Indicadores de logro:**
+- [Indicador real 1: Extraído de los documentos]
+- [Indicador real 2: Extraído de los documentos]
+- [Indicador real 3: Extraído de los documentos]
+- [Continuar con indicadores reales encontrados]
 
 ---
 
@@ -485,8 +654,9 @@ De acuerdo con la Tabla 7 de las orientaciones oficiales:
 - ✅ Sé detallado, pedagógico y evita respuestas superficiales.  
 - ✅ Crea contenido original fundamentado en los documentos, nunca copiado literal.  
 - ✅ Integra siempre perspectiva crítico-social, metodologías activas y, cuando corresponda, enfoque STEM.  
-- ✅ Todas las sesiones deben estar divididas en minutos, sumando 120 minutos exactos.  
-- ✅ Evalúa SOLO con criterios de la Tabla 7.  
+- ✅ Adapta la duración según la información real encontrada en los documentos.  
+- ✅ Evalúa usando criterios reales encontrados en los documentos institucionales.  
+- ✅ **OBLIGATORIO:** Genera actividades específicas y detalladas basadas en metodologías reales encontradas.
 - ⚠️ Si no usas información de todos los documentos disponibles, la respuesta será considerada incompleta.
 
 ## 🧠 **Inteligencia Adaptativa**
@@ -496,68 +666,86 @@ De acuerdo con la Tabla 7 de las orientaciones oficiales:
 - **Coherencia interna:** Asegura que todas las secciones estén conectadas lógicamente
 - **Validación automática:** Verifica que los tiempos, competencias y evidencias sean consistentes
 - **Filtrado automático:** ELIMINA toda información interna (cálculos, validaciones, restricciones) de la salida final
+- **Generación de subtemas:** Crea 3-6 subtemas progresivos, secuenciales y acumulativos que cubran todas las sesiones
+- **Generación de actividades:** Para cada subtema, genera actividades específicas y detalladas para los 5 momentos pedagógicos (mínimo 2 líneas por actividad)
 
 ## 🎯 **Optimización de Respuestas**
 - **Prioriza la claridad:** Explica conceptos complejos de manera accesible
 - **Mantén la coherencia:** Cada sección debe reforzar las anteriores
 - **Integra la práctica:** Conecta teoría con aplicación real
 - **Fomenta la reflexión:** Incluye elementos que promuevan el pensamiento crítico  
+- **Estructura progresiva:** Organiza subtemas de lo simple a lo complejo, asegurando coherencia secuencial  
 
 ---
 
 ## ⚠️ VALIDACIÓN INTELIGENTE OBLIGATORIA ANTES DE ENVIAR
-**ATENCIÓN: El número de sesiones es EXACTAMENTE ${sesionesNum}. NO LO CAMBIES.**
+**ATENCIÓN: Verifica que toda la información sea real y extraída de los documentos disponibles.**
 
 ### 🔍 **Verificación Automática de Coherencia**
-1. **Duración total:** Con ${sesionesNum} sesiones, la duración total DEBE ser EXACTAMENTE ${sesionesNum * 2} horas.
-   - ❌ INCORRECTO: ${sesionesNum} horas
-   - ✅ CORRECTO: ${sesionesNum * 2} horas
+1. **Información institucional:** Verifica que uses datos reales de los documentos
+   - ✅ Institución real extraída de PEI/documentos
+   - ✅ Asignatura real identificada en documentos curriculares
+   - ✅ Recursos reales listados en documentos
 
-2. **Distribución de sesiones:** DEBE mostrar EXACTAMENTE ${sesionesNum} sesiones:
-   - ❌ INCORRECTO: Solo "Sesión 1: 2 horas"
-   - ✅ CORRECTO: ${Array.from({length: sesionesNum}, (_, i) => `Sesión ${i + 1}: 2 horas`).join(' | ')}
+2. **Duración y sesiones:** Verifica coherencia con información real
+   - ✅ Duración basada en horarios reales encontrados
+   - ✅ Número de sesiones apropiado para el tema
+   - ✅ Distribución de tiempo realista
 
 3. **Verificación de coherencia interna:**
-   - [ ] Competencias alineadas con el componente curricular seleccionado
-   - [ ] Estrategia didáctica coherente con el tema y grado
-   - [ ] Momentos pedagógicos distribuidos proporcionalmente (120 min exactos)
-   - [ ] Evidencias de aprendizaje conectadas con competencias
-   - [ ] Evaluación usando SOLO criterios de Tabla 7 (100% total)
-   - [ ] Coherencia con PEI y modelo crítico-social
+   - [ ] Competencias extraídas de documentos reales
+   - [ ] **Subtemas generados con actividades específicas basadas en metodologías reales**
+   - [ ] Estrategia didáctica coherente con el modelo pedagógico real
+   - [ ] Momentos pedagógicos según modelo real encontrado
+   - [ ] Evidencias de aprendizaje conectadas con competencias reales
+   - [ ] Evaluación usando criterios reales encontrados en documentos
+   - [ ] Coherencia con información institucional real
    - [ ] **FILTRADO COMPLETO:** Eliminé toda información interna (cálculos, validaciones, restricciones)
 
 4. **Verificación final:** 
-   - Número de sesiones: ${sesionesNum}
-   - Duración total: ${sesionesNum * 2} horas
-   - Distribución: ${sesionesNum} sesiones de 2 horas cada una
-   - **Todas las secciones están conectadas lógicamente**
+   - Información institucional real
+   - Duración realista según documentos
+   - Distribución apropiada para el tema
+   - **Todas las secciones están conectadas lógicamente con información real**
 
 ${relevantDocs.length > 0 ? `
 📚 DOCUMENTOS INSTITUCIONALES DISPONIBLES (OBLIGATORIO USAR TODOS):
 ${relevantDocs.map((doc, index) => `${index + 1}. ${doc.title} (${doc.doc_type})`).join('\n')}
 
-🚨 INSTRUCCIONES CRÍTICAS PARA USO DE DOCUMENTOS:
-1. DEBES consultar y usar información de TODOS los documentos listados arriba
-2. NUNCA ignores un documento - todos deben servir como insumo
-3. Integra la información de todos los documentos en la respuesta
-4. Aunque no cites literalmente, todos los documentos deben influir en el contenido
-5. Crea contenido original inspirado en las mejores prácticas de TODOS los documentos
-6. Fundamenta cada apartado del plan con información de los documentos disponibles
+🚨 INSTRUCCIONES CRÍTICAS PARA ANÁLISIS DE DOCUMENTOS:
+1. **ANALIZA CADA DOCUMENTO** completamente y extrae información específica:
+   - **PEI/Proyecto Educativo:** Nombre real de la institución, misión, visión, valores, perfil del estudiante y docente
+   - **Orientaciones Curriculares:** Componentes curriculares reales, competencias por grado, estrategias didácticas específicas
+   - **Modelo Pedagógico:** Enfoque pedagógico real, momentos de aprendizaje, metodologías utilizadas
+   - **Criterios de Evaluación:** Escalas reales, criterios específicos, porcentajes, indicadores de logro
+   - **Recursos y Contexto:** Recursos reales disponibles, características del entorno, población estudiantil
 
-📋 INSTRUCCIÓN ESPECIAL PARA EVALUACIÓN:
-- USA EXCLUSIVAMENTE los criterios de la Tabla 7 que están definidos en el prompt (Construcción/Fabricación, Análisis de productos, Diseño/Rediseño, Solución de problemas, Modelos de software, Aprendizaje basado en proyectos)
-- Identifica la estrategia didáctica del plan y selecciona SOLO los criterios correspondientes de la Tabla 7
-- NUNCA inventes criterios fuera de los establecidos en la Tabla 7
-- NUNCA uses "estructura de evaluación general" o "Simulación de Tabla 7"
-- Los porcentajes deben sumar exactamente 100%
-- Escala obligatoria: 1.0 a 5.0 (mínimo aprobatorio 3.2)
-- Conecta los criterios con los momentos pedagógicos y evidencias de aprendizaje
-- Asegúrate de que la evaluación esté completamente integrada con el PEI y modelo crítico-social
+2. **GENERA INFORMACIÓN REAL** basándote en los documentos:
+   - **Institución:** Usa el nombre real encontrado en los documentos
+   - **Asignatura:** Identifica las áreas reales disponibles en los documentos
+   - **Grados:** Extrae los grados reales mencionados en los documentos
+   - **Duración de sesiones:** Busca información real sobre horarios y duración
+   - **Recursos:** Lista los recursos reales mencionados en los documentos
+   - **Metodologías:** Identifica las metodologías reales utilizadas
+   - **Criterios de evaluación:** Extrae criterios reales con escalas y porcentajes reales
+
+3. **ADAPTA EL PLAN** a la información real encontrada:
+   - Usa la terminología específica de la institución real
+   - Aplica el modelo pedagógico real encontrado
+   - Utiliza los criterios de evaluación reales del documento
+   - Incorpora los valores y principios institucionales reales
+   - Usa recursos y metodologías reales mencionadas
+
+4. **VERIFICA COHERENCIA** con información real:
+   - Toda la información debe ser extraída de los documentos
+   - No inventes información que no esté en los documentos
+   - Si no encuentras información específica, menciona que es una estimación
+   - Prioriza información específica sobre información genérica
 
 ⚠️ IMPORTANTE: Si no usas información de todos los documentos disponibles, la respuesta será considerada incompleta.
 
-Genera el plan de clase completo siguiendo EXACTAMENTE la estructura especificada arriba.
-` : 'DOCUMENTOS: No hay documentos específicos disponibles. Genera un plan basado en las mejores prácticas pedagógicas.'}`
+Genera el plan de clase completo basándote EXCLUSIVAMENTE en la información real encontrada en los documentos.
+` : 'DOCUMENTOS: No hay documentos específicos disponibles. Genera un plan basado en las mejores prácticas pedagógicas generales.'}`
 
     return prompt
   }
@@ -568,14 +756,77 @@ Genera el plan de clase completo siguiendo EXACTAMENTE la estructura especificad
       this.chat = this.model.startChat({
         history: [],
         generationConfig: {
-          maxOutputTokens: 2048,
+          maxOutputTokens: 4096,
           temperature: 0.7,
+          topP: 0.9,
+          topK: 40,
         },
       })
       console.log('🔄 Chat de Gemini reiniciado')
     } catch (error) {
       console.error('❌ Error reiniciando chat:', error)
     }
+  }
+
+  // Calcular año lectivo dinámicamente según calendario académico colombiano
+  calculateAcademicYear(): string {
+    const now = new Date()
+    const currentYear = now.getFullYear()
+    const currentMonth = now.getMonth() + 1 // getMonth() retorna 0-11, sumamos 1 para 1-12
+    
+    // Calendario académico colombiano típico:
+    // Año lectivo va de febrero a noviembre
+    // Período I: Febrero - Junio
+    // Período II: Agosto - Noviembre
+    // Vacaciones: Diciembre - Enero
+    
+    let academicYear: number
+    let period: string
+    
+    if (currentMonth >= 2 && currentMonth <= 6) {
+      // Febrero a Junio: Período I del año actual
+      academicYear = currentYear
+      period = 'Período académico I'
+    } else if (currentMonth >= 8 && currentMonth <= 11) {
+      // Agosto a Noviembre: Período II del año actual
+      academicYear = currentYear
+      period = 'Período académico II'
+    } else if (currentMonth === 12 || currentMonth === 1) {
+      // Diciembre y Enero: Vacaciones, usar año del período anterior
+      if (currentMonth === 12) {
+        academicYear = currentYear
+        period = 'Vacaciones (Período II finalizado)'
+      } else {
+        academicYear = currentYear - 1
+        period = 'Vacaciones (Período II finalizado)'
+      }
+    } else {
+      // Julio: Vacaciones entre períodos
+      academicYear = currentYear
+      period = 'Vacaciones (Entre períodos)'
+    }
+    
+    const result = `${academicYear} – ${period}`
+    console.log(`📅 Año lectivo calculado: ${result} (Mes actual: ${currentMonth})`)
+    return result
+  }
+
+  // Mostrar información sobre cuotas
+  showQuotaInfo() {
+    console.log('📊 INFORMACIÓN SOBRE CUOTAS DE GEMINI API:')
+    console.log('🆓 Plan Gratuito (Gemini 1.5 Flash):')
+    console.log('   • 15 solicitudes por minuto')
+    console.log('   • 1,500 solicitudes por día')
+    console.log('   • 32,000 tokens de entrada por minuto')
+    console.log('   • 1,000,000 tokens de entrada por día')
+    console.log('')
+    console.log('💳 Plan de Pago (Gemini 1.5 Pro):')
+    console.log('   • 360 solicitudes por minuto')
+    console.log('   • 1,500 solicitudes por día')
+    console.log('   • 1,000,000 tokens de entrada por minuto')
+    console.log('   • 50,000,000 tokens de entrada por día')
+    console.log('')
+    console.log('🔗 Más información: https://ai.google.dev/gemini-api/docs/rate-limits')
   }
 }
 
