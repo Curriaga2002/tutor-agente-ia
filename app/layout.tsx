@@ -4,6 +4,7 @@ import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import { AppProvider } from '../contexts/AppProvider'
 import './globals.css'
+import '../styles/markdown.css'
 
 export const metadata: Metadata = {
   title: 'Planeador AgenteIA',

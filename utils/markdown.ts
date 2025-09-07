@@ -3,6 +3,13 @@ export function processMarkdown(text: string): string {
   if (!text || typeof text !== 'string') return ''
   
   return text
+    // Limpiar espacios extra y normalizar
+    .replace(/\s+$/gm, '') // Eliminar espacios al final de líneas
+    .replace(/^\s+/gm, '') // Eliminar espacios al inicio de líneas
+    .replace(/\n\s*\n\s*\n/g, '\n\n') // Normalizar múltiples saltos de línea
+    // Eliminar líneas en blanco entre elementos de lista
+    .replace(/(^- .*)\n\s*\n(^- .*)/gm, '$1\n$2')
+    .replace(/(^- .*)\n\s*\n(^- .*)/gm, '$1\n$2') // Aplicar dos veces para casos múltiples
     // Normalizar dobles dos puntos y títulos con ':' extra
     .replace(/:{2,}/g, ':')
     .replace(/^##\s*([^:]+):\s*$/gm, '## $1')
@@ -10,7 +17,7 @@ export function processMarkdown(text: string): string {
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
     // Código
-    .replace(/```(.*?)```/g, '<pre><code>$1</code></pre>')
+    .replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>')
     .replace(/`(.*?)`/g, '<code>$1</code>')
     // Títulos
     .replace(/^### (.*$)/gm, '<h3>$1</h3>')
@@ -22,6 +29,12 @@ export function processMarkdown(text: string): string {
     // Saltos de línea
     .replace(/\n\n/g, '<br><br>')
     .replace(/\n/g, '<br>')
+    // Limpiar HTML resultante
+    .replace(/<br>\s*<br>\s*<br>/g, '<br><br>') // Normalizar múltiples <br>
+    .replace(/<br>\s*<\/h[1-6]>/g, '</h$1>') // Eliminar <br> antes de cierre de títulos
+    .replace(/<h[1-6][^>]*>\s*<br>/g, '<h$1>') // Eliminar <br> después de apertura de títulos
+    // Eliminar <br> extra entre elementos de lista
+    .replace(/<\/li>\s*<br>\s*<li>/g, '</li><li>')
 }
 
 // Función para limpiar texto para exportación

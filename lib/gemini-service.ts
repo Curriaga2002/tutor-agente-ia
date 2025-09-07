@@ -286,6 +286,35 @@ export class GeminiService {
 - NO muestres citas textuales, IDs ni fragmentos de documentos.
 - Estas instrucciones son internas: **no deben aparecer en la respuesta final**.
 
+## 0.1) Formato de salida OBLIGATORIO
+- Usa EXACTAMENTE los títulos y emojis definidos en la estructura.
+- NO agregues líneas en blanco entre secciones.
+- NO agregues espacios extra al final de las líneas.
+- Mantén los textos juntos sin espacios innecesarios.
+- Preserva la estructura de markdown con títulos, subtítulos y listas.
+- Para los momentos pedagógicos, incluye el tiempo estimado al final de cada momento.
+- Genera contenido específico y detallado, no placeholders genéricos.
+- Incluye actividades concretas y contextualizadas para cada momento.
+- El formato debe ser compacto y sin espacios extra.
+- CRÍTICO: En la sección IDENTIFICACIÓN, mantén todos los campos juntos sin líneas en blanco entre ellos.
+- CRÍTICO: No agregues espacios extra entre los campos de la identificación.
+
+## 0.2) INSTRUCCIONES PARA RESPUESTAS EXTENSAS Y COMPLETAS
+- **DETALLA CADA SECCIÓN:** Proporciona información exhaustiva y específica para cada apartado.
+- **COMPETENCIAS:** Redacta 3-5 competencias detalladas con verbos de acción específicos y contextos claros.
+- **SUBTEMAS:** Genera 4-6 subtemas progresivos con descripciones específicas y vinculación clara a las sesiones.
+- **ESTRATEGIA:** Explica en mínimo 150 palabras la fundamentación pedagógica, metodológica y teórica.
+- **MOMENTOS PEDAGÓGICOS:** Para cada momento, incluye:
+  * Actividades específicas y detalladas (mínimo 3-4 líneas por actividad)
+  * Roles del docente y estudiante claramente definidos
+  * Tiempo estimado específico
+  * Recursos y materiales necesarios
+  * Criterios de evaluación del momento
+- **EVIDENCIAS:** Especifica evidencias observables, medibles y contextualizadas para cada tipo (cognitivas, procedimentales, actitudinales).
+- **EVALUACIÓN:** Detalla criterios específicos con porcentajes justificados, indicadores de logro específicos y escalas de valoración.
+- **CONTEXTUALIZACIÓN:** Adapta todo el contenido al grado específico, recursos disponibles y contexto institucional.
+- **COHERENCIA:** Asegura que todas las secciones estén interconectadas y alineadas con el modelo crítico-social.
+
 ## 1) Recuperación de documentos (bucket/RAG)
 Antes de responder:
 1. Consulta el bucket y construye \`relevantDocs\` con metadatos \`{title, doc_type, year?, source?}\`.
@@ -402,9 +431,8 @@ Tu salida debe ser **auténtica, contextualizada y coherente con el modelo crít
 
 ---
 
-# PLAN DE CLASE
-
-## IDENTIFICACIÓN
+# 📑 PLAN DE CLASE
+## 📝 IDENTIFICACIÓN
 - **Institución:** ${extractedInfo?.institution || '[Extraer del PEI/documentos institucionales]'}
 - **Área:** ${extractedInfo?.subject || '[Identificar de los documentos curriculares]'}
 - **Grado:** ${grado}
@@ -413,55 +441,56 @@ Tu salida debe ser **auténtica, contextualizada y coherente con el modelo crít
 - **Sesiones:** ${sesionesNum}
 - **Recursos Tecnológicos Disponibles:** ${recursos}
 - **Docente:** ${nombreDocente || '[A definir por el docente]'}
-
-## COMPONENTE CURRICULAR
+## 📚 COMPONENTE CURRICULAR
 [Componentes curriculares reales extraídos de documentos]
-
-## COMPETENCIAS
+## 🎯 COMPETENCIAS
 [Competencias alineadas con MEN 2022 y PEI]
-
-## SUBTEMAS
+## 🎯 SUBTEMAS
 [Listado progresivo de 3–6 subtemas, vinculados a sesiones y actividades específicas]
-
-## ESTRATEGIA A DESARROLLAR
-[Explicación fundamentada en MEN + Revisión Sistemática, mínimo 100 palabras]
-
-## MOMENTOS PEDAGÓGICOS (Modelo Crítico-Social)
+## 🎯 ESTRATEGIA A DESARROLLAR
+[Explicación fundamentada en MEN + Revisión Sistemática, mínimo 150 palabras. Incluye fundamentación teórica, metodológica y pedagógica específica]
+## 🔍 MOMENTOS PEDAGÓGICOS (Modelo Crítico-Social)
 ### 7.1 EXPLORACIÓN
-- **Actividad:**
-- **Rol docente:**
-- **Rol estudiante:**
-
+- **Actividad:** [Descripción detallada y específica de la actividad, mínimo 3-4 líneas]
+- **Rol docente:** [Rol específico del docente en este momento, acciones concretas]
+- **Rol estudiante:** [Rol específico del estudiante, comportamientos esperados]
+- **Recursos:** [Materiales y recursos necesarios para este momento]
+- **Tiempo:** [X] min
 ### 7.2 PROBLEMATIZACIÓN
-- **Actividad:**
-- **Rol docente:**
-- **Rol estudiante:**
-
+- **Actividad:** [Descripción detallada y específica de la actividad, mínimo 3-4 líneas]
+- **Rol docente:** [Rol específico del docente en este momento, acciones concretas]
+- **Rol estudiante:** [Rol específico del estudiante, comportamientos esperados]
+- **Recursos:** [Materiales y recursos necesarios para este momento]
+- **Tiempo:** [X] min
 ### 7.3 DIÁLOGO
-- **Actividad:**
-- **Rol docente:**
-- **Rol estudiante:**
-
+- **Actividad:** [Descripción detallada y específica de la actividad, mínimo 3-4 líneas]
+- **Rol docente:** [Rol específico del docente en este momento, acciones concretas]
+- **Rol estudiante:** [Rol específico del estudiante, comportamientos esperados]
+- **Recursos:** [Materiales y recursos necesarios para este momento]
+- **Tiempo:** [X] min
 ### 7.4 PRAXIS-REFLEXIÓN
-- **Actividad:**
-- **Rol docente:**
-- **Rol estudiante:**
-
+- **Actividad:** [Descripción detallada y específica de la actividad, mínimo 3-4 líneas]
+- **Rol docente:** [Rol específico del docente en este momento, acciones concretas]
+- **Rol estudiante:** [Rol específico del estudiante, comportamientos esperados]
+- **Recursos:** [Materiales y recursos necesarios para este momento]
+- **Tiempo:** [X] min
 ### 7.5 ACCIÓN-TRANSFORMACIÓN
-- **Actividad:**
-- **Rol docente:**
-- **Rol estudiante:**
-
-## EVIDENCIAS DE APRENDIZAJE
-- **Cognitivas:**
-- **Procedimentales:**
-- **Actitudinales:**
-*(Conexión con PEI y modelo crítico-social)*
-
-## EVALUACIÓN
-- **Criterios:** [Seleccionar de la lista oficial de Tabla 7 según la estrategia usada, con porcentajes que sumen 100%]
+- **Actividad:** [Descripción detallada y específica de la actividad, mínimo 3-4 líneas]
+- **Rol docente:** [Rol específico del docente en este momento, acciones concretas]
+- **Rol estudiante:** [Rol específico del estudiante, comportamientos esperados]
+- **Recursos:** [Materiales y recursos necesarios para este momento]
+- **Tiempo:** [X] min
+## 📂 EVIDENCIAS DE APRENDIZAJE
+- **Cognitivas:** [Evidencias específicas de conocimiento, comprensión y análisis. Mínimo 3 evidencias detalladas]
+- **Procedimentales:** [Evidencias específicas de habilidades, destrezas y productos. Mínimo 3 evidencias detalladas]
+- **Actitudinales:** [Evidencias específicas de valores, actitudes y participación. Mínimo 3 evidencias detalladas]
+*(Conexión explícita con PEI y modelo crítico-social)*
+## 📝 EVALUACIÓN
+- **Criterios:** [Seleccionar de la lista oficial de Tabla 7 según la estrategia usada, con porcentajes que sumen 100%. Incluir justificación de cada porcentaje]
 - **Escala:** 1.0 a 5.0 (mínimo 3.2)
-- **Indicadores de logro:** [Extraídos de documentos]
+- **Indicadores de logro:** [Mínimo 5 indicadores específicos extraídos de documentos, con descripciones detalladas]
+- **Instrumentos de evaluación:** [Especificar herramientas, técnicas y procedimientos de evaluación]
+- **Criterios de valoración:** [Describir cómo se valorará cada criterio, con escalas específicas]
 
 ${relevantDocs.length > 0 ? `
 📚 DOCUMENTOS INSTITUCIONALES DISPONIBLES (OBLIGATORIO USAR TODOS):

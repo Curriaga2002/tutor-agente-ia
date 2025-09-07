@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react'
 import { useChat } from '../contexts/ChatContext'
-import { processMarkdown } from '../utils/markdown'
+import { FormattedMessage } from './FormattedMessage'
 
 export function ChatMessages() {
   const { messages, isLoading } = useChat()
@@ -30,20 +30,10 @@ export function ChatMessages() {
                 : 'bg-white/80 border border-white/50 shadow-xl shadow-blue-200/40'
             }`}
           >
-            {message.isFormatted ? (
-              <div 
-                className="prose prose-sm max-w-none break-words"
-                style={{
-                  lineHeight: '1.6',
-                  fontSize: '14px'
-                }}
-                dangerouslySetInnerHTML={{ 
-                  __html: processMarkdown(message.text)
-                }} 
-              />
-            ) : (
-              <p className="whitespace-pre-wrap">{message.text}</p>
-            )}
+            <FormattedMessage 
+              text={message.text}
+              isFormatted={message.isFormatted}
+            />
             <div className={`text-xs mt-2 ${
               message.isUser ? 'text-blue-100' : 'text-gray-500'
             }`}>

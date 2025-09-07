@@ -1,0 +1,170 @@
+/* Estilos unificados para formateo de markdown en toda la aplicación */
+
+/* Estilos base para texto */
+.prose {
+  color: #374151 !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* Títulos */
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  color: #1f2937 !important;
+  font-weight: 700 !important;
+  margin-bottom: 1rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.prose h1 {
+  font-size: 1.5rem !important;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.prose h2 {
+  font-size: 1.25rem !important;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.25rem;
+}
+
+.prose h3 {
+  font-size: 1.125rem !important;
+}
+
+/* Texto en negrita y cursiva */
+.prose strong {
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+}
+
+.prose em {
+  color: #4b5563 !important;
+  font-style: italic !important;
+}
+
+/* Listas */
+.prose li {
+  margin-bottom: 4px !important;
+  color: #374151 !important;
+  line-height: 1.4;
+}
+
+.prose ul {
+  margin-left: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 0;
+}
+
+.prose ol {
+  margin-left: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 0;
+}
+
+/* Listas compactas para identificación */
+.prose ul li:not(:last-child) {
+  margin-bottom: 2px !important;
+}
+
+/* Código */
+.prose code {
+  background-color: #f3f4f6 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  color: #374151 !important;
+  font-size: 0.875rem;
+}
+
+.prose pre {
+  background-color: #f3f4f6 !important;
+  padding: 12px !important;
+  border-radius: 6px !important;
+  border: 1px solid #d1d5db !important;
+  color: #374151 !important;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.prose pre code {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* Párrafos */
+.prose p {
+  margin-bottom: 1rem !important;
+  color: #374151 !important;
+  line-height: 1.6;
+}
+
+/* Enlaces */
+.prose a {
+  color: #2563eb !important;
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: #1d4ed8 !important;
+}
+
+/* Preservar colores originales de emojis */
+.prose * {
+  color: unset !important;
+}
+
+/* Restaurar colores específicos después del reset */
+.prose {
+  color: #374151 !important;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  color: #1f2937 !important;
+}
+
+.prose strong {
+  color: #1f2937 !important;
+}
+
+.prose code {
+  color: #374151 !important;
+}
+
+.prose li {
+  color: #374151 !important;
+}
+
+.prose p {
+  color: #374151 !important;
+}
+
+/* Espaciado y márgenes */
+.prose > *:first-child {
+  margin-top: 0 !important;
+}
+
+.prose > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .prose {
+    font-size: 13px;
+  }
+  
+  .prose h1 {
+    font-size: 1.25rem !important;
+  }
+  
+  .prose h2 {
+    font-size: 1.125rem !important;
+  }
+  
+  .prose h3 {
+    font-size: 1rem !important;
+  }
+}

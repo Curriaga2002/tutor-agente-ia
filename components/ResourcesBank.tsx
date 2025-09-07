@@ -4,32 +4,7 @@ import { useState, useEffect } from "react"
 import { createClient } from "../lib/supabase/client"
 import { useAuth } from '../hooks/useAuth'
 import { useExport } from '../hooks/useExport'
-
-// Función para procesar markdown y convertir a HTML
-const processMarkdown = (text: string): string => {
-  if (!text || typeof text !== 'string') return ''
-  
-  return text
-    // Normalizar dobles dos puntos y títulos con ':' extra
-    .replace(/:{2,}/g, ':')
-    .replace(/^##\s*([^:]+):\s*$/gm, '## $1')
-    // Formateo de texto
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Código
-    .replace(/```(.*?)```/g, '<pre><code>$1</code></pre>')
-    .replace(/`(.*?)`/g, '<code>$1</code>')
-    // Títulos
-    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-    // Listas
-    .replace(/^- (.*$)/gm, '<li>• $1</li>')
-    .replace(/^\d+\. (.*$)/gm, '<li>$&</li>')
-    // Saltos de línea
-    .replace(/\n\n/g, '<br><br>')
-    .replace(/\n/g, '<br>')
-}
+import { FormattedMessage } from './FormattedMessage'
 
 interface ResourcesBankProps {
   setActiveTab: (tab: "generar" | "historial") => void
@@ -692,86 +667,11 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                         }`}
                       >
                         <div className="text-xs sm:text-sm lg:text-base leading-relaxed break-words">
-                          {message.isFormatted ? (
-                            <div 
-                              className="prose prose-sm max-w-none break-words"
-                              style={{
-                                lineHeight: '1.6',
-                                fontSize: '14px'
-                              }}
-                              dangerouslySetInnerHTML={{ 
-                                __html: `
-                                  <style>
-                                    .prose { 
-                                      color: #374151 !important; 
-                                      overflow-wrap: anywhere; 
-                                      word-break: break-word; 
-                                    }
-                                    .prose li { 
-                                      margin-bottom: 8px !important; 
-                                      color: #374151 !important;
-                                    }
-                                    .prose h1, .prose h2, .prose h3 { 
-                                      color: #1f2937 !important; 
-                                      font-weight: 700 !important;
-                                      margin-bottom: 1rem !important;
-                                    }
-                                    .prose strong { 
-                                      color: #1f2937 !important; 
-                                      font-weight: 600 !important;
-                                    }
-                                    .prose code { 
-                                      background-color: #f3f4f6 !important; 
-                                      padding: 2px 6px !important; 
-                                      border-radius: 4px !important; 
-                                      font-family: monospace !important;
-                                      color: #374151 !important;
-                                    }
-                                    .prose pre { 
-                                      background-color: #f3f4f6 !important; 
-                                      padding: 12px !important; 
-                                      border-radius: 6px !important; 
-                                      border: 1px solid #d1d5db !important;
-                                      color: #374151 !important;
-                                    }
-                                    /* Estilos base para texto */
-                                    .prose {
-                                      color: #374151 !important;
-                                    }
-                                    .prose h1, .prose h2, .prose h3 {
-                                      color: #1f2937 !important;
-                                    }
-                                    .prose strong {
-                                      color: #1f2937 !important;
-                                    }
-                                    .prose code {
-                                      color: #374151 !important;
-                                    }
-                                    /* Preservar colores originales de emojis usando unset */
-                                    .prose * {
-                                      color: unset !important;
-                                    }
-                                    .prose {
-                                      color: #374151 !important;
-                                    }
-                                    .prose h1, .prose h2, .prose h3 {
-                                      color: #1f2937 !important;
-                                    }
-                                    .prose strong {
-                                      color: #1f2937 !important;
-                                    }
-                                    .prose code {
-                                      color: #374151 !important;
-                                    }
-                                  </style>
-                                  ${processMarkdown(message.text)}
-                                `
-                              }} 
-                              key={`formatted-${message.id}-${forceRender}`}
-                            />
-                          ) : (
-                            <div className="whitespace-pre-wrap" key={`plain-${message.id}-${forceRender}`}>{message.text}</div>
-                          )}
+                          <FormattedMessage 
+                            text={message.text}
+                            isFormatted={message.isFormatted}
+                            key={`formatted-${message.id}-${forceRender}`}
+                          />
                         </div>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 sm:mt-3 lg:mt-4 gap-1 sm:gap-0">
                           <span className="text-xs sm:text-sm opacity-70">
