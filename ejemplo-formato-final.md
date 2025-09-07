@@ -17,13 +17,11 @@
 
 ## 📚 COMPONENTE CURRICULAR
 
-**COMPONENTES CURRICULARES OFICIALES MEN 2022:**
+**COMPONENTES SELECCIONADOS (SELECCIÓN INTELIGENTE):**
 1. **Pensamiento Computacional** - Desarrollo de habilidades para resolver problemas mediante algoritmos, estructuras de control y lógica computacional.
-2. **Sistemas y Entornos Informáticos** - Comprensión de hardware, software, redes y entornos digitales.
-3. **Diseño y Desarrollo de Software** - Creación de programas, aplicaciones y soluciones tecnológicas.
-4. **Tecnología, Sociedad y Ambiente (CTS)** - Análisis del impacto social y ambiental de la tecnología.
+2. **Diseño y Desarrollo de Software** - Creación de programas, aplicaciones y soluciones tecnológicas.
 
-**Justificación:** Estos componentes se integran coherentemente con el tema "Programación", promoviendo el desarrollo integral de competencias tecnológicas, pensamiento crítico y responsabilidad social, alineados con el modelo pedagógico crítico-social y el PEI de la institución.
+**Justificación de la selección:** Para el tema "Programación" se seleccionaron estos dos componentes porque son los más relevantes y apropiados para el grado 8°. El Pensamiento Computacional es fundamental para desarrollar la lógica algorítmica necesaria en programación, mientras que Diseño y Desarrollo de Software permite a los estudiantes crear programas funcionales. Esta selección se alinea con el nivel de complejidad apropiado para octavo grado y las actividades planificadas, promoviendo el desarrollo integral de competencias tecnológicas y pensamiento crítico, en coherencia con el modelo pedagógico crítico-social y el PEI de la institución.
 
 ---
 
