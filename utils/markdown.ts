@@ -2,11 +2,25 @@
 export function processMarkdown(text: string): string {
   if (!text || typeof text !== 'string') return ''
   
-  return text
+  // Detectar si es un mensaje de configuración para preservar saltos de línea específicos
+  const isConfigMessage = text.includes('CONFIGURACIÓN COMPLETADA EXITOSAMENTE')
+  
+  let processedText = text
     // Limpiar espacios extra y normalizar
     .replace(/\s+$/gm, '') // Eliminar espacios al final de líneas
     .replace(/^\s+/gm, '') // Eliminar espacios al inicio de líneas
-    .replace(/\n\s*\n\s*\n/g, '\n\n') // Normalizar múltiples saltos de línea
+
+  // Preservar saltos de línea específicos en mensajes de configuración
+  if (isConfigMessage) {
+    // Preservar doble salto de línea después de "Sesiones:"
+    processedText = processedText.replace(/(\*\*Sesiones:\*\* .*)\n(\*\*💡)/g, '$1\n\n$2')
+    // Agregar espacio después del título "Ejemplo de solicitud para Tecnología e Informática:"
+    processedText = processedText.replace(/(\*\*💡 Ejemplo de solicitud para Tecnología e Informática:\*\*)\n/g, '$1\n\n')
+  } else {
+    processedText = processedText.replace(/\n\s*\n\s*\n/g, '\n\n') // Normalizar múltiples saltos de línea
+  }
+
+  return processedText
     // Eliminar líneas en blanco entre elementos de lista
     .replace(/(^- .*)\n\s*\n(^- .*)/gm, '$1\n$2')
     .replace(/(^- .*)\n\s*\n(^- .*)/gm, '$1\n$2') // Aplicar dos veces para casos múltiples
