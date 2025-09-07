@@ -38,8 +38,6 @@ export function useChatActions() {
     todosLosDocumentos: PDFContent[]
   }> => {
     try {
-      console.log('🔍 Consultando documentos institucionales...')
-      console.log('📚 Total de documentos disponibles:', documents.length)
       
       // Buscar PEI
       const peiDocs = documents.filter(doc => 
@@ -47,7 +45,6 @@ export function useChatActions() {
         doc.title.toLowerCase().includes('proyecto educativo') ||
         doc.content.toLowerCase().includes('proyecto educativo institucional')
       )
-      console.log('🏫 Documentos PEI encontrados:', peiDocs.length)
       
       // Buscar Modelo Pedagógico
       const modeloPedagogicoDocs = documents.filter(doc => 
@@ -55,7 +52,6 @@ export function useChatActions() {
         doc.title.toLowerCase().includes('enfoque pedagógico') ||
         doc.content.toLowerCase().includes('modelo pedagógico')
       )
-      console.log('🧠 Documentos Modelo Pedagógico encontrados:', modeloPedagogicoDocs.length)
       
       // Buscar Orientaciones Curriculares
       const orientacionesCurricularesDocs = documents.filter(doc => 
@@ -63,7 +59,6 @@ export function useChatActions() {
         doc.title.toLowerCase().includes('curricular') ||
         doc.content.toLowerCase().includes('orientaciones curriculares')
       )
-      console.log('📋 Documentos Orientaciones Curriculares encontrados:', orientacionesCurricularesDocs.length)
       
       // Buscar Tabla 7
       const tabla7Docs = documents.filter(doc => 
@@ -71,7 +66,6 @@ export function useChatActions() {
         doc.content.toLowerCase().includes('tabla 7') ||
         doc.content.toLowerCase().includes('criterios de evaluación')
       )
-      console.log('📊 Documentos Tabla 7 encontrados:', tabla7Docs.length)
       
       const todosLosDocumentos = [...documents]
       
@@ -99,21 +93,9 @@ export function useChatActions() {
   const generatePedagogicalResponse = useCallback(async (userInput: string, relevantDocs: PDFContent[], chatHistory: any[]): Promise<string> => {
     try {
       setLoading(true)
-      console.log('🔍 Iniciando generación de respuesta pedagógica...')
-      console.log('📝 Input del usuario:', userInput)
-      console.log('📚 Documentos relevantes recibidos:', relevantDocs.length)
-      console.log('💬 Historial del chat:', chatHistory.length, 'mensajes')
       
       // Consultar documentos institucionales
-      console.log('🔍 Buscando documentos institucionales...')
       const documentosInstitucionales = await consultarDocumentosInstitucionales()
-      console.log('📚 Documentos institucionales encontrados:', {
-        pei: documentosInstitucionales.pei ? '✅' : '❌',
-        modeloPedagogico: documentosInstitucionales.modeloPedagogico ? '✅' : '❌',
-        orientacionesCurriculares: documentosInstitucionales.orientacionesCurriculares ? '✅' : '❌',
-        tabla7: documentosInstitucionales.tabla7 ? '✅' : '❌',
-        totalDocumentos: documentosInstitucionales.todosLosDocumentos?.length || 0
-      })
       
       // Actualizar estado de documentos consultados
       updateConsultedDocuments({
@@ -126,7 +108,6 @@ export function useChatActions() {
       
       // Usar TODOS los documentos disponibles del bucket
       let relevantFiles = [...documentosInstitucionales.todosLosDocumentos]
-      console.log('📁 Documentos del bucket:', relevantFiles.length)
       
       // Agregar TODOS los documentos del contexto (ya incluye todos los documentos del bucket)
       relevantDocs.forEach(doc => {
@@ -134,7 +115,6 @@ export function useChatActions() {
           relevantFiles.push(doc)
         }
       })
-      console.log('📚 Total de documentos a procesar:', relevantFiles.length)
       
       
       // Construir contexto con historial del chat
@@ -171,14 +151,6 @@ ${userInput}
 ${chatContext}`
       
       // Generar respuesta con Gemini
-      console.log('🤖 Enviando solicitud a Gemini con contexto...')
-      console.log('📋 Configuración:', {
-        grado: planningConfig.grado,
-        tema: planningConfig.tema,
-        sesiones: sesionesNum,
-        horas: horasNum,
-        documentos: relevantFiles.length
-      })
       
       const geminiResponse = await geminiService.generateClassPlan(
         planningConfig.grado,
@@ -189,7 +161,6 @@ ${chatContext}`
         planningConfig.nombreDocente
       )
       
-      console.log('✅ Respuesta de Gemini recibida:', geminiResponse.success ? 'Éxito' : 'Error')
       
       if (geminiResponse.success) {
         return geminiResponse.text
@@ -224,12 +195,6 @@ ${chatContext}`
       // El userMessage se agrega al final del array, así que tomamos todos excepto el último
       const currentChatHistory = messages.slice(0, -1)
       
-      // Debug: mostrar historial que se envía al agente
-      console.log('📝 Historial del chat enviado al agente:', currentChatHistory.map(msg => ({
-        sender: msg.isUser ? 'Docente' : 'Asistente',
-        text: msg.text.substring(0, 100) + '...',
-        timestamp: msg.timestamp
-      })))
       
       // Generar respuesta con historial del chat y TODOS los documentos
       const aiResponse = await generatePedagogicalResponse(inputText, documents, currentChatHistory)
