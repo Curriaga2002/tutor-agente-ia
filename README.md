@@ -592,9 +592,8 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 
 ---
 
-## 📞 Soporte y Contacto
+## Soporte
 
-- **Email**: soporte@ie-camilo-torres.edu.co
 - **Documentación**: [Wiki del proyecto](https://github.com/tu-usuario/tutor-agente-ia/wiki)
 - **Issues**: [GitHub Issues](https://github.com/tu-usuario/tutor-agente-ia/issues)
 - **Discusiones**: [GitHub Discussions](https://github.com/tu-usuario/tutor-agente-ia/discussions)
