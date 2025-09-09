@@ -100,23 +100,23 @@ flowchart TD
 
 ### 🔄 Flujo de Datos Principal
 
-```mermaid
-sequenceDiagram
-    participant U as Usuario
-    participant F as Frontend
-    participant AI as OpenAI Assistant
-    participant DB as Supabase
-    U->>F: Configuración inicial
-    F->>AI: Generación de plan
-    AI-->>F: Plan estructurado
-    F->>F: Validación y formateo
-    F->>U: Plan de clase final
-    U->>F: Solicitar guardado
-    F->>DB: Almacenar plan
-    U->>F: Solicitar exportación
-    F->>F: Generar Word/PDF
-    F-->>U: Archivo descargado
-```
+%% Flujo simplificado sin bucket ni documentos externos
+flowchart TD
+    A[Docente: Entrada (Grado, Tema, Sesiones)] 
+    B[Memoria del Sistema: Historial de chat + Perfil del docente]
+    C[Agente de Planificación (OpenAI Assistant)]
+    D[Generación de Plan]
+    E[Plan de Clase Final]
+    F[Almacenamiento: Base de datos + Historial]
+    G[Exportación: Word, PDF, etc.]
+
+    A --> C
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+
 
 ### 🔄 Flujo de Generación de Plan
 
