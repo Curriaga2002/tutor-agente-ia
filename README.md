@@ -51,15 +51,14 @@ El **Planeador Didáctico Inteligente** es un sistema web avanzado que utiliza i
 ### 📊 Diagrama de Flujo Principal
 
 ```mermaid
-%% Flujo simplificado sin bucket ni documentos externos
 flowchart TD
-    A[🎓 Docente<br/>Entrada: Grado, Tema, Sesiones] 
-    B[🧠 Memoria del Sistema<br/>• Historial de chat<br/>• Perfil del docente]
-    C[🤖 Agente de Planificación (OpenAI Assistant)]
-    D[⚙️ Generación de Plan]
-    E[📋 Plan de Clase Final]
-    F[💾 Almacenamiento<br/>Base de datos + Historial]
-    G[📤 Exportación<br/>Word, PDF, etc.]
+    A[Docente\nEntrada: Grado, Tema, Sesiones] 
+    B[Memoria del Sistema\nHistorial de chat, Perfil del docente]
+    C[Agente de Planificación (OpenAI Assistant)]
+    D[Generación de Plan]
+    E[Plan de Clase Final]
+    F[Almacenamiento\nBase de datos + Historial]
+    G[Exportación\nWord, PDF, etc.]
 
     A --> C
     B --> C
