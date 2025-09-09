@@ -100,7 +100,7 @@ flowchart TD
 
 ### 🔄 Flujo de Datos Principal
 
-```sequenceDiagram
+sequenceDiagram
     participant Docente
     participant Agente
     participant BaseDeDatos as "Base de Datos"
@@ -122,7 +122,6 @@ flowchart TD
     Agente ->> Exportacion: Generar Word/PDF
     Exportacion -->> Docente: Archivo descargado
 
-```
 
 
 
