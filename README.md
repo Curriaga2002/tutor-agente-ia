@@ -51,8 +51,9 @@ El **Planeador Didáctico Inteligente** es un sistema web avanzado que utiliza i
 ### 📊 Diagrama de Flujo Principal
 
 ```mermaid
+
 flowchart TD
-    A[Docente\nEntrada 
+    A[Docente\nEntrada]
     B[Memoria]
     C[Agente de Planificación]
     D[Generación de Plan]
