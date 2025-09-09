@@ -3,7 +3,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
-[![Google Gemini](https://img.shields.io/badge/Google-Gemini-orange?style=for-the-badge&logo=google)](https://ai.google.dev/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-Assistant-blueviolet?style=for-the-badge&logo=openai)](https://platform.openai.com/)
 
 > **Sistema de generación automática de planes de clase** utilizando inteligencia artificial, diseñado específicamente para docentes de Tecnología e Informática de la Institución Educativa Camilo Torres.
 
@@ -222,7 +222,7 @@ flowchart TD
 - **Storage** - Almacenamiento de archivos
 
 ### IA y Procesamiento
-- **Google Gemini API** - Modelo de lenguaje
+- **OpenAI Assistant API (GPT-4)** - Modelo de lenguaje para generación de planes y chat
 - **PDF Processing** - Extracción de contenido
 - **Vector Embeddings** - Representación semántica
 - **Prompt Engineering** - Optimización de prompts
@@ -517,27 +517,39 @@ interface DocumentContextType {
 
 ## 🔧 API y Servicios
 
-### 🤖 Servicio de IA (Gemini)
+### 🤖 Servicio de IA (OpenAI Assistant)
 
 ```typescript
-// lib/gemini-service.ts
-class GeminiService {
-  async generateClassPlan(
-    grado: string,
-    tema: string,
-    contexto: string,
-    documentos: PDFContent[],
-    recursos: string,
-    nombreDocente: string
-  ): Promise<GeminiResponse>
-}
+// lib/openai-assistant-service.ts
+export async function getOpenAIResponse(context: {
+  message: string;
+  planningConfig?: any;
+  chatHistory?: any[];
+}): Promise<{ answer: string }>
 ```
 
 **Características:**
-- Modelo: `gemini-1.5-flash`
-- Temperatura: 0.7
-- Max tokens: 2048
-- Prompt engineering optimizado
+- Modelo: `gpt-4` (o el modelo configurado en OpenAI)
+- Prompt engineering optimizado con contexto, historial y configuración inicial
+- Respuestas estructuradas y formateadas en Markdown
+- Integración segura vía backend (la API Key nunca se expone al frontend)
+
+#### Conexión y configuración
+
+1. **Obtener una API Key de OpenAI** desde https://platform.openai.com/api-keys
+2. **Configurar variables en `.env.local`:**
+   ```env
+   # OpenAI
+   OPENAI_API_KEY=sk-...
+   ASSISTANT_ID=asst_...
+   ```
+3. **El backend se encarga de:**
+   - Recibir el mensaje, configuración y contexto del usuario
+   - Construir el prompt enriquecido
+   - Llamar a la API de OpenAI Assistant
+   - Devolver la respuesta al frontend
+
+4. **El frontend solo interactúa con el backend** mediante endpoints `/api/chat/openai`.
 
 ### 📚 Servicio de Documentos
 
@@ -789,7 +801,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 ## 🙏 Agradecimientos
 
 - **Institución Educativa Camilo Torres** por la confianza y apoyo
-- **Google Gemini** por la API de inteligencia artificial
+- **OpenAI** por la API de inteligencia artificial
 - **Supabase** por la infraestructura de backend
 - **Comunidad de Next.js** por el framework
 - **Contribuidores** del proyecto

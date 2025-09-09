@@ -18,7 +18,6 @@ export function ChatInput() {
   }
 
   const handleCancel = () => {
-    // Implementar cancelación si es necesario
     setInputText("")
   }
 
@@ -39,8 +38,13 @@ export function ChatInput() {
             disabled={!isConfigured || !inputText.trim() || isLoading || isSaving}
             className="flex-1 sm:flex-none px-4 sm:px-6 lg:px-10 py-3 sm:py-4 lg:py-5 bg-gradient-to-r from-blue-500/80 to-purple-500/80 backdrop-blur-sm text-white rounded-xl sm:rounded-2xl hover:from-blue-600/90 hover:to-purple-600/90 focus:outline-none focus:ring-4 focus:ring-blue-200/30 disabled:opacity-50 transition-all duration-300 font-medium text-sm sm:text-base lg:text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transform hover:-translate-y-0.5 disabled:transform-none"
           >
-            <span className="hidden sm:inline">{isLoading ? '🔄' : '📤'} Enviar</span>
-            <span className="sm:hidden">{isLoading ? '🔄' : '📤'}</span>
+            <span className="hidden sm:inline">
+              {isLoading ? '🔄' : '📤'} 
+              {isLoading ? 'Generando...' : 'Enviar'}
+            </span>
+            <span className="sm:hidden">
+              {isLoading ? '🔄' : '📤'}
+            </span>
           </button>
           <button
             type="button"

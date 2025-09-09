@@ -1,6 +1,5 @@
 // Servicio de indexación de documentos educativos para el sistema de planeación didáctica
 import { processPDF, ProcessedPDF } from './pdf-processor'
-import { GeminiEmbeddingService } from './gemini-embeddings'
 import { VectorSearchService } from './vector-search'
 
 export interface DocumentMetadata {
@@ -33,7 +32,6 @@ export interface IndexingProgress {
 }
 
 // Instancias de los servicios
-const geminiService = new GeminiEmbeddingService()
 const vectorService = new VectorSearchService()
 
 /**
@@ -67,7 +65,7 @@ export async function indexDocument(
     
     // Generar embeddings para cada chunk
     const chunks = processedPDF.chunks.map(chunk => chunk.content)
-    const embeddings = await geminiService.generateBatchEmbeddings({ texts: chunks })
+    const embeddings = await vectorService.generateBatchEmbeddings({ texts: chunks })
     
     onProgress?.({
       stage: 'embedding',
@@ -159,7 +157,7 @@ export async function saveToDatabase(
   try {
     // Generar embeddings para los chunks
     const chunks = processedDoc.chunks.map(chunk => chunk.content)
-    const embeddings = await geminiService.generateBatchEmbeddings({ texts: chunks })
+    const embeddings = await vectorService.generateBatchEmbeddings({ texts: chunks })
     
     // Por ahora simulamos el guardado
     const documentId = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`

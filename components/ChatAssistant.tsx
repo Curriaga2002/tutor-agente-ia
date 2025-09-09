@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useChat } from '../contexts/ChatContext'
 import { useChatActions } from '../hooks/useChatActions'
 import { ConfigurationForm } from './ConfigurationForm'
@@ -31,6 +31,8 @@ export function ChatAssistant({
   
   const { sendMessage } = useChatActions()
   const [sessionRestored, setSessionRestored] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const configBlockRef = useRef<HTMLDivElement>(null)
 
   // Notificar actualización del chat
   useEffect(() => {
@@ -48,37 +50,38 @@ export function ChatAssistant({
     setSessionRestored(true)
   }, [])
 
+  const handleCopyConfig = () => {
+    if (configBlockRef.current) {
+      // Copiar solo las líneas que empiezan con '•'
+      const allText = configBlockRef.current.innerText
+      const lines = allText.split('\n')
+      const detailsLines = lines.filter(line => line.trim().startsWith('•'))
+      const textToCopy = detailsLines.join('\n')
+      navigator.clipboard.writeText(textToCopy)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    }
+  }
+
   const handleConfigurationSubmit = () => {
     
     setConfiguration(planningConfig)
     
     
-    // Solo mostrar mensaje de confirmación sin enviar automáticamente
-              const configMessage: Message = {
-                id: Date.now().toString(),
-                text: `✅ **CONFIGURACIÓN COMPLETADA EXITOSAMENTE**
-
-**🎯 Detalles de tu planeación:**
-• **Grado:** ${planningConfig.grado}
-• **Asignatura:** ${planningConfig.asignatura}
-• **Tema:** ${planningConfig.tema}
-• **Duración:** ${Number(planningConfig.sesiones) * 2} horas
-• **Sesiones:** ${planningConfig.sesiones}
-
-
-**💡 Ejemplo de solicitud para Tecnología e Informática:**
-
-"Genera un plan de clase para grado 8° sobre programación básica con Scratch.
-Cantidad de estudiantes: 30.
-Recursos disponibles: 15 computadores.
-Estrategia de trabajo: Grupos de 2 estudiantes por computador.
-Metodología: Aprendizaje basado en proyectos con enfoque colaborativo, alineado al modelo crítico-social.
-Duración: 2 sesiones (4 horas).
-Evaluación: Formativa mediante observación, lista de cotejo y producto final del proyecto en Scratch."`,
-                isUser: false,
-                timestamp: new Date(),
-                isFormatted: true,
-              }
+    // Construir detalles dinámicamente, excluyendo campos no deseados
+    const configDetails = Object.entries(planningConfig)
+      .filter(([key]) =>
+        !['consultarPEI', 'consultarModeloPedagogico', 'filtrosInstitucionales'].includes(key)
+      )
+      .map(([key, value]) => `• **${key.charAt(0).toUpperCase() + key.slice(1)}:** ${value}`)
+      .join('\n')
+    const configMessage: Message = {
+      id: Date.now().toString(),
+      text: `✅ **CONFIGURACIÓN COMPLETADA EXITOSAMENTE**\n\n**🎯 Detalles de tu planeación:**\n\n${configDetails}`,
+      isUser: false,
+      timestamp: new Date(),
+      isFormatted: true,
+    }
     
     // Agregar mensaje de confirmación sin enviar automáticamente
     addMessage(configMessage)
@@ -109,7 +112,27 @@ Evaluación: Formativa mediante observación, lista de cotejo y producto final d
         )}
         
         {/* Mensajes del Chat */}
-        <ChatMessages />
+        <ChatMessages 
+          renderExtra={(message) => {
+            // Solo mostrar el botón de copiar en el mensaje de configuración
+            if (
+              message.text.startsWith('✅ **CONFIGURACIÓN COMPLETADA EXITOSAMENTE**')
+            ) {
+              return (
+                <div className="flex items-center mt-2">
+                  <button
+                    onClick={handleCopyConfig}
+                    className="ml-auto px-3 py-1 rounded bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition"
+                  >
+                    {copied ? '¡Copiado!' : 'Copiar'}
+                  </button>
+                </div>
+              )
+            }
+            return null
+          }}
+          configBlockRef={configBlockRef}
+        />
                   </div>
 
       {/* Input del Chat */}

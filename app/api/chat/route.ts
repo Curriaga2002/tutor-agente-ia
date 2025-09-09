@@ -1,8 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyAShoky_qkTPbWB4txPu6kgpProE8_1tDI"
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
-
 function generateFallbackResponse(message: string, context: any, documents: any[] = []): string {
   const lowerMessage = message.toLowerCase()
 
@@ -119,121 +116,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Mensaje requerido" }, { status: 400 })
     }
 
-    if (!GEMINI_API_KEY || GEMINI_API_KEY === "your-api-key-here") {
-      console.warn("Gemini API key not configured, using fallback response")
-      const fallbackResponse = generateFallbackResponse(message, context, documents)
-      return NextResponse.json({
-        response: fallbackResponse,
-        formSuggestions: null,
-      })
-    }
-
-    const documentContext =
-      documents.length > 0
-        ? `\n\nDocumentos cargados por el usuario:\n${documents
-            .map((doc: any) => `- ${doc.name} (${doc.type}):\n${doc.content}`)
-            .join("\n\n")}`
-        : ""
-
-    const systemPrompt = `Eres un asistente especializado en planeación didáctica para grados 8° y 9° en Colombia. 
-Tu objetivo es ayudar a los docentes a crear planeaciones efectivas y pedagógicamente sólidas.
-
-Contexto actual de la planeación:
-- Grado: ${context?.grado || "No especificado"}
-- Tema: ${context?.tema || "No especificado"}
-- Duración: ${context?.duracion || "No especificada"}
-- Sesiones: ${context?.sesiones || "No especificado"}${documentContext}
-
-Instrucciones:
-1. Responde de manera detallada y práctica, aprovechando todo el contexto disponible
-2. Enfócate en aspectos pedagógicos relevantes para el contexto colombiano
-3. Sugiere objetivos, actividades, recursos y evaluaciones específicas
-4. Considera los estándares básicos de competencias del MEN Colombia
-5. Si hay documentos cargados, analiza TODO su contenido para enriquecer tus respuestas
-6. Extrae información relevante de los documentos y aplícala a la planeación didáctica
-7. Mantén un tono profesional pero amigable
-8. Si detectas información incompleta en el contexto, sugiere completarla
-9. Utiliza toda la información disponible en los documentos para crear respuestas más completas y contextualizadas
-
-Responde en español y de manera útil para la planeación didáctica, aprovechando al máximo el contenido de los documentos cargados.`
-
-    const prompt = `${systemPrompt}\n\nPregunta del docente: ${message}`
-
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
-
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        },
-        safetySettings: [
-          {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE",
-          },
-          {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE",
-          },
-        ],
-      }),
-      signal: controller.signal,
-    })
-
-    clearTimeout(timeoutId)
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      console.error("Gemini API Error:", response.status, errorData)
-      const fallbackResponse = generateFallbackResponse(message, context, documents)
-      return NextResponse.json({
-        response: fallbackResponse,
-        formSuggestions: null,
-      })
-    }
-
-    const data = await response.json()
-
-    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text
-
-    if (!aiResponse) {
-      console.error("Invalid Gemini response structure:", data)
-      const fallbackResponse = generateFallbackResponse(message, context, documents)
-      return NextResponse.json({
-        response: fallbackResponse,
-        formSuggestions: null,
-      })
-    }
-
-    let formSuggestions = null
-    const lowerResponse = aiResponse.toLowerCase()
-
-    // Simple logic to suggest form updates based on AI response content
-    if (lowerResponse.includes("te sugiero") || lowerResponse.includes("recomiendo")) {
-      // Could implement more sophisticated parsing here
-      formSuggestions = {}
-    }
+    const fallbackResponse = generateFallbackResponse(message, context, documents)
 
     return NextResponse.json({
-      response: aiResponse,
-      formSuggestions,
+      response: fallbackResponse,
+      formSuggestions: null,
     })
   } catch (error: any) {
     console.error("Error en el chat:", error)

@@ -1,12 +1,13 @@
-import { useCallback } from 'react'
+import { useCallback, useState, useRef } from 'react'
 import { useChat } from '../contexts/ChatContext'
 import { usePlanning } from '../contexts/PlanningContext'
 import { useDocuments } from '../contexts/DocumentContext'
 import { PDFContent } from '../types'
 
-export function useChatActions() {
+export function useStreamingChat() {
   const { 
     addMessage, 
+    updateMessage,
     setLoading, 
     setSaving, 
     setError,
@@ -17,6 +18,10 @@ export function useChatActions() {
   
   const { addToChatHistory } = usePlanning()
   const { searchDocuments, documents } = useDocuments()
+  
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   // Función para buscar documentos relevantes
   const searchRelevantDocuments = useCallback(async (query: string): Promise<PDFContent[]> => {
@@ -37,7 +42,6 @@ export function useChatActions() {
     todosLosDocumentos: PDFContent[]
   }> => {
     try {
-      
       // Buscar PEI
       const peiDocs = documents.filter(doc => 
         doc.title.toLowerCase().includes('pei') ||
@@ -68,7 +72,6 @@ export function useChatActions() {
       
       const todosLosDocumentos = [...documents]
       
-      
       return {
         pei: peiDocs,
         modeloPedagogico: modeloPedagogicoDocs,
@@ -88,10 +91,18 @@ export function useChatActions() {
     }
   }, [documents])
 
-  // Función para generar respuesta pedagógica
-  const generatePedagogicalResponse = useCallback(async (userInput: string, relevantDocs: PDFContent[], chatHistory: any[]): Promise<string> => {
+  // Función para generar respuesta con streaming
+  const generateStreamingResponse = useCallback(async (
+    userInput: string, 
+    relevantDocs: PDFContent[], 
+    chatHistory: any[]
+  ): Promise<void> => {
     try {
       setLoading(true)
+      setIsStreaming(true)
+      
+      // Crear nuevo AbortController para esta solicitud
+      abortControllerRef.current = new AbortController()
       
       // Consultar documentos institucionales
       const documentosInstitucionales = await consultarDocumentosInstitucionales()
@@ -108,19 +119,16 @@ export function useChatActions() {
       // Usar TODOS los documentos disponibles del bucket
       let relevantFiles = [...documentosInstitucionales.todosLosDocumentos]
       
-      // Agregar TODOS los documentos del contexto (ya incluye todos los documentos del bucket)
+      // Agregar TODOS los documentos del contexto
       relevantDocs.forEach(doc => {
         if (!relevantFiles.some(existing => existing.id === doc.id)) {
           relevantFiles.push(doc)
         }
       })
       
-      
       // Construir contexto con historial del chat
       const sesionesNum = Math.min(2, Math.max(1, Number(planningConfig.sesiones || '1') || 1))
       const horasNum = sesionesNum * 2
-      
-      // Construir historial del chat para el contexto
       
       const chatContext = chatHistory.length > 0 ? `
 ## 📝 HISTORIAL DE LA CONVERSACIÓN:
@@ -139,7 +147,6 @@ ${userInput}
 
 `
       
-      
       const combinedContext = `REGLAS ESTRICTAS PARA LA RESPUESTA (OBLIGATORIAS):
 1) Usa EXACTAMENTE la duración total: ${horasNum} horas.
 2) Usa EXACTAMENTE el número de sesiones: ${sesionesNum}.
@@ -149,84 +156,138 @@ ${userInput}
 
 ${chatContext}`
       
-      // Generar respuesta con Gemini
+      // Crear mensaje inicial para streaming
+      const streamingMessage = {
+        text: '🔄 Generando respuesta...',
+        isUser: false,
+        isFormatted: true
+      }
       
-      // const geminiResponse = await geminiService.generateClassPlan(
-      //   planningConfig.grado,
-      //   planningConfig.tema,
-      //   combinedContext,
-      //   relevantFiles,
-      //   planningConfig.recursos,
-      //   planningConfig.nombreDocente
-      // )
+      const messageId = addMessage(streamingMessage)
+      setStreamingMessageId(messageId)
       
       
-      // if (geminiResponse.success) {
-      //   return geminiResponse.text
-      // } else {
-      //   throw new Error(geminiResponse.error || 'Error generando respuesta')
-      // }
+      // Realizar llamada a la API con streaming
+      const response = await fetch('/api/chat/stream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userInput,
+          context: combinedContext,
+          relevantDocs: relevantFiles,
+          planningConfig: planningConfig
+        }),
+        signal: abortControllerRef.current.signal
+      })
       
-      // Simulando una respuesta de OpenAI para la generación de plan
-      return `Simulando respuesta de OpenAI para la generación de plan. Contexto: ${combinedContext}. Documentos: ${relevantFiles.map(doc => doc.title).join(', ')}.`
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`)
+      }
+      
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('No se pudo obtener el stream de respuesta')
+      }
+      
+      const decoder = new TextDecoder()
+      let accumulatedText = ''
+      
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          
+          if (done) break
+          
+          const chunk = decoder.decode(value, { stream: true })
+          accumulatedText += chunk
+          
+          // Actualizar el mensaje con el texto acumulado
+          updateMessage(messageId, { text: accumulatedText })
+          
+        }
+      } finally {
+        reader.releaseLock()
+      }
+      
+      // Agregar al historial cuando termine el streaming
+      const finalMessage = {
+        text: accumulatedText,
+        isUser: false,
+        isFormatted: true
+      }
+      addToChatHistory(finalMessage as any)
+      
       
     } catch (error) {
-      console.error('❌ Error generando respuesta pedagógica:', error)
+      console.error('❌ Error en streaming:', error)
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        return
+      }
+      
       setError(error instanceof Error ? error.message : 'Error desconocido')
-      return `❌ **Error generando respuesta:** ${error instanceof Error ? error.message : 'Error desconocido'}`
+      
+      // Actualizar el mensaje de streaming con el error
+      if (streamingMessageId) {
+        updateMessage(streamingMessageId, { 
+          text: `❌ **Error generando respuesta:** ${error instanceof Error ? error.message : 'Error desconocido'}` 
+        })
+      }
     } finally {
       setLoading(false)
+      setIsStreaming(false)
+      setStreamingMessageId(null)
+      abortControllerRef.current = null
     }
-  }, [planningConfig, setLoading, setError, updateConsultedDocuments, consultarDocumentosInstitucionales])
+  }, [planningConfig, setLoading, setError, updateConsultedDocuments, consultarDocumentosInstitucionales, addMessage, updateMessage, addToChatHistory])
 
-  // Función para enviar mensaje usando OpenAI
+  // Función para enviar mensaje con streaming
   const sendMessage = useCallback(async (inputText: string) => {
     if (!inputText.trim()) return
+
     const userMessage = {
       text: inputText,
       isUser: true,
       isFormatted: false
     }
+
     addMessage(userMessage)
     addToChatHistory(userMessage as any)
-    setLoading(true)
+
     try {
-      // Construir el contexto completo
-      const chatHistory = messages.concat({ ...userMessage, timestamp: new Date() });
-      const payload = {
-        message: inputText,
-        planningConfig,
-        chatHistory
-      };
-      const res = await fetch('/api/chat/openai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      const data = await res.json()
-      const assistantMessage = {
-        text: data.answer,
-        isUser: false,
-        isFormatted: true
-      }
-      addMessage(assistantMessage)
-      addToChatHistory(assistantMessage as any)
+      // Obtener historial actual del chat (sin incluir el mensaje que acabamos de agregar)
+      const currentChatHistory = messages.slice(0, -1)
+      
+      // Generar respuesta con streaming
+      await generateStreamingResponse(inputText, documents, currentChatHistory)
+      
     } catch (error) {
+      console.error('❌ Error en el chat:', error)
       const errorMessage = {
         text: `❌ **Error generando respuesta:** ${error instanceof Error ? error.message : 'Error desconocido'}`,
         isUser: false,
         isFormatted: true
       }
       addMessage(errorMessage)
-    } finally {
-      setLoading(false)
     }
-  }, [addMessage, addToChatHistory, setLoading, planningConfig, messages])
+  }, [addMessage, addToChatHistory, messages, generateStreamingResponse, documents])
+
+  // Función para cancelar streaming
+  const cancelStreaming = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+  }, [])
 
   return {
     sendMessage,
+    cancelStreaming,
+    isStreaming,
+    streamingMessageId,
     searchRelevantDocuments,
     consultarDocumentosInstitucionales,
-    generatePedagogicalResponse
+    generateStreamingResponse
   }
 }

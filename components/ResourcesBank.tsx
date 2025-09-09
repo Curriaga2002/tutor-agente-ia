@@ -5,6 +5,7 @@ import { createClient } from "../lib/supabase/client"
 import { useAuth } from '../hooks/useAuth'
 import { useExport } from '../hooks/useExport'
 import { FormattedMessage } from './FormattedMessage'
+import ReactMarkdown from 'react-markdown'
 
 interface ResourcesBankProps {
   setActiveTab: (tab: "generar" | "historial") => void
@@ -667,11 +668,14 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                         }`}
                       >
                         <div className="text-xs sm:text-sm lg:text-base leading-relaxed break-words">
-                          <FormattedMessage 
-                            text={message.text}
-                            isFormatted={message.isFormatted}
-                            key={`formatted-${message.id}-${forceRender}`}
-                          />
+                          {message.isUser
+                            ? <FormattedMessage 
+                                text={message.text}
+                                isFormatted={message.isFormatted}
+                                key={`formatted-${message.id}-${forceRender}`}
+                              />
+                            : <div className="prose prose-blue max-w-none"><ReactMarkdown>{message.text}</ReactMarkdown></div>
+                          }
                         </div>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 sm:mt-3 lg:mt-4 gap-1 sm:gap-0">
                           <span className="text-xs sm:text-sm opacity-70">
