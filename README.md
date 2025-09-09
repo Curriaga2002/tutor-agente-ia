@@ -99,7 +99,7 @@ flowchart TD
 ## 📈 Flujos de Datos
 
 ### 🔄 Flujo de Datos Principal
-
+```mermaid
 sequenceDiagram
     participant Docente
     participant Agente
@@ -122,7 +122,7 @@ sequenceDiagram
     Agente ->> Exportacion: Generar Word/PDF
     Exportacion -->> Docente: Archivo descargado
 
-
+```
 
 
 
