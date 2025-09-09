@@ -285,7 +285,7 @@ tutor-agente-ia/
 │   │   ├── client.ts                # Cliente público
 │   │   └── server.ts                # Cliente servidor
 │   ├── educational-content-service.ts # Servicio de contenido
-│   ├── gemini-service.ts            # Servicio de IA
+│   ├── openai-assistant-service.ts   # Servicio de IA (OpenAI Assistant)
 │   ├── pdf-content-processor.ts     # Procesador de PDFs
 │   ├── vector-search.ts             # Búsqueda vectorial
 │   └── utils.ts                     # Utilidades generales
@@ -343,8 +343,9 @@ tutor-agente-ia/
    NEXT_PUBLIC_SUPABASE_URL=tu_url_supabase
    NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
    
-   # Google Gemini
-   NEXT_PUBLIC_GEMINI_API_KEY=tu_gemini_api_key
+   # OpenAI Assistant
+   OPENAI_API_KEY=tu_openai_api_key
+   ASSISTANT_ID=tu_assistant_id
    
    # Opcional: Claves de administración
    SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
