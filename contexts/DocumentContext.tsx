@@ -2,62 +2,21 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { PDFContent, DocumentState } from '../types'
-import { useBucketDocuments } from '../hooks/useBucketDocuments'
 
-interface DocumentContextType extends DocumentState {
-  // Actions
-  refreshDocuments: () => Promise<void>
-  getDocumentsByType: (type: string) => PDFContent[]
-  searchDocuments: (query: string) => PDFContent[]
-}
+// El sistema de documentos/bucket ha sido eliminado. Este contexto puede ser adaptado o eliminado si ya no es necesario.
 
-const DocumentContext = createContext<DocumentContextType | undefined>(undefined)
+const DocumentContext = createContext<DocumentState | undefined>(undefined)
 
-interface DocumentProviderProps {
-  children: ReactNode
-}
-
-export function DocumentProvider({ children }: DocumentProviderProps) {
-  const {
-    documents,
-    isLoading,
-    error,
-    refreshDocuments,
-    documentCount,
-    lastUpdated
-  } = useBucketDocuments()
-
-  const getDocumentsByType = useCallback((type: string): PDFContent[] => {
-    return documents.filter(doc => 
-      doc.doc_type.toLowerCase().includes(type.toLowerCase()) ||
-      doc.title.toLowerCase().includes(type.toLowerCase())
-    )
-  }, [documents])
-
-  const searchDocuments = useCallback((query: string): PDFContent[] => {
-    if (!query.trim()) return documents
-
-    const queryLower = query.toLowerCase()
-    return documents.filter(doc => 
-      doc.title.toLowerCase().includes(queryLower) ||
-      doc.content.toLowerCase().includes(queryLower) ||
-      doc.doc_type.toLowerCase().includes(queryLower)
-    )
-  }, [documents])
-
-  const value: DocumentContextType = {
-    // State
-    documents,
-    isLoading,
-    error,
-    documentCount,
-    lastUpdated,
-    // Actions
-    refreshDocuments,
-    getDocumentsByType,
-    searchDocuments
+export function DocumentProvider({ children }: { children: ReactNode }) {
+  // Puedes dejar el estado vacío o adaptarlo según necesidades futuras
+  const value: DocumentState = {
+    documents: [],
+    isLoading: false,
+    error: null,
+    documentCount: 0,
+    lastUpdated: null,
+    refreshDocuments: () => {},
   }
-
   return (
     <DocumentContext.Provider value={value}>
       {children}
@@ -65,10 +24,10 @@ export function DocumentProvider({ children }: DocumentProviderProps) {
   )
 }
 
-export function useDocuments() {
+export function useDocumentContext() {
   const context = useContext(DocumentContext)
   if (context === undefined) {
-    throw new Error('useDocuments must be used within a DocumentProvider')
+    throw new Error('useDocumentContext must be used within a DocumentProvider')
   }
   return context
 }

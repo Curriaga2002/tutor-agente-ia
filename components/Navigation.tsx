@@ -66,21 +66,6 @@ export function Navigation() {
               
               {isAdmin && (
                 <button
-                  onClick={() => handleTabChange(ActiveTab.ESTADO)}
-                  className={`py-2 sm:py-3 px-2 sm:px-3 lg:px-4 font-medium text-xs sm:text-sm transition-all duration-300 rounded-lg sm:rounded-xl backdrop-blur-sm whitespace-nowrap ${
-                    activeTab === ActiveTab.ESTADO
-                      ? 'bg-gray-900/90 text-white shadow-lg shadow-gray-900/25'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-white/40 hover:shadow-md hover:shadow-gray-200/50'
-                  }`}
-                >
-                  <span className="hidden xl:inline">📊 Estado de la App</span>
-                  <span className="hidden lg:inline xl:hidden">📊 Estado</span>
-                  <span className="lg:hidden">📊</span>
-                </button>
-              )}
-              
-              {isAdmin && (
-                <button
                   onClick={() => handleTabChange(ActiveTab.USUARIOS)}
                   className={`py-2 sm:py-3 px-2 sm:px-3 lg:px-4 font-medium text-xs sm:text-sm transition-all duration-300 rounded-lg sm:rounded-xl backdrop-blur-sm whitespace-nowrap ${
                     activeTab === ActiveTab.USUARIOS
@@ -147,19 +132,6 @@ export function Navigation() {
             >
               📚 Banco de Recursos
             </button>
-            
-            {isAdmin && (
-              <button
-                onClick={() => handleTabChange(ActiveTab.ESTADO)}
-                className={`w-full text-left py-3 px-4 font-medium text-sm transition-all duration-300 rounded-xl backdrop-blur-sm ${
-                  activeTab === ActiveTab.ESTADO
-                    ? 'bg-gray-900/90 text-white shadow-lg shadow-gray-900/25'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/40 hover:shadow-md hover:shadow-gray-200/50'
-                }`}
-              >
-                📊 Estado de la App
-              </button>
-            )}
             
             {isAdmin && (
               <button
