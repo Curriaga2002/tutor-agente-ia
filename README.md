@@ -58,7 +58,7 @@ flowchart TD
     C[Agente de Planificación]
     D[Generación de Plan]
     E[Plan de Clase Final]
-    F[Almacenamiento\nHistorial]
+    F[Almacenamiento\Historial]
     G[Exportación\Word]
 
     A --> C
@@ -127,9 +127,9 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    A[Usuario completa configuración] --> B[Validación de campos]
+    A[configuración inicial] --> B[Validación de campos]
     B --> C[Construcción de prompt]
-    C --> D[Envío a OpenAI Assistant API]
+    C --> D[Envío a API open IA]
     D --> E[Procesamiento de respuesta]
     E --> F[Validación de estructura]
     F --> G[Formateo markdown]
