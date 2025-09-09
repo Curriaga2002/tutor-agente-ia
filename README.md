@@ -102,13 +102,13 @@ flowchart TD
 
 %% Flujo simplificado sin bucket ni documentos externos
 flowchart TD
-    A[Docente: Entrada (Grado, Tema, Sesiones)] 
-    B[Memoria del Sistema: Historial de chat + Perfil del docente]
-    C[Agente de Planificación (OpenAI Assistant)]
+    A[Docente\nEntrada: Grado, Tema, Sesiones] 
+    B[Memoria del Sistema\nHistorial de chat, Perfil del docente]
+    C[Agente de Planificación - OpenAI Assistant]
     D[Generación de Plan]
     E[Plan de Clase Final]
-    F[Almacenamiento: Base de datos + Historial]
-    G[Exportación: Word, PDF, etc.]
+    F[Almacenamiento\nBase de datos + Historial]
+    G[Exportación\nWord, PDF, etc.]
 
     A --> C
     B --> C
