@@ -154,7 +154,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     A[Usuario solicita exportar] --> B[Recolección de datos]
-    B --> C[Generación de documento Word]
+    B --> C[Generación de Word]
     C --> D[Formateo de contenido]
     D --> E[Descarga automática]
     E --> F[Confirmación de éxito]
