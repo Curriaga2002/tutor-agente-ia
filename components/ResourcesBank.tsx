@@ -543,7 +543,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
             {filteredPlaneaciones.map((plan) => (
               <div 
                 key={plan.id} 
-                className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:shadow-2xl hover:shadow-gray-200/60 hover:border-gray-300 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group"
+                className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:shadow-2xl hover:shadow-gray-200/60 hover:border-gray-300 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col h-full"
               >
                 <div className="flex justify-between items-start mb-3 sm:mb-4">
                   <div className="flex-1">
@@ -567,7 +567,7 @@ export default function ResourcesBank({ setActiveTab, setCurrentPlanningData }: 
                   </div>
                 </div>
                 
-                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 pt-3 sm:pt-4 border-t border-gray-100">
+                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 pt-3 sm:pt-4 border-t border-gray-100 mt-auto">
                   <button
                     onClick={() => viewChatHistory(plan)}
                     className="flex items-center justify-center px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-200 transition-colors duration-200 text-xs sm:text-sm font-medium group-hover:bg-blue-50 group-hover:text-blue-700"
