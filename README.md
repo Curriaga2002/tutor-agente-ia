@@ -52,12 +52,12 @@ El **Planeador Didáctico Inteligente** es un sistema web avanzado que utiliza i
 
 ```mermaid
 flowchart TD
-    A[Docente\nEntrada: Grado, Tema, Sesiones] 
-    B[Memoria del Sistema\nHistorial de chat,\nPerfil del docente]
-    C[Agente de Planificación\nOpenAI Assistan]
+    A[Docente\nEntrada 
+    B[Memoria del Sistema]
+    C[Agente de Planificación]
     D[Generación de Plan]
     E[Plan de Clase Final]
-    F[Almacenamiento\nBase de datos + Historial]
+    F[Almacenamiento\nHistorial]
     G[Exportación\nWord, PDF, etc.]
 
     A --> C
