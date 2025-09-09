@@ -100,23 +100,28 @@ flowchart TD
 
 ### 🔄 Flujo de Datos Principal
 
-```mermaid
-%% Flujo simplificado sin bucket ni documentos externos
-flowchart TD
-    A[Docente\nEntrada: Grado, Tema, Sesiones] 
-    B[Memoria del Sistema\nHistorial de chat, Perfil del docente]
-    C[Agente de Planificación - OpenAI Assistant]
-    D[Generación de Plan]
-    E[Plan de Clase Final]
-    F[Almacenamiento\nBase de datos + Historial]
-    G[Exportación\nWord, PDF, etc.]
+```sequenceDiagram
+    participant Docente
+    participant Agente
+    participant BaseDeDatos as "Base de Datos"
+    participant Gemini as "Gemini AI"
+    participant Exportacion as "Exportación"
 
-    A --> C
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> G
+    Docente ->> Agente: Configuración inicial
+    Agente ->> BaseDeDatos: Consulta documentos
+    BaseDeDatos -->> Agente: Documentos relevantes
+    Agente ->> Gemini: Generación de plan
+    Gemini -->> Agente: Plan estructurado
+    Agente ->> Agente: Aplicar guardrails
+    Agente -->> Docente: Plan de clase final
+
+    Docente ->> Agente: Solicitar guardado
+    Agente ->> BaseDeDatos: Almacenar plan
+
+    Docente ->> Agente: Solicitar exportación
+    Agente ->> Exportacion: Generar Word/PDF
+    Exportacion -->> Docente: Archivo descargado
+
 ```
 
 
