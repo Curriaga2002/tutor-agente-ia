@@ -54,7 +54,7 @@ El **Planeador Didáctico Inteligente** es un sistema web avanzado que utiliza i
 
 flowchart TD
     A[Docente\Entrada]
-    B[Memoria]
+    B[IA-Documentación]
     C[Agente de Planificación]
     D[Generación de Plan]
     E[Plan de Clase Final]
