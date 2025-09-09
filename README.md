@@ -144,7 +144,7 @@ flowchart TD
     A[Usuario solicita guardar] --> B[Validación de datos]
     B --> C[Preparación de payload]
     C --> D[Inserción en base de datos]
-    D --> E[Actualización de estado local]
+    D --> E[Actualización state local]
     E --> F[Confirmación al usuario]
     F --> G[Actualización de historial]
 ```
