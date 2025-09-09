@@ -51,63 +51,22 @@ El **Planeador Didáctico Inteligente** es un sistema web avanzado que utiliza i
 ### 📊 Diagrama de Flujo Principal
 
 ```mermaid
-graph TB
-    %% Entradas Iniciales
+%% Flujo simplificado sin bucket ni documentos externos
+flowchart TD
     A[🎓 Docente<br/>Entrada: Grado, Tema, Sesiones] 
-    B[🧠 Memoria del Sistema<br/>• Historial de chat<br/>• Perfil del docente<br/>• Estado de conversación]
-    
-    %% Agente de Planificación
-    C[🤖 Agente de Planificación<br/>Análisis de contexto]
-    
-    %% Procesos Paralelos
-    D[📄 Consulta de Documentos<br/>PEI, MEN 2022, Tabla 7]
-    E[🎯 Mapeo de Competencias<br/>Según grado y tema]
-    
-    %% Generación del Plan
-    F[⚙️ Generación de Plan<br/>Estructura completa]
-    
-    %% Observabilidad
-    G[📊 Observabilidad<br/>• Métricas de rendimiento<br/>• Logs de interacción<br/>• Análisis de calidad]
-    
-    %% Guardrails
-    H[🛡️ Guardrails<br/>• Filtrado de información interna<br/>• Validación de coherencia<br/>• Anti-alucinación]
-    
-    %% Plan de Clase Final
-    I[📋 Plan de Clase Final<br/>• Identificación<br/>• Competencias<br/>• Momentos pedagógicos<br/>• Evaluación Tabla 7]
-    
-    %% Almacenamiento y Exportación
-    J[💾 Almacenamiento<br/>Base de datos + Historial]
-    K[📤 Exportación<br/>Word, PDF, etc.]
-    
-    %% Flujo principal
+    B[🧠 Memoria del Sistema<br/>• Historial de chat<br/>• Perfil del docente]
+    C[🤖 Agente de Planificación (OpenAI Assistant)]
+    D[⚙️ Generación de Plan]
+    E[📋 Plan de Clase Final]
+    F[💾 Almacenamiento<br/>Base de datos + Historial]
+    G[📤 Exportación<br/>Word, PDF, etc.]
+
     A --> C
     B --> C
     C --> D
-    C --> E
-    D --> F
+    D --> E
     E --> F
-    F --> H
-    H --> I
-    I --> J
-    J --> K
-    
-    %% Observabilidad (línea punteada)
-    F -.-> G
-    
-    %% Estilos
-    classDef entrada fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef agente fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
-    classDef proceso fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
-    classDef guardrail fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef resultado fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
-    classDef observabilidad fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    
-    class A,B entrada
-    class C agente
-    class D,E,F proceso
-    class H guardrail
-    class I,J,K resultado
-    class G observabilidad
+    F --> G
 ```
 
 ---
@@ -120,11 +79,9 @@ graph TB
 - **Integración de competencias** según grado y tema
 - **Evaluación con Tabla 7** (criterios oficiales)
 
-### 📚 Gestión de Documentos
-- **Consulta en tiempo real** de documentos institucionales
-- **Búsqueda vectorial** para contenido relevante
-- **Procesamiento automático** de PDFs
-- **Integración de múltiples fuentes** de información
+### 📚 Gestión de Planeaciones
+- **Historial de planeaciones** organizado
+- **Exportación a Word** con formato profesional
 
 ### 💬 Interfaz Intuitiva
 - **Chat interactivo** con asistente IA
@@ -148,13 +105,9 @@ graph TB
 sequenceDiagram
     participant U as Usuario
     participant F as Frontend
-    participant AI as Open IA Assitant
+    participant AI as OpenAI Assistant
     participant DB as Supabase
-    participant S as Storage
-    
     U->>F: Configuración inicial
-    F->>DB: Consulta documentos
-    DB-->>F: Documentos relevantes
     F->>AI: Generación de plan
     AI-->>F: Plan estructurado
     F->>F: Validación y formateo
@@ -162,8 +115,8 @@ sequenceDiagram
     U->>F: Solicitar guardado
     F->>DB: Almacenar plan
     U->>F: Solicitar exportación
-    F->>S: Generar Word/PDF
-    S-->>U: Archivo descargado
+    F->>F: Generar Word/PDF
+    F-->>U: Archivo descargado
 ```
 
 ### 🔄 Flujo de Generación de Plan
@@ -171,14 +124,13 @@ sequenceDiagram
 ```mermaid
 flowchart TD
     A[Usuario completa configuración] --> B[Validación de campos]
-    B --> C[Consulta documentos relevantes]
-    C --> D[Construcción de prompt]
-    D --> E[Envío a Open IA Assitan API]
-    E --> F[Procesamiento de respuesta]
-    F --> G[Validación de estructura]
-    G --> H[Formateo markdown]
-    H --> I[Mostrar al usuario]
-    I --> J[Opción de guardar/exportar]
+    B --> C[Construcción de prompt]
+    C --> D[Envío a OpenAI Assistant API]
+    D --> E[Procesamiento de respuesta]
+    E --> F[Validación de estructura]
+    F --> G[Formateo markdown]
+    G --> H[Mostrar al usuario]
+    H --> I[Opción de guardar/exportar]
 ```
 
 ### 💾 Flujo de Persistencia
@@ -218,13 +170,9 @@ flowchart TD
 ### Backend
 - **Supabase** - Backend as a Service
 - **PostgreSQL** - Base de datos relacional
-- **Vector Search** - Búsqueda semántica
-- **Storage** - Almacenamiento de archivos
 
 ### IA y Procesamiento
 - **OpenAI Assistant API (GPT-4)** - Modelo de lenguaje para generación de planes y chat
-- **PDF Processing** - Extracción de contenido
-- **Vector Embeddings** - Representación semántica
 - **Prompt Engineering** - Optimización de prompts
 
 ### Herramientas de Desarrollo
@@ -254,13 +202,11 @@ tutor-agente-ia/
 │   │   ├── toast.tsx                # Notificaciones
 │   │   ├── toaster.tsx              # Contenedor de toasts
 │   │   └── use-toast.ts             # Hook de toast
-│   ├── AppStatus.tsx                # Estado del sistema
 │   ├── ChatAssistant.tsx            # Chat principal
 │   ├── ChatHeader.tsx               # Header del chat
 │   ├── ChatInput.tsx                # Input del chat
 │   ├── ChatMessages.tsx             # Mensajes del chat
 │   ├── ConfigurationForm.tsx        # Formulario de configuración
-│   ├── ConsultedDocuments.tsx       # Documentos consultados
 │   ├── InitialMessage.tsx           # Mensaje inicial
 │   ├── Navigation.tsx               # Navegación
 │   ├── PlanningAssistant.tsx        # Layout principal
@@ -270,12 +216,10 @@ tutor-agente-ia/
 │   ├── AppProvider.tsx              # Proveedor principal
 │   ├── AuthContext.tsx              # Contexto de autenticación
 │   ├── ChatContext.tsx              # Contexto del chat
-│   ├── DocumentContext.tsx          # Contexto de documentos
 │   ├── NavigationContext.tsx        # Contexto de navegación
 │   └── PlanningContext.tsx          # Contexto de planeación
 ├── 📁 hooks/                        # Custom Hooks
 │   ├── useAuth.ts                   # Hook de autenticación
-│   ├── useBucketDocuments.ts        # Hook de documentos
 │   ├── useChatActions.ts            # Hook de acciones del chat
 │   ├── usePlanningActions.ts        # Hook de acciones de planeación
 │   └── index.ts                     # Exportaciones
@@ -284,10 +228,8 @@ tutor-agente-ia/
 │   │   ├── admin.ts                 # Cliente admin
 │   │   ├── client.ts                # Cliente público
 │   │   └── server.ts                # Cliente servidor
-│   ├── educational-content-service.ts # Servicio de contenido
 │   ├── openai-assistant-service.ts   # Servicio de IA (OpenAI Assistant)
 │   ├── pdf-content-processor.ts     # Procesador de PDFs
-│   ├── vector-search.ts             # Búsqueda vectorial
 │   └── utils.ts                     # Utilidades generales
 ├── 📁 types/                        # Tipos TypeScript
 │   └── index.ts                     # Definiciones de tipos
@@ -315,7 +257,7 @@ tutor-agente-ia/
 - **npm** o **pnpm** (recomendado)
 - **Git** para clonar el repositorio
 - **Cuenta de Supabase** para backend
-- **API Key de Google Open IA** para IA
+- **API Key de OpenAI** para IA
 
 ### 🔧 Instalación
 
@@ -374,7 +316,6 @@ tutor-agente-ia/
 1. **Crear proyecto en Supabase**
 2. **Ejecutar scripts SQL** (ver sección Base de Datos)
 3. **Configurar políticas RLS**
-4. **Subir documentos al Storage**
 
 ---
 
@@ -395,8 +336,7 @@ tutor-agente-ia/
 #### 2. **Generación de Plan**
 - Iniciar conversación con el asistente
 - Solicitar plan de clase específico
-- El sistema consulta documentos relevantes
-- Genera plan estructurado y completo
+- El sistema genera plan estructurado y completo
 
 #### 3. **Revisión y Edición**
 - Revisar el plan generado
@@ -413,7 +353,6 @@ tutor-agente-ia/
 #### **Pestaña "Generar"**
 - Formulario de configuración
 - Chat interactivo con asistente
-- Visualización de documentos consultados
 - Botones de acción (enviar, limpiar, guardar)
 
 #### **Pestaña "Historial"**
@@ -421,12 +360,6 @@ tutor-agente-ia/
 - Búsqueda y filtrado
 - Visualización de chats completos
 - Exportación individual
-
-#### **Pestaña "Estado"** (Solo administradores)
-- Estado del sistema
-- Estadísticas de uso
-- Gestión de usuarios
-- Monitoreo de documentos
 
 ---
 
@@ -439,19 +372,16 @@ graph TD
     A[PlanningAssistant] --> B[Navigation]
     A --> C[ChatAssistant]
     A --> D[ResourcesBank]
-    A --> E[AppStatus]
     
     C --> F[ConfigurationForm]
     C --> G[ChatHeader]
     C --> H[ChatMessages]
     C --> I[ChatInput]
-    C --> J[ConsultedDocuments]
     C --> K[InitialMessage]
     
     B --> L[AuthContext]
     C --> M[ChatContext]
     D --> N[PlanningContext]
-    E --> O[DocumentContext]
 ```
 
 ### 📱 Componentes Clave
@@ -497,19 +427,6 @@ interface ChatContextType {
   planningConfig: PlanningConfig
   isLoading: boolean
   isSaving: boolean
-  consultedDocuments: ConsultedDocuments
-  // ... acciones
-}
-```
-
-#### **DocumentContext**
-```typescript
-interface DocumentContextType {
-  documents: PDFContent[]
-  isLoading: boolean
-  error: string | null
-  documentCount: number
-  lastUpdated: Date | null
   // ... acciones
 }
 ```
@@ -552,41 +469,6 @@ export async function getOpenAIResponse(context: {
 
 4. **El frontend solo interactúa con el backend** mediante endpoints `/api/chat/openai`.
 
-### 📚 Servicio de Documentos
-
-```typescript
-// lib/educational-content-service.ts
-class EducationalContentService {
-  async getDocuments(): Promise<PDFContent[]>
-  async searchDocuments(query: string): Promise<PDFContent[]>
-  async getDocumentById(id: string): Promise<PDFContent>
-}
-```
-
-**Funcionalidades:**
-- Carga de documentos desde Supabase Storage
-- Búsqueda vectorial semántica
-- Procesamiento de PDFs
-- Extracción de contenido
-
-### 🔍 Búsqueda Vectorial
-
-```typescript
-// lib/vector-search.ts
-class VectorSearchService {
-  async searchSimilar(
-    query: string,
-    limit: number = 5
-  ): Promise<SearchResult[]>
-}
-```
-
-**Características:**
-- Embeddings de 1536 dimensiones
-- Búsqueda híbrida (texto + vector)
-- Scoring combinado
-- Filtrado por metadatos
-
 ---
 
 ## 📊 Base de Datos
@@ -607,74 +489,6 @@ CREATE TABLE planeaciones (
   user_id UUID REFERENCES auth.users(id)
 );
 ```
-
-#### **Tabla: documents**
-```sql
-CREATE TABLE documents (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
-  doc_type VARCHAR(50),
-  metadata JSONB,
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-#### **Tabla: chunks**
-```sql
-CREATE TABLE chunks (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  document_id UUID REFERENCES documents(id),
-  content TEXT NOT NULL,
-  metadata JSONB,
-  embedding vector(1536),
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-### 🔧 Funciones SQL
-
-#### **search_educational_content**
-```sql
-CREATE OR REPLACE FUNCTION search_educational_content(
-  query_text TEXT,
-  query_embedding vector(1536),
-  match_threshold FLOAT DEFAULT 0.5,
-  match_count INT DEFAULT 5
-)
-RETURNS TABLE (
-  id UUID,
-  title TEXT,
-  content TEXT,
-  doc_type VARCHAR(50),
-  similarity FLOAT
-)
-```
-
-#### **insert_educational_document**
-```sql
-CREATE OR REPLACE FUNCTION insert_educational_document(
-  p_title TEXT,
-  p_content TEXT,
-  p_doc_type VARCHAR(50),
-  p_metadata JSONB,
-  p_embedding vector(1536)
-)
-RETURNS UUID
-```
-
-### 🔒 Políticas RLS
-
-```sql
--- Política para planeaciones
-CREATE POLICY "Users can view their own planeaciones" ON planeaciones
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert their own planeaciones" ON planeaciones
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-```
-
----
 
 ---
 
@@ -705,22 +519,6 @@ CREATE POLICY "Users can insert their own planeaciones" ON planeaciones
 - Validación de respuestas
 - Anti-alucinación
 - Límites de tokens
-
-### 🔐 Configuración de Seguridad
-
-```typescript
-// Configuración de Supabase
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true
-    }
-  }
-)
-```
 
 ---
 
@@ -796,16 +594,6 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 - **Documentación**: [Wiki del proyecto](https://github.com/tu-usuario/tutor-agente-ia/wiki)
 - **Issues**: [GitHub Issues](https://github.com/tu-usuario/tutor-agente-ia/issues)
 - **Discusiones**: [GitHub Discussions](https://github.com/tu-usuario/tutor-agente-ia/discussions)
-
----
-
-## 🙏 Agradecimientos
-
-- **Institución Educativa Camilo Torres** por la confianza y apoyo
-- **OpenAI** por la API de inteligencia artificial
-- **Supabase** por la infraestructura de backend
-- **Comunidad de Next.js** por el framework
-- **Contribuidores** del proyecto
 
 ---
 
