@@ -104,18 +104,13 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     participant Docente
-    participant Agente
+    participant Agente as "OpenAI Assistant"
     participant BaseDeDatos as "Base de Datos"
-    participant Gemini as "Open IA"
     participant Exportacion as "Exportación"
 
     Docente ->> Agente: Configuración inicial
-    Agente ->> BaseDeDatos: Consulta documentos
-    BaseDeDatos -->> Agente: Documentos relevantes
-    Agente ->> Open IA: Generación de plan
-    Open IA -->> Agente: Plan estructurado
-    Agente ->> Agente: Aplicar guardrails
-    Agente -->> Docente: Plan de clase final
+    Docente ->> Agente: Solicitar plan de clase
+    Agente -->> Docente: Plan estructurado
 
     Docente ->> Agente: Solicitar guardado
     Agente ->> BaseDeDatos: Almacenar plan
