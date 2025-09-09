@@ -53,12 +53,12 @@ El **Planeador Didáctico Inteligente** es un sistema web avanzado que utiliza i
 ```mermaid
 flowchart TD
     A[Docente\nEntrada: Grado, Tema, Sesiones] 
-    B[Memoria del Sistema\Historial de chat, Perfil del docente]
-    C[Agente de Planificación IA]
+    B[Memoria del Sistema\nHistorial de chat, Perfil del docente]
+    C[Agente de Planificación (OpenAI Assistant)]
     D[Generación de Plan]
     E[Plan de Clase Final]
-    F[Almacenamiento\Base de datos + Historial]
-    G[Exportación\Word, PDF, etc.]
+    F[Almacenamiento\nBase de datos + Historial]
+    G[Exportación\nWord, PDF, etc.]
 
     A --> C
     B --> C
@@ -96,22 +96,24 @@ flowchart TD
 
 ---
 
+
 ## 📈 Flujos de Datos
 
 ### 🔄 Flujo de Datos Principal
+
 ```mermaid
 sequenceDiagram
     participant Docente
     participant Agente
     participant BaseDeDatos as "Base de Datos"
-    participant Gemini as "Gemini AI"
+    participant Gemini as "Open IA"
     participant Exportacion as "Exportación"
 
     Docente ->> Agente: Configuración inicial
     Agente ->> BaseDeDatos: Consulta documentos
     BaseDeDatos -->> Agente: Documentos relevantes
-    Agente ->> Gemini: Generación de plan
-    Gemini -->> Agente: Plan estructurado
+    Agente ->> Open IA: Generación de plan
+    Open IA -->> Agente: Plan estructurado
     Agente ->> Agente: Aplicar guardrails
     Agente -->> Docente: Plan de clase final
 
@@ -123,7 +125,6 @@ sequenceDiagram
     Exportacion -->> Docente: Archivo descargado
 
 ```
-
 
 
 ### 🔄 Flujo de Generación de Plan
