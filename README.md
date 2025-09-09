@@ -100,6 +100,7 @@ flowchart TD
 
 ### 🔄 Flujo de Datos Principal
 
+```mermaid
 %% Flujo simplificado sin bucket ni documentos externos
 flowchart TD
     A[Docente\nEntrada: Grado, Tema, Sesiones] 
@@ -116,6 +117,8 @@ flowchart TD
     D --> E
     E --> F
     F --> G
+```
+
 
 
 
