@@ -118,6 +118,7 @@ flowchart TD
     F --> G
 
 
+
 ### 🔄 Flujo de Generación de Plan
 
 ```mermaid
