@@ -53,8 +53,8 @@ El **Planeador Didáctico Inteligente** es un sistema web avanzado que utiliza i
 ```mermaid
 flowchart TD
     A[Docente\nEntrada: Grado, Tema, Sesiones] 
-    B[Memoria del Sistema\nHistorial de chat, Perfil del docente]
-    C[Agente de Planificación (OpenAI Assistant)]
+    B[Memoria del Sistema\nHistorial de chat,\nPerfil del docente]
+    C[Agente de Planificación\n(OpenAI Assistant)]
     D[Generación de Plan]
     E[Plan de Clase Final]
     F[Almacenamiento\nBase de datos + Historial]
@@ -104,7 +104,7 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     participant Docente
-    participant Agente as "OpenAI Assistant"
+    participant Agente as "OpenAI\nAssistant"
     participant BaseDeDatos as "Base de Datos"
     participant Exportacion as "Exportación"
 
