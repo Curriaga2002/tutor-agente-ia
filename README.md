@@ -148,7 +148,7 @@ graph TB
 sequenceDiagram
     participant U as Usuario
     participant F as Frontend
-    participant AI as OpenIa Assitant
+    participant AI as Open IA Assitant
     participant DB as Supabase
     participant S as Storage
     
@@ -173,7 +173,7 @@ flowchart TD
     A[Usuario completa configuración] --> B[Validación de campos]
     B --> C[Consulta documentos relevantes]
     C --> D[Construcción de prompt]
-    D --> E[Envío a OpenIA Assitan API]
+    D --> E[Envío a Open IA Assitan API]
     E --> F[Procesamiento de respuesta]
     F --> G[Validación de estructura]
     G --> H[Formateo markdown]
@@ -315,7 +315,7 @@ tutor-agente-ia/
 - **npm** o **pnpm** (recomendado)
 - **Git** para clonar el repositorio
 - **Cuenta de Supabase** para backend
-- **API Key de Google OpenIA** para IA
+- **API Key de Google Open IA** para IA
 
 ### 🔧 Instalación
 
